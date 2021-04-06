@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<VTE.SortBy>Sort by</VTE.SortBy>
+	<VTE.Search>Search</VTE.Search>
+	<VTE.Name>Name</VTE.Name>
+	<VTE.Item>Item</VTE.Item>
+	<VTE.MarketValue>Market Value</VTE.MarketValue>
+	<VTE.CurrentValue>Current Value</VTE.CurrentValue>
+	<VTE.Change>Change</VTE.Change>
+	<VTE.RecentChange>Recent Change</VTE.RecentChange>
+</LanguageData>
