@@ -114,7 +114,7 @@ namespace VanillaTradingExpanded
         public override void GameComponentTick()
         {
             base.GameComponentTick();
-            if (Find.TickManager.TicksGame % 6000 == 0) // every 3 day
+            if (Find.TickManager.TicksGame % 180000 == 0) // every 3 day
             {
                 previousPriceModifiers.Clear();
                 foreach (var key in priceModifiers.Keys)
