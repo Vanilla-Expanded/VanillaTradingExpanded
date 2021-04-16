@@ -169,6 +169,8 @@ namespace VanillaTradingExpanded
 			Text.Anchor = TextAnchor.MiddleLeft;
 			Text.Font = GameFont.Small;
 			float num = 0f;
+			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = true;
+
 			for (int j = 0; j < cachedTradeables.Count; j++)
 			{
 				if (num > scrollPosition.y - cellHeight && num < scrollPosition.y + viewRect.height)
@@ -192,21 +194,47 @@ namespace VanillaTradingExpanded
 					var thingLabelRect = new Rect(thingIconRect.xMax + thingLabelXOffset, rect2.y, thingLabelWidth, rect2.height);
 					Widgets.Label(thingLabelRect, thingDef.LabelCap);
 					var thingMarketValueRect = new Rect(thingLabelRect.xMax + thingMarketValueXOffset, rect2.y, thingMarketValueWidth, rect2.height);
-					Widgets.Label(thingMarketValueRect, thingDef.GetStatValueAbstract(StatDefOf.MarketValue).ToString());
+
+					var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+					Widgets.Label(thingMarketValueRect, baseMarketValue.ToString());
 
 					var thingCurrentValueRect = new Rect(thingMarketValueRect.xMax + thingCurrentValueXOffset, rect2.y, thingCurrentValueWidth, rect2.height);
-					Widgets.Label(thingCurrentValueRect, "35");
+					var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+					Widgets.Label(thingCurrentValueRect, currentPrice.ToString());
 
+					var totalChange = GetTotalChangeFor(currentPrice, baseMarketValue);
 					var thingChangeRect = new Rect(thingCurrentValueRect.xMax + thingTotalChangeXOffset, rect2.y, thingTotalChangeWidth, rect2.height);
-					Widgets.Label(thingChangeRect, "35");
+					var totalChangeString = totalChange.ToStringDecimalIfSmall() + "%";
+					if (totalChange > 0)
+                    {
+						GUI.color = Color.green;
+						totalChangeString += "▲";
+					}
+					else if (totalChange < 0)
+                    {
+						GUI.color = Color.red;
+						totalChangeString += "▼";
+					}
 
-					var recentChange = 0.25f;
+					Widgets.Label(thingChangeRect, totalChangeString);
+					GUI.color = Color.white;
+					var recentChange = GetRecentChangeFor(thingDef, currentPrice, baseMarketValue);
+
 					var thingRecentChangeRect = new Rect(thingChangeRect.xMax + thingRecentChangeXOffset, rect2.y, thingRecentChangeWidth, rect2.height);
-					GUI.color = Color.red;
-					Widgets.Label(thingRecentChangeRect, (recentChange * 100).ToStringDecimalIfSmall() + "▼");
+					var recentChangeString = recentChange.ToStringDecimalIfSmall() + "%";
+					if (recentChange > 0)
+					{
+						GUI.color = Color.green;
+						recentChangeString += "▲";
+					}
+					else if (recentChange < 0)
+					{
+						GUI.color = Color.red;
+						recentChangeString += "▼";
+					}
+					Widgets.Label(thingRecentChangeRect, recentChangeString);
 					GUI.color = Color.white;
 				}
-
 				tablePos.y += cellHeight;
 				num += cellHeight;
 			}
@@ -214,8 +242,41 @@ namespace VanillaTradingExpanded
 			Text.Anchor = TextAnchor.UpperLeft;
 			Text.Font = GameFont.Small;
 			Widgets.EndScrollView();
+			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = false;
+		}
+		private float GetTotalChangeFor(float currentPrice, float baseMarketValue)
+		{
+			var change = currentPrice - baseMarketValue;
+			return (change / baseMarketValue) * 100f;
+		}
+		private float GetRecentChangeFor(ThingDef thingDef, float currentPrice, float baseMarketValue)
+        {
+			var previousPrice = TradingManager.Instance.previousPriceModifiers.TryGetValue(thingDef, out var prevPrice) ? prevPrice : baseMarketValue;
+			var change = currentPrice - previousPrice;
+			return (change / previousPrice) * 100f;
 		}
 
+		private float GetTotalChangeFor(ThingDef thingDef)
+		{
+			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+			var change = currentPrice - baseMarketValue;
+			return (change / baseMarketValue) * 100f;
+		}
+		private float GetRecentChangeFor(ThingDef thingDef)
+		{
+			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+			var previousPrice = TradingManager.Instance.previousPriceModifiers.TryGetValue(thingDef, out var prevPrice) ? prevPrice : baseMarketValue;
+			var change = currentPrice - previousPrice;
+			return (change / previousPrice) * 100f;
+		}
+		private float GetCurrentValueFor(ThingDef thingDef)
+		{
+			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+			return currentPrice;;
+		}
 		public void SetDirty()
 		{
 			dirty = true;
@@ -251,10 +312,13 @@ namespace VanillaTradingExpanded
 			cachedTradeables.Clear();
 			cachedTradeables.AddRange(TradingManager.Instance.cachedTradeables);
 			if (!textFilter.NullOrEmpty())
-            {
+			{
 				cachedTradeables = cachedTradeables.Where(x => x.LabelCap.ToLower().RawText.Contains(textFilter)).ToList();
 			}
+			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = true;
 			cachedTradeables = SortByColumn(sortByColumn);
+			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = false;
+
 		}
 
 		private List<ThingDef> SortByColumn(Column column)
@@ -264,6 +328,9 @@ namespace VanillaTradingExpanded
 				case Column.None: return sortDescending ? cachedTradeables.OrderByDescending(x => x.LabelCap.ToString()).ToList() : cachedTradeables.OrderBy(x => x.LabelCap.ToString()).ToList();
 				case Column.Item: return sortDescending ? cachedTradeables.OrderByDescending(x => x.LabelCap.ToString()).ToList() : cachedTradeables.OrderBy(x => x.LabelCap.ToString()).ToList();
 				case Column.MarketValue: return sortDescending ? cachedTradeables.OrderByDescending(x => x.GetStatValueAbstract(StatDefOf.MarketValue)).ToList() : cachedTradeables.OrderBy(x => x.GetStatValueAbstract(StatDefOf.MarketValue)).ToList();
+				case Column.CurrentValue: return sortDescending ? cachedTradeables.OrderByDescending(x => GetCurrentValueFor(x)).ToList() : cachedTradeables.OrderBy(x => GetCurrentValueFor(x)).ToList();
+				case Column.Change: return sortDescending ? cachedTradeables.OrderByDescending(x => GetTotalChangeFor(x)).ToList() : cachedTradeables.OrderBy(x => GetTotalChangeFor(x)).ToList();
+				case Column.RecentChange: return sortDescending ? cachedTradeables.OrderByDescending(x => GetRecentChangeFor(x)).ToList() : cachedTradeables.OrderBy(x => GetRecentChangeFor(x)).ToList();
 				default: return sortDescending ? cachedTradeables.OrderByDescending(x => x.LabelCap).ToList() : cachedTradeables.OrderBy(x => x.LabelCap).ToList();
 			}
 		}
