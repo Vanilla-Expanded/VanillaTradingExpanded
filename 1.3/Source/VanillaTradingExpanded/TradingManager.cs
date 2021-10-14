@@ -23,18 +23,17 @@ namespace VanillaTradingExpanded
         public HashSet<ThingDef> cachedTradeables;
         public TradingManager()
         {
-
+            Instance = this;
         }
 
         public TradingManager(Game game)
         {
-
+            Instance = this;
         }
 
         public override void FinalizeInit()
         {
             base.FinalizeInit();
-            Instance = this;
             cachedTradeables = new HashSet<ThingDef>();
             foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
             {
@@ -48,6 +47,7 @@ namespace VanillaTradingExpanded
 
         public void PreInit()
         {
+            Instance = this;
             if (priceModifiers is null)
             {
                 priceModifiers = new Dictionary<ThingDef, float>();
