@@ -14,6 +14,7 @@ namespace VanillaTradingExpanded
     [DefOf]
     public static class VTE_DefOf
     {
-        public static JobDef VTE_UseTradingTerminal;
+        public static JobDef VTE_ViewPrices;
+        public static JobDef VTE_ContactBank;
     }
 }

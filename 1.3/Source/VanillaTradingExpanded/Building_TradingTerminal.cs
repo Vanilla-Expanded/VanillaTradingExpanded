@@ -70,22 +70,47 @@ namespace VanillaTradingExpanded
 			}
 			else
 			{
-				FloatMenuOption floatMenuOption = GetFloatMenuOption(myPawn);
-				if (floatMenuOption != null)
+				var floatOption = GetViewMarketPricesOption(myPawn);
+				if (floatOption != null)
 				{
-					yield return floatMenuOption;
+					yield return floatOption;
 				}
+				foreach (var floatOption2 in GetBankOptions(myPawn))
+                {
+					yield return floatOption2;
+                }
+
 			}
 		}
-
-		private FloatMenuOption GetFloatMenuOption(Pawn negotiator)
+		private FloatMenuOption GetViewMarketPricesOption(Pawn negotiator)
         {
-			string text = "VTE.ViewMarketPrices’".Translate();
+			string text = "VTE.ViewMarketPrices".Translate();
 			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, delegate
 			{
-				Job job = JobMaker.MakeJob(VTE_DefOf.VTE_UseTradingTerminal, this);
+				Job job = JobMaker.MakeJob(VTE_DefOf.VTE_ViewPrices, this);
 				negotiator.jobs.TryTakeOrderedJob(job);
 			}, MenuOptionPriority.Default), negotiator, this);
 		}
-	}
+
+		public Faction currentVisitableFactionBank;
+		private IEnumerable<FloatMenuOption> GetBankOptions(Pawn negotiator)
+		{
+			foreach (var kvp in TradingManager.Instance.banksByFaction)
+            {
+				var extension = kvp.Key.def.GetModExtension<BankExtension>();
+				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(extension.bankNameKey.Translate(kvp.Key.Named("FACTION")), delegate
+				{
+					Job job = JobMaker.MakeJob(VTE_DefOf.VTE_ContactBank, this);
+					currentVisitableFactionBank = kvp.Key;
+					negotiator.jobs.TryTakeOrderedJob(job);
+				}, MenuOptionPriority.Default), negotiator, this);
+			}
+		}
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+			Scribe_References.Look(ref currentVisitableFactionBank, "currentVisitableFactionBank");
+        }
+    }
 }

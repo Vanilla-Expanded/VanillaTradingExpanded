@@ -11,27 +11,42 @@ using Verse.AI;
 
 namespace VanillaTradingExpanded
 {
-	public class JobDriver_UseTradingTerminal : JobDriver
+	public abstract class JobDriver_UseTradingTerminal : JobDriver
 	{
+		public Building_TradingTerminal TradingTerminal => this.TargetA.Thing as Building_TradingTerminal;
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
 			return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
 		}
-
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
 			this.FailOnDespawnedOrNull(TargetIndex.A);
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.InteractionCell).FailOn((Toil to) => !((Building_TradingTerminal)to.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing).CanUseTerminalNow);
+			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.InteractionCell).FailOn((Toil to) => !TradingTerminal.CanUseTerminalNow);
 			Toil openTradingTerminal = new Toil();
 			openTradingTerminal.initAction = delegate
 			{
 				Pawn actor = openTradingTerminal.actor;
-				if (((Building_TradingTerminal)actor.jobs.curJob.GetTarget(TargetIndex.A).Thing).CanUseTerminalNow)
-				{
-					Find.WindowStack.Add(new Window_MarketPrices());
-				}
+				DoAction(actor);
 			};
 			yield return openTradingTerminal;
+		}
+
+		protected abstract void DoAction(Pawn actor);
+	}
+
+    public class JobDriver_ViewPrices : JobDriver_UseTradingTerminal
+    {
+        protected override void DoAction(Pawn actor)
+        {
+			Find.WindowStack.Add(new Window_MarketPrices());
+		}
+	}
+
+    public class JobDriver_ContactBank : JobDriver_UseTradingTerminal
+    {
+        protected override void DoAction(Pawn actor)
+        {
+			Find.WindowStack.Add(new Window_Bank(actor, TradingTerminal.currentVisitableFactionBank));
 		}
 	}
 }

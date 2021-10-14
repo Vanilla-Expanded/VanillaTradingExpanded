@@ -9,4 +9,19 @@
 	<VTE.CurrentValue>Current Value</VTE.CurrentValue>
 	<VTE.Change>Change</VTE.Change>
 	<VTE.RecentChange>Recent Change</VTE.RecentChange>
+	
+	<VTE.ViewMarketPrices>View prices</VTE.ViewMarketPrices>
+	
+	<VTE.EmpireBankName>Empire bank</VTE.EmpireBankName>
+	<VTE.OutlanderCivilBankName>Bank of {FACTION_name}</VTE.OutlanderCivilBankName>
+	
+	<VTE.LocalFunds>Local funds: {0}</VTE.LocalFunds>
+	<VTE.BankBalance>Bank balance: {0}</VTE.BankBalance>
+	<VTE.BankFees>Bank fees: {0}%</VTE.BankFees>
+	<VTE.BankFeesBasedOn>Based on {0} goodwill with {FACTION_name}</VTE.BankFeesBasedOn>
+	<VTE.DepositOrWithdraw>Deposit or Withdraw</VTE.DepositOrWithdraw>
+	<VTE.DepositOrWithdrawDesc>Positive numbers deposit. Negative numbers withdraw.</VTE.DepositOrWithdrawDesc>
+	<VTE.AreYouSureYouWantToDeposit>Are you sure that you want to deposit {0}?</VTE.AreYouSureYouWantToDeposit>
+	<VTE.AreYouSureYouWantToWithdraw>Are you sure that you want to withdraw {0}?</VTE.AreYouSureYouWantToWithdraw>
+	
 </LanguageData>

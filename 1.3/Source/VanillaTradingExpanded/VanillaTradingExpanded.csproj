@@ -22,6 +22,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
@@ -47,7 +50,11 @@
     <Compile Include="TradingManager.cs" />
     <Compile Include="GuiHelper.cs" />
     <Compile Include="HarmonyPatches.cs" />
+    <Compile Include="BankExtension.cs" />
+    <Compile Include="Bank.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="VTE_DefOf.cs" />
+    <Compile Include="Window_Bank.cs" />
     <Compile Include="Window_MarketPrices.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -15,12 +15,14 @@ namespace VanillaTradingExpanded
     {
         public static TradingManager Instance;
 
+        // goods
         public Dictionary<ThingDef, float> priceModifiers;
-
         public Dictionary<ThingDef, float> rawUnprocessedPriceModifiers;
         public Dictionary<ThingDef, float> previousPriceModifiers;
-
         public HashSet<ThingDef> cachedTradeables;
+
+        // banks
+        public Dictionary<Faction, Bank> banksByFaction = new Dictionary<Faction, Bank>();
         public TradingManager()
         {
             Instance = this;
@@ -48,17 +50,29 @@ namespace VanillaTradingExpanded
         public void PreInit()
         {
             Instance = this;
-            if (priceModifiers is null)
+            priceModifiers ??= new Dictionary<ThingDef, float>();
+            rawUnprocessedPriceModifiers ??= new Dictionary<ThingDef, float>();
+            previousPriceModifiers ??= new Dictionary<ThingDef, float>();
+            banksByFaction ??= new Dictionary<Faction, Bank>();
+            RecheckBanks();
+        }
+
+        private void RecheckBanks()
+        {
+            foreach (var faction in Find.FactionManager.AllFactions)
             {
-                priceModifiers = new Dictionary<ThingDef, float>();
-            }
-            if (rawUnprocessedPriceModifiers is null)
-            {
-                rawUnprocessedPriceModifiers = new Dictionary<ThingDef, float>();
-            }
-            if (previousPriceModifiers is null)
-            {
-                previousPriceModifiers = new Dictionary<ThingDef, float>();
+                var bankExtension = faction.def.GetModExtension<BankExtension>();
+                if (bankExtension != null)
+                {
+                    if (!banksByFaction.ContainsKey(faction))
+                    {
+                        banksByFaction[faction] = new Bank(faction);
+                    }
+                }
+                else if (banksByFaction.ContainsKey(faction))
+                {
+                    banksByFaction.Remove(faction);
+                }
             }
         }
 
@@ -80,7 +94,6 @@ namespace VanillaTradingExpanded
                     rawUnprocessedPriceModifiers[soldThing.def] = soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
             }
-
         }
         public void RegisterPurchasedThing(Thing soldThing, int countToSell)
         {
@@ -179,6 +192,7 @@ namespace VanillaTradingExpanded
             Scribe_Collections.Look(ref priceModifiers, "priceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys1, ref floatValues1);
             Scribe_Collections.Look(ref rawUnprocessedPriceModifiers, "rawUnprocessedPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys2, ref floatValues2);
             Scribe_Collections.Look(ref previousPriceModifiers, "previousPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys3, ref floatValues3);
+            Scribe_Collections.Look(ref banksByFaction, "banksByFaction", LookMode.Reference, LookMode.Deep, ref factionKeys, ref bankValues);
         }
 
         private List<ThingDef> thingDefsKeys1;
@@ -187,5 +201,8 @@ namespace VanillaTradingExpanded
         private List<float> floatValues2;
         private List<ThingDef> thingDefsKeys3;
         private List<float> floatValues3;
+
+        private List<Faction> factionKeys;
+        private List<Bank> bankValues;
     }
 }

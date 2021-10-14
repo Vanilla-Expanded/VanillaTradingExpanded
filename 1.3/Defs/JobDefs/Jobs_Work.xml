@@ -3,9 +3,16 @@
 
 
   <JobDef>
-    <defName>VTE_UseTradingTerminal</defName>
-    <driverClass>VanillaTradingExpanded.JobDriver_UseTradingTerminal</driverClass>
-    <reportString>using trading terminal.</reportString>
+    <defName>VTE_ViewPrices</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_ViewPrices</driverClass>
+    <reportString>using trading terminal to view prices.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
+  
+  <JobDef>
+    <defName>VTE_ContactBank</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_ContactBank</driverClass>
+    <reportString>using trading terminal to contact bank.</reportString>
     <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
   </JobDef>
 

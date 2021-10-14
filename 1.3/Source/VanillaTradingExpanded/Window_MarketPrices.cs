@@ -64,50 +64,50 @@ namespace VanillaTradingExpanded
 			SetDirty();
 		}
 
-		[TweakValue("0TRADING", 0, 1000)] private static float maxWidth = 800;
-		[TweakValue("0TRADING", 0, 1000)] private static float maxHeight = 600;
+		private static float maxWidth = 800;
+		private static float maxHeight = 600;
 
-		[TweakValue("0TRADING", 0, 100)] private static float cellHeight = 35f;
+		private static float cellHeight = 35f;
 
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSortByLabelHeight = 35;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSortByLabelWidth = 50;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSortByButtonHeight = 35;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSortByButtonWidth = 125;
-		[TweakValue("0TRADING", 0, 1000)] private static float sortByPosYInitial = 0;
-		[TweakValue("0TRADING", 0, 1000)] private static float sortByXOffset = 10;
+		private static int cachedSortByLabelHeight = 35;
+		private static int cachedSortByLabelWidth = 50;
+		private static int cachedSortByButtonHeight = 35;
+		private static int cachedSortByButtonWidth = 125;
+		private static float sortByPosYInitial = 0;
+		private static float sortByXOffset = 10;
 
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSearchLabelHeight = 35;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSearchLabelWidth = 46;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSearchYOffset = 6;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSearchXOffset = 16;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSearchInputHeight = 26;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedSearchInputWidth = 125;
+		private static int cachedSearchLabelHeight = 35;
+		private static int cachedSearchLabelWidth = 46;
+		private static int cachedSearchYOffset = 6;
+		private static int cachedSearchXOffset = 16;
+		private static int cachedSearchInputHeight = 26;
+		private static int cachedSearchInputWidth = 125;
 
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedHeaderHeight = 26;
-		[TweakValue("0TRADING", 0, 1000)] private static int cachedHeaderWidth = 80;
-		[TweakValue("0TRADING", 0, 1000)] private static float headerPosYInitial = 70;
-		[TweakValue("0TRADING", 0, 1000)] private static float tablePosInitialYOffset = 30;
+		private static int cachedHeaderHeight = 26;
+		private static int cachedHeaderWidth = 80;
+		private static float headerPosYInitial = 70;
+		private static float tablePosInitialYOffset = 30;
 
-		[TweakValue("0TRADING", 0, 1000)] private static float thingIconXOffset = 30;
-		[TweakValue("0TRADING", 0, 1000)] private static float thingIconWidth = 30;
+		private static float thingIconXOffset = 30;
+		private static float thingIconWidth = 30;
 
-		[TweakValue("0TRADING", 0, 1000)] private static float infoCardXOffset = 5;
-		[TweakValue("0TRADING", 0, 1000)] private static float infoCardYOffset = 5;
+		private static float infoCardXOffset = 5;
+		private static float infoCardYOffset = 5;
 
-		[TweakValue("0TRADING", 0, 1000)] private static float thingLabelXOffset = 35;
-		[TweakValue("0TRADING", 0, 1000)] private static float thingLabelWidth = 120;
+		private static float thingLabelXOffset = 35;
+		private static float thingLabelWidth = 120;
 
-		[TweakValue("0TRADING", 0, 1000)] private static float thingMarketValueXOffset = 35;
-		[TweakValue("0TRADING", 0, 1000)] private static float thingMarketValueWidth = 120;
+		private static float thingMarketValueXOffset = 35;
+		private static float thingMarketValueWidth = 120;
 
-		[TweakValue("0TRADING", 0, 1000)] private static float thingCurrentValueXOffset = 10;
-		[TweakValue("0TRADING", 0, 1000)] private static float thingCurrentValueWidth = 120;
+		private static float thingCurrentValueXOffset = 10;
+		private static float thingCurrentValueWidth = 120;
 
-		[TweakValue("0TRADING", 0, 1000)] private static float thingTotalChangeXOffset = 25;
-		[TweakValue("0TRADING", 0, 1000)] private static float thingTotalChangeWidth = 120;
+		private static float thingTotalChangeXOffset = 25;
+		private static float thingTotalChangeWidth = 120;
 
-		[TweakValue("0TRADING", -100, 1000)] private static float thingRecentChangeXOffset = 0;
-		[TweakValue("0TRADING", 0, 1000)] private static float thingRecentChangeWidth = 120;
+		private static float thingRecentChangeXOffset = 0;
+		private static float thingRecentChangeWidth = 120;
 		public override Vector2 InitialSize => new Vector2(maxWidth, Mathf.Min(maxHeight, UI.screenHeight));
 
 		private string textFilter;
