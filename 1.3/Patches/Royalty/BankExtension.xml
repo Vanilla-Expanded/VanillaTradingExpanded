@@ -23,7 +23,7 @@
 						</feesByGoodwill>
 						<loanOptions>
 							<li>
-								<loanNameKey>VTE.QuickCash</loanNameKey>
+								<loanNameKey>VTE.QuickCashLoan</loanNameKey>
 								<fixedLoanAmount>10000</fixedLoanAmount>
 								<fixedRepayAmount>15000</fixedRepayAmount>
 								<transactionFeesIncluded>true</transactionFeesIncluded>

@@ -19,6 +19,9 @@ namespace VanillaTradingExpanded
             
         }
     }
+
+
+    [HotSwappableAttribute]
     public class Bank : IExposable
     {
         public Faction parentFaction;
@@ -31,12 +34,15 @@ namespace VanillaTradingExpanded
         public Bank(Faction faction)
         {
             this.parentFaction = faction;
+            this.bankExtension = faction.def.GetModExtension<BankExtension>();
         }
         public List<Loan> loans = new List<Loan>();
 
         public int DepositAmount => depositAmount;
         public float Balance => depositAmount + loans.Sum(x => x.amount);
-        public float Fees => this.parentFaction.def.GetModExtension<BankExtension>().feesByGoodwill.Evaluate(this.parentFaction.GoodwillWith(Faction.OfPlayer));
+
+        public BankExtension bankExtension;
+        public float Fees => bankExtension.feesByGoodwill.Evaluate(this.parentFaction.GoodwillWith(Faction.OfPlayer));
         
         public void DepositSilver(List<Thing> silvers, int amountToDeposit)
         {
@@ -82,6 +88,7 @@ namespace VanillaTradingExpanded
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 loans ??= new List<Loan>();
+                bankExtension = parentFaction.def.GetModExtension<BankExtension>();
             }
         }
     }

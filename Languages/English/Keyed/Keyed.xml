@@ -30,5 +30,14 @@
 	<VTE.AmountToWithdraw>Amount to withdraw</VTE.AmountToWithdraw>
 	<VTE.FeesToPay>Fees to pay</VTE.FeesToPay>
 	<VTE.Total>Total</VTE.Total>
-	
+	<VTE.Loans>Loans</VTE.Loans>
+	<VTE.QuickCashLoan>Quick Cash loan</VTE.QuickCashLoan>
+	<VTE.ShortTermLoan>Short Term loan</VTE.ShortTermLoan>
+	<VTE.LongTermLoan>Long Term loan</VTE.LongTermLoan>
+	<VTE.MortgageLoan>Mortgage loan</VTE.MortgageLoan>
+	<VTE.LoanOptionsUnlockText>Unlocks after putting your money on the deposit</VTE.LoanOptionsUnlockText>
+	<VTE.Repay>Repay</VTE.Repay>
+	<VTE.RepayDate>By {0}</VTE.RepayDate>
+	<VTE.TakeLoan>Take loan</VTE.TakeLoan>
+	<VTE.RepayFromBalance>Repay from balance</VTE.RepayFromBalance>
 </LanguageData>

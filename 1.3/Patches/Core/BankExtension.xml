@@ -23,7 +23,7 @@
 							</feesByGoodwill>
 							<loanOptions>
 								<li>
-									<loanNameKey>VTE.QuickCash</loanNameKey>
+									<loanNameKey>VTE.QuickCashLoan</loanNameKey>
 									<fixedLoanAmount>10000</fixedLoanAmount>
 									<fixedRepayAmount>15000</fixedRepayAmount>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
@@ -35,6 +35,48 @@
 									<repayAmountPerDeposit>0.5</repayAmountPerDeposit>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
 									<loanRepayPeriodDays>60</loanRepayPeriodDays>
+								</li>
+								<li>
+									<loanNameKey>VTE.LongTermLoan</loanNameKey>
+									<loanAmountPerDeposit>1</loanAmountPerDeposit>
+									<repayAmountPerDeposit>1</repayAmountPerDeposit>
+									<transactionFeesIncluded>true</transactionFeesIncluded>
+									<loanRepayPeriodDays>120</loanRepayPeriodDays>
+								</li>
+								<li>
+									<loanNameKey>VTE.MortgageLoan</loanNameKey>
+									<loanAmountPerDeposit>2</loanAmountPerDeposit>
+									<repayAmountPerDeposit>2.5</repayAmountPerDeposit>
+									<transactionFeesIncluded>true</transactionFeesIncluded>
+									<loanRepayPeriodDays>300</loanRepayPeriodDays>
+								</li>
+								<li>
+									<loanNameKey>VTE.ShortTermLoan</loanNameKey>
+									<loanAmountPerDeposit>0.5</loanAmountPerDeposit>
+									<repayAmountPerDeposit>0.5</repayAmountPerDeposit>
+									<transactionFeesIncluded>true</transactionFeesIncluded>
+									<loanRepayPeriodDays>60</loanRepayPeriodDays>
+								</li>
+								<li>
+									<loanNameKey>VTE.ShortTermLoan</loanNameKey>
+									<loanAmountPerDeposit>0.5</loanAmountPerDeposit>
+									<repayAmountPerDeposit>0.5</repayAmountPerDeposit>
+									<transactionFeesIncluded>true</transactionFeesIncluded>
+									<loanRepayPeriodDays>60</loanRepayPeriodDays>
+								</li>
+								<li>
+									<loanNameKey>VTE.LongTermLoan</loanNameKey>
+									<loanAmountPerDeposit>1</loanAmountPerDeposit>
+									<repayAmountPerDeposit>1</repayAmountPerDeposit>
+									<transactionFeesIncluded>true</transactionFeesIncluded>
+									<loanRepayPeriodDays>120</loanRepayPeriodDays>
+								</li>
+								<li>
+									<loanNameKey>VTE.MortgageLoan</loanNameKey>
+									<loanAmountPerDeposit>2</loanAmountPerDeposit>
+									<repayAmountPerDeposit>2.5</repayAmountPerDeposit>
+									<transactionFeesIncluded>true</transactionFeesIncluded>
+									<loanRepayPeriodDays>300</loanRepayPeriodDays>
 								</li>
 							</loanOptions>
 						</li>

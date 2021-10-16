@@ -11,15 +11,44 @@ using Verse.AI;
 
 namespace VanillaTradingExpanded
 {
+    [HotSwappableAttribute]
     public class LoanOption
     {
         public string loanNameKey;
-        public float? fixedLoanAmount;
-        public float? fixedRepayAmount;
+        public int? fixedLoanAmount;
+        public int? fixedRepayAmount;
         public float? loanAmountPerDeposit;
         public float? repayAmountPerDeposit;
         public bool transactionFeesIncluded;
         public float loanRepayPeriodDays;
+        public int GetLoanAmountFrom(Bank bank)
+        {
+            if (fixedLoanAmount.HasValue)
+            {
+                return fixedLoanAmount.Value;
+            }
+            return Mathf.CeilToInt(bank.Balance * loanAmountPerDeposit.Value);
+        }
+
+        public int GetRepayAmountFrom(Bank bank)
+        {
+            if (fixedRepayAmount.HasValue)
+            {
+                return fixedRepayAmount.Value;
+            }
+            float loanAmount = GetLoanAmountFrom(bank);
+            if (transactionFeesIncluded)
+            {
+                loanAmount *= (1f + bank.Fees);
+            }
+            return Mathf.CeilToInt(loanAmount);
+        }
+
+        public string GetRepayDateFor(Pawn negotiator)
+        {
+            var ticks = (int)(Find.TickManager.TicksAbs + (GenDate.TicksPerDay * loanRepayPeriodDays));
+            return GenDate.DateFullStringAt(ticks, Find.WorldGrid.LongLatOf(negotiator.Map.Tile));
+        }
     }
     public class BankExtension : DefModExtension
     {
