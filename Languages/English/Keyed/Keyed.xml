@@ -23,5 +23,12 @@
 	<VTE.DepositOrWithdrawDesc>Positive numbers deposit. Negative numbers withdraw.</VTE.DepositOrWithdrawDesc>
 	<VTE.AreYouSureYouWantToDeposit>Are you sure that you want to deposit {0}?</VTE.AreYouSureYouWantToDeposit>
 	<VTE.AreYouSureYouWantToWithdraw>Are you sure that you want to withdraw {0}?</VTE.AreYouSureYouWantToWithdraw>
+	<VTE.Breakdown>Breakdown</VTE.Breakdown>
+	<VTE.BreakdownDesc>Performing transactions will incur a charge based on current Bank fee</VTE.BreakdownDesc>
+	<VTE.AmountToDepositWithdraw>Amount to deposit / withdraw</VTE.AmountToDepositWithdraw>
+	<VTE.AmountToDeposit>Amount to deposit</VTE.AmountToDeposit>
+	<VTE.AmountToWithdraw>Amount to withdraw</VTE.AmountToWithdraw>
+	<VTE.FeesToPay>Fees to pay</VTE.FeesToPay>
+	<VTE.Total>Total</VTE.Total>
 	
 </LanguageData>

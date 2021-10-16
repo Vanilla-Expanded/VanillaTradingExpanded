@@ -41,7 +41,7 @@ namespace VanillaTradingExpanded
             {
                 if (thingDef.tradeability != Tradeability.None && thingDef.GetStatValueAbstract(StatDefOf.MarketValue) > 0)
                 {
-                    Log.Message($"Adding: {thingDef}, {thingDef.tradeability}, {thingDef.GetStatValueAbstract(StatDefOf.MarketValue)}");
+                    //Log.Message($"Adding: {thingDef}, {thingDef.tradeability}, {thingDef.GetStatValueAbstract(StatDefOf.MarketValue)}");
                     cachedTradeables.Add(thingDef);
                 }
             }
@@ -54,7 +54,10 @@ namespace VanillaTradingExpanded
             rawUnprocessedPriceModifiers ??= new Dictionary<ThingDef, float>();
             previousPriceModifiers ??= new Dictionary<ThingDef, float>();
             banksByFaction ??= new Dictionary<Faction, Bank>();
-            RecheckBanks();
+            if (Find.World != null)
+            {
+                RecheckBanks();
+            }
         }
 
         private void RecheckBanks()
@@ -193,6 +196,7 @@ namespace VanillaTradingExpanded
             Scribe_Collections.Look(ref rawUnprocessedPriceModifiers, "rawUnprocessedPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys2, ref floatValues2);
             Scribe_Collections.Look(ref previousPriceModifiers, "previousPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys3, ref floatValues3);
             Scribe_Collections.Look(ref banksByFaction, "banksByFaction", LookMode.Reference, LookMode.Deep, ref factionKeys, ref bankValues);
+            PreInit();
         }
 
         private List<ThingDef> thingDefsKeys1;

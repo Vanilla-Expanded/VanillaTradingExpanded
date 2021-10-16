@@ -23,6 +23,11 @@ namespace VanillaTradingExpanded
     {
         public Faction parentFaction;
         private int depositAmount;
+
+        public Bank()
+        {
+
+        }
         public Bank(Faction faction)
         {
             this.parentFaction = faction;
@@ -46,7 +51,7 @@ namespace VanillaTradingExpanded
                 int num = Math.Min(amountToDeposit, thing.stackCount);
                 thing.SplitOff(num).Destroy();
                 amountToDeposit -= num;
-                depositAmount += num;
+                depositAmount += (int)(num * (1f - Fees));
             }
         }
 
@@ -56,9 +61,10 @@ namespace VanillaTradingExpanded
             while (amountToWithwraw > 0)
             {
                 Thing thing = ThingMaker.MakeThing(ThingDefOf.Silver);
-                thing.stackCount = Mathf.Min(thing.def.stackLimit, amountToWithwraw);
-                amountToWithwraw -= thing.stackCount;
-                depositAmount -= thing.stackCount;
+                var curAmount = Mathf.Min(thing.def.stackLimit, amountToWithwraw);
+                thing.stackCount = (int)(curAmount * (1f - Fees));
+                amountToWithwraw -= curAmount;
+                depositAmount -= curAmount;
                 thingsToLaunch.Add(thing);
             }
             foreach (var thing in thingsToLaunch)

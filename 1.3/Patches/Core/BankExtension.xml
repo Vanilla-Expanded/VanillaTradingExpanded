@@ -10,27 +10,34 @@
 				<li Class="PatchOperationAddModExtension">
 					<xpath>/Defs/FactionDef[defName = "OutlanderCivil"]</xpath>
 					<value>
-					<li Class="VanillaTradingExpanded.BankExtension">
-						<bankNameKey>VTE.OutlanderCivilBankName</bankNameKey>
-						<feesByGoodwill>
-							<points>
-								<li>(-100, 0.4)</li>
-								<li>(-50, 0.3)</li>
-								<li>(0, 0.2)</li>
-								<li>(50, 0.1)</li>
-								<li>(100, 0)</li>
-							</points>
-						</feesByGoodwill>
-						<loanOptions>
-							<li>
-								<loanNameKey>VTE.QuickCash</loanNameKey>
-								<fixedLoanAmount>10000</fixedLoanAmount>
-								<fixedRepayAmount>15000</fixedRepayAmount>
-								<transactionFeesIncluded>true</transactionFeesIncluded>
-								<loanRepayPeriodDays>15</loanRepayPeriodDays>
-							</li>
-						</loanOptions>
-					</li>
+						<li Class="VanillaTradingExpanded.BankExtension">
+							<bankNameKey>VTE.OutlanderCivilBankName</bankNameKey>
+							<feesByGoodwill>
+								<points>
+									<li>(-100, 0.4)</li>
+									<li>(-50, 0.3)</li>
+									<li>(0, 0.2)</li>
+									<li>(50, 0.1)</li>
+									<li>(100, 0)</li>
+								</points>
+							</feesByGoodwill>
+							<loanOptions>
+								<li>
+									<loanNameKey>VTE.QuickCash</loanNameKey>
+									<fixedLoanAmount>10000</fixedLoanAmount>
+									<fixedRepayAmount>15000</fixedRepayAmount>
+									<transactionFeesIncluded>true</transactionFeesIncluded>
+									<loanRepayPeriodDays>15</loanRepayPeriodDays>
+								</li>
+								<li>
+									<loanNameKey>VTE.ShortTermLoan</loanNameKey>
+									<loanAmountPerDeposit>0.5</loanAmountPerDeposit>
+									<repayAmountPerDeposit>0.5</repayAmountPerDeposit>
+									<transactionFeesIncluded>true</transactionFeesIncluded>
+									<loanRepayPeriodDays>60</loanRepayPeriodDays>
+								</li>
+							</loanOptions>
+						</li>
 					</value>
 				</li>
 			</operations>

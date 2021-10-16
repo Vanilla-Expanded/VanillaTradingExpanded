@@ -41,7 +41,7 @@ namespace VanillaTradingExpanded
 			var posY = 0f;
 			DrawBankStatus(inRect, posY);
 			DrawBankFeesInfo(inRect, ref posY);
-			DrawWithdrawBox(inRect, ref posY);
+			DrawDepositAndWithdrawInfo(inRect, ref posY);
 		}
 
 		[TweakValue("0TRADING", 0, 1000)] private static float testx = 5;
@@ -76,9 +76,9 @@ namespace VanillaTradingExpanded
 			posY = feesInfoDescRect.yMax + 20;
 		}
 
-		public int amountToDepositOrWithDraw;
+		public int amountToDepositOrWithdraw;
 		public string textEntryBuffer;
-		private void DrawWithdrawBox(Rect inRect, ref float posY)
+		private void DrawDepositAndWithdrawInfo(Rect inRect, ref float posY)
 		{
 			var depositOrWithdrawLabelRect = new Rect(inRect.x, posY, 300, 24);
 			Widgets.Label(depositOrWithdrawLabelRect, "VTE.DepositOrWithdraw".Translate());
@@ -103,66 +103,102 @@ namespace VanillaTradingExpanded
 
 			var silverThings = AvailableSilver;
 			var withdrawFullyRect = new Rect(silverLabel.xMax + 410, withdrawBox.y, 24, 24);
-			if (bank.DepositAmount == 0 && amountToDepositOrWithDraw == 0)
+			if (bank.DepositAmount == 0 && amountToDepositOrWithdraw == 0)
             {
 				GUI.color = Widgets.InactiveColor;
 			}
 			if (Widgets.ButtonText(withdrawFullyRect, "<<"))
             {
-				amountToDepositOrWithDraw = -Mathf.Max(bank.DepositAmount, 0);
+				amountToDepositOrWithdraw = -Mathf.Max(bank.DepositAmount, 0);
 			}
 			var withdrawRect = new Rect(withdrawFullyRect.xMax, withdrawBox.y, 24, 24);
-			if (Widgets.ButtonText(withdrawRect, "<") && bank.DepositAmount > -amountToDepositOrWithDraw)
+			if (Widgets.ButtonText(withdrawRect, "<") && bank.DepositAmount > -amountToDepositOrWithdraw)
 			{
-				amountToDepositOrWithDraw--;
+				amountToDepositOrWithdraw--;
 			}
 
 			GUI.color = Color.white;
 			var textEntry = new Rect(withdrawRect.xMax + 5, withdrawBox.y, 60, 24);
 
-			textEntryBuffer = amountToDepositOrWithDraw.ToString();
-			Widgets.TextFieldNumeric<int>(textEntry, ref amountToDepositOrWithDraw, ref textEntryBuffer, -999999);
+			textEntryBuffer = amountToDepositOrWithdraw.ToString();
+			Widgets.TextFieldNumeric<int>(textEntry, ref amountToDepositOrWithdraw, ref textEntryBuffer, -999999);
 
 			var depositRect = new Rect(textEntry.xMax + 5, withdrawBox.y, 24, 24);
 			if (Widgets.ButtonText(depositRect, ">"))
 			{
-				if (silverThings.Sum(x => x.stackCount) > amountToDepositOrWithDraw)
+				if (silverThings.Sum(x => x.stackCount) > amountToDepositOrWithdraw)
                 {
-					amountToDepositOrWithDraw++;
+					amountToDepositOrWithdraw++;
 				}
 			}
 			var depositFullyRect = new Rect(depositRect.xMax, withdrawBox.y, 24, 24);
 			if (Widgets.ButtonText(depositFullyRect, ">>"))
 			{
-				amountToDepositOrWithDraw = silverThings.Sum(x => x.stackCount);
+				amountToDepositOrWithdraw = silverThings.Sum(x => x.stackCount);
 			}
 			var confirmRect = new Rect(depositFullyRect.xMax + 5, withdrawBox.y, 90, 24);
 
 			if (Widgets.ButtonText(confirmRect, "Confirm".Translate()))
 			{
-				if (amountToDepositOrWithDraw != 0)
+				if (amountToDepositOrWithdraw != 0)
                 {
-					var warning = amountToDepositOrWithDraw > 0 ? "VTE.AreYouSureYouWantToDeposit".Translate(amountToDepositOrWithDraw)
-							: "VTE.AreYouSureYouWantToWithdraw".Translate(amountToDepositOrWithDraw);
+					var warning = amountToDepositOrWithdraw > 0 ? "VTE.AreYouSureYouWantToDeposit".Translate(amountToDepositOrWithdraw)
+							: "VTE.AreYouSureYouWantToWithdraw".Translate(amountToDepositOrWithdraw);
 					Find.WindowStack.Add(new Dialog_MessageBox(warning, "Yes".Translate(), delegate ()
 					{
-						if (amountToDepositOrWithDraw > 0)
+						if (amountToDepositOrWithdraw > 0)
 						{
-							bank.DepositSilver(silverThings, amountToDepositOrWithDraw);
+							bank.DepositSilver(silverThings, amountToDepositOrWithdraw);
 						}
-						else if (amountToDepositOrWithDraw < 0)
+						else if (amountToDepositOrWithdraw < 0)
 						{
-							bank.WithdrawSilver(negotiator, -amountToDepositOrWithDraw);
+							bank.WithdrawSilver(negotiator, -amountToDepositOrWithdraw);
 						}
-						amountToDepositOrWithDraw = 0;
+						amountToDepositOrWithdraw = 0;
 						cachedThings = null;
 					}, "No".Translate()));
 				}
 			}
+			posY = withdrawBox.yMax + 20;
 
-			posY = withdrawBox.yMax;
+			var breakdownLabelRect = new Rect(inRect.x, posY, 200, 24);
+			Widgets.Label(breakdownLabelRect, "VTE.Breakdown".Translate());
+			Text.Font = GameFont.Tiny;
+			GUI.color = Color.gray;
+			var breakdownLabelDescRect = new Rect(breakdownLabelRect.xMax + 180, posY + 3, 400, 24);
+			Widgets.Label(breakdownLabelDescRect, "VTE.BreakdownDesc".Translate());
+			GUI.color = Color.white;
+			Text.Font = GameFont.Small;
+
+			Text.Anchor = TextAnchor.MiddleLeft;
+
+			posY = breakdownLabelDescRect.yMax + 5;
+			var amountAbs = Mathf.Abs(amountToDepositOrWithdraw);
+			DrawBreakdownLine(inRect, ref posY, amountToDepositOrWithdraw == 0 ? "VTE.AmountToDepositWithdraw".Translate() : amountToDepositOrWithdraw > 0
+							? "VTE.AmountToDeposit".Translate() : "VTE.AmountToWithdraw".Translate(), amountAbs.ToString(), true);
+
+			var amountAfterFees = (int)(amountAbs * (1f - bank.Fees));
+			DrawBreakdownLine(inRect, ref posY, "VTE.FeesToPay".Translate(), (amountAbs - amountAfterFees).ToString(), false);
+			DrawBreakdownLine(inRect, ref posY, "VTE.Total".Translate(), amountAfterFees.ToString(), true);
+
+			Text.Anchor = TextAnchor.UpperLeft;
+
 		}
 
+		private void DrawBreakdownLine(Rect inRect, ref float posY, string label, string amount, bool highlight)
+        {
+			var lineBox = new Rect(inRect.x, posY, inRect.width, 30);
+			if (highlight)
+            {
+				Widgets.DrawHighlight(lineBox);
+			}
+			var labelRect = new Rect(lineBox.x + 100, lineBox.y, Text.CalcSize(label).x, lineBox.height);
+			Widgets.Label(labelRect, label);
+			var amountRect = new Rect(lineBox.x + 500, lineBox.y, 80, lineBox.height);
+			Widgets.Label(amountRect, amount);
+
+			posY = lineBox.yMax;
+		}
 		private List<Thing> cachedThings;
 		public List<Thing> AvailableSilver
         {
