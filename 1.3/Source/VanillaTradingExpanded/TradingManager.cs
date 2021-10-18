@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
+using Verse.Grammar;
 
 namespace VanillaTradingExpanded
 {
-
     public class TradingManager : GameComponent
     {
         public static TradingManager Instance;
@@ -18,11 +18,16 @@ namespace VanillaTradingExpanded
         // goods
         public Dictionary<ThingDef, float> priceModifiers;
         public Dictionary<ThingDef, float> rawUnprocessedPriceModifiers;
+
+
         public Dictionary<ThingDef, float> previousPriceModifiers;
         public HashSet<ThingDef> cachedTradeables;
 
         // banks
-        public Dictionary<Faction, Bank> banksByFaction = new Dictionary<Faction, Bank>();
+        public Dictionary<Faction, Bank> banksByFaction;
+
+        // news
+        public List<News> allNews;
         public TradingManager()
         {
             Instance = this;
@@ -54,6 +59,7 @@ namespace VanillaTradingExpanded
             rawUnprocessedPriceModifiers ??= new Dictionary<ThingDef, float>();
             previousPriceModifiers ??= new Dictionary<ThingDef, float>();
             banksByFaction ??= new Dictionary<Faction, Bank>();
+            allNews ??= new List<News>();
             if (Find.World != null)
             {
                 RecheckBanks();
@@ -114,7 +120,25 @@ namespace VanillaTradingExpanded
             }
         }
 
-
+        public News CreateNews(NewsDef newsDef)
+        {
+            var context = newsDef.Worker.GenerateContext();
+            var nameRequest = newsDef.Worker.GetGrammarRequest(context);
+            nameRequest.Includes.Add(newsDef.textRulePack);
+            return new News
+            {
+                text = GrammarResolver.Resolve("root", nameRequest),
+                creationTick = Find.TickManager.TicksGame,
+                priceImpact = newsDef.priceImpactRandomInRange.RandomInRange,
+                priceImpactStartTick = newsDef.priceImpactTicksDelay.RandomInRange + Find.TickManager.TicksGame,
+                affectedThingCategories = newsDef.thingCategories,
+                affectedThingDefs = newsDef.thingDefs
+            };
+        }
+        public void RegisterNews(News news)
+        {
+            allNews.Add(news);
+        }
         public override void StartedNewGame()
         {
             PreInit();
@@ -134,6 +158,16 @@ namespace VanillaTradingExpanded
             {
                 kvp.Value.Tick();
             }
+
+            if (Find.TickManager.TicksGame % 60 == 0)
+            {
+                var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElement();
+                var news = CreateNews(newsDefs);
+                RegisterNews(news);
+
+                Log.Message("News: " + news.text);
+            }
+
             if (Find.TickManager.TicksGame % 180000 == 0) // every 3 day
             {
                 previousPriceModifiers.Clear();
@@ -189,10 +223,6 @@ namespace VanillaTradingExpanded
                 }
             }
         }
-        public void RemoveDestroyedPawn(Pawn key)
-        {
-
-        }
         public override void ExposeData()
         {
             base.ExposeData();
@@ -200,6 +230,7 @@ namespace VanillaTradingExpanded
             Scribe_Collections.Look(ref rawUnprocessedPriceModifiers, "rawUnprocessedPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys2, ref floatValues2);
             Scribe_Collections.Look(ref previousPriceModifiers, "previousPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys3, ref floatValues3);
             Scribe_Collections.Look(ref banksByFaction, "banksByFaction", LookMode.Reference, LookMode.Deep, ref factionKeys, ref bankValues);
+            Scribe_Collections.Look(ref allNews, "news");
             PreInit();
         }
 

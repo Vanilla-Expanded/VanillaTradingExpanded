@@ -24,7 +24,7 @@ namespace VanillaTradingExpanded
             string text = "VTE.CollectorsText".Translate(bankerFaction.Named("FACTION"));
             text += "\n\n";
             text += parms.raidStrategy.arrivalTextEnemy;
-            text += "\n";
+            text += "\n\n";
             text += "VTE.CollectorsTextPartTwo".Translate();
             return text;
         }

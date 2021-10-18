@@ -15,5 +15,11 @@
     <reportString>using trading terminal to contact bank.</reportString>
     <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
   </JobDef>
-
+  
+  <JobDef>
+    <defName>VTE_ViewNews</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_ViewNews</driverClass>
+    <reportString>using trading terminal to view news.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
 </Defs>

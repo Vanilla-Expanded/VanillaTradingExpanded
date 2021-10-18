@@ -49,4 +49,12 @@ namespace VanillaTradingExpanded
 			Find.WindowStack.Add(new Window_Bank(actor, TradingTerminal.currentVisitableFactionBank));
 		}
 	}
+
+	public class JobDriver_ViewNews : JobDriver_UseTradingTerminal
+	{
+		protected override void DoAction(Pawn actor)
+		{
+			Find.WindowStack.Add(new Window_News());
+		}
+	}
 }

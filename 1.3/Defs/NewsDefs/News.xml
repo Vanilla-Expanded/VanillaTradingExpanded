@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <VanillaTradingExpanded.NewsDef>
+		<defName>VTE_FactionWar</defName>
+		<textRulePack>VTE_FactionPreparesToWar</textRulePack>
+		<newsWorker>VanillaTradingExpanded.NewsWorker_FactionAction</newsWorker>
+		<thingCategories>
+			<li></li>
+		</thingCategories>
+		<thingDefs>
+			<li></li>
+		</thingDefs>
+		<priceImpactRandomInRange>0.5~3</priceImpactRandomInRange> <!-- 50%-300% -->
+		<priceImpactTicksDelay>30000~120000</priceImpactTicksDelay> 
+		<commonality>0.1</commonality>
+  </VanillaTradingExpanded.NewsDef>
+
+  <RulePackDef>
+    <defName>VTE_FactionPreparesToWar</defName>
+    <rulePack>
+      <rulesStrings>
+        <li>root->[FACTION_name] text example 1</li>
+        <li>root->[FACTION_name] text example 2</li>
+        <li>root->[FACTION_name] text example 3</li>
+      </rulesStrings>
+    </rulePack>
+  </RulePackDef>
+ 
+</Defs>

@@ -70,11 +70,8 @@ namespace VanillaTradingExpanded
 			}
 			else
 			{
-				var floatOption = GetViewMarketPricesOption(myPawn);
-				if (floatOption != null)
-				{
-					yield return floatOption;
-				}
+				yield return GetViewMarketPricesOption(myPawn);
+				yield return GetViewNewsOption(myPawn);
 				foreach (var floatOption2 in GetBankOptions(myPawn))
                 {
 					yield return floatOption2;
@@ -88,6 +85,16 @@ namespace VanillaTradingExpanded
 			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, delegate
 			{
 				Job job = JobMaker.MakeJob(VTE_DefOf.VTE_ViewPrices, this);
+				negotiator.jobs.TryTakeOrderedJob(job);
+			}, MenuOptionPriority.Default), negotiator, this);
+		}
+
+		private FloatMenuOption GetViewNewsOption(Pawn negotiator)
+		{
+			string text = "VTE.ViewNews".Translate();
+			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, delegate
+			{
+				Job job = JobMaker.MakeJob(VTE_DefOf.VTE_ViewNews, this);
 				negotiator.jobs.TryTakeOrderedJob(job);
 			}, MenuOptionPriority.Default), negotiator, this);
 		}

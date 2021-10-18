@@ -125,22 +125,24 @@ namespace VanillaTradingExpanded
                             Messages.Message("VTE.IndebtedMessage".Translate(this.parentFaction.Named("FACTION")), MessageTypeDefOf.NegativeEvent);
                         }
 
-                        if (!loan.warrantForIndebtednessWarningIssued && Mathf.Abs(loan.DaysUntil) >= IndebtednessPeriodDaysUntilWarrant)
+                        if (Mathf.Abs(loan.DaysUntil) >= IndebtednessPeriodDaysUntilWarrant)
                         {
-                            loan.warrantForIndebtednessWarningIssued = true;
-                            Find.LetterStack.ReceiveLetter("VTE.DebtCollection".Translate(), "VTE.DebtCollectionDesc".Translate(loan.repayAmount, parentFaction.Named("FACTION")), LetterDefOf.ThreatBig);
-                        }
-
-                        if (Rand.MTBEventOccurs(15, 60000f, 1f))
-                        {
-                            IncidentWorker_Collectors.bankerFaction = this.parentFaction;
-                            var parms = StorytellerUtility.DefaultParmsNow(IncidentCategoryDefOf.ThreatBig, Find.World);
-                            parms.points *= 2;
-                            parms.target = Find.AnyPlayerHomeMap;
-                            parms.faction = Find.FactionManager.AllFactions.FirstOrDefault(x => x.def.defName == "Pirate")
-                                ?? Find.FactionManager.GetFactions(false, false, false).Where(x => x.HostileTo(Faction.OfPlayer)).RandomElement();
-                            VTE_DefOf.VTE_Collectors.Worker.TryExecute(parms);
-                            IncidentWorker_Collectors.bankerFaction = null;
+                            if (!loan.warrantForIndebtednessWarningIssued)
+                            {
+                                loan.warrantForIndebtednessWarningIssued = true;
+                                Find.LetterStack.ReceiveLetter("VTE.DebtCollection".Translate(), "VTE.DebtCollectionDesc".Translate(loan.repayAmount, parentFaction.Named("FACTION")), LetterDefOf.ThreatBig);
+                            }
+                            if (Rand.MTBEventOccurs(15, 60000f, 1f))
+                            {
+                                IncidentWorker_Collectors.bankerFaction = this.parentFaction;
+                                var parms = StorytellerUtility.DefaultParmsNow(IncidentCategoryDefOf.ThreatBig, Find.World);
+                                parms.points *= 2;
+                                parms.target = Find.AnyPlayerHomeMap;
+                                parms.faction = Find.FactionManager.AllFactions.FirstOrDefault(x => x.def.defName == "Pirate")
+                                    ?? Find.FactionManager.GetFactions(false, false, false).Where(x => x.HostileTo(Faction.OfPlayer)).RandomElement();
+                                VTE_DefOf.VTE_Collectors.Worker.TryExecute(parms);
+                                IncidentWorker_Collectors.bankerFaction = null;
+                            }
                         }
                     }
                 }

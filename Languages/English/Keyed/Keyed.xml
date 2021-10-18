@@ -11,7 +11,7 @@
 	<VTE.RecentChange>Recent Change</VTE.RecentChange>
 	
 	<VTE.ViewMarketPrices>View prices</VTE.ViewMarketPrices>
-	
+	<VTE.ViewNews>View news</VTE.ViewNews>
 	<VTE.EmpireBankName>Empire bank</VTE.EmpireBankName>
 	<VTE.OutlanderCivilBankName>Bank of {FACTION_name}</VTE.OutlanderCivilBankName>
 	
@@ -49,4 +49,14 @@
 
 They have been hired by {FACTION_name} to encourage you to pay off your debt.</VTE.CollectorsText>
 	<VTE.CollectorsTextPartTwo>Pay off your debt using a trading terminal to stop them from coming back.</VTE.CollectorsTextPartTwo>
+	
+	<VTE.LocalNews>Local News</VTE.LocalNews>
+	<VTE.FilterBy>Filter by</VTE.FilterBy>
+	<VTE.All>All</VTE.All>
+	<VTE.OnlySpecificCategory>Only specific category</VTE.OnlySpecificCategory>
+	<VTE.OnlyTradeShips>Only trader ship</VTE.OnlyTradeShips>
+	<VTE.OnlyBullish>Only bullish</VTE.OnlyBullish>
+	<VTE.OnlyBearish>Only bearish</VTE.OnlyBearish>
+	<VTE.News>News</VTE.News>
+	<VTE.Date>Date</VTE.Date>
 </LanguageData>
