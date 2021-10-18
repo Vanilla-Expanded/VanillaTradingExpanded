@@ -37,7 +37,16 @@
 	<VTE.MortgageLoan>Mortgage loan</VTE.MortgageLoan>
 	<VTE.LoanOptionsUnlockText>Unlocks after putting your money on the deposit</VTE.LoanOptionsUnlockText>
 	<VTE.Repay>Repay</VTE.Repay>
-	<VTE.RepayDate>By {0}</VTE.RepayDate>
+	<VTE.RepayDate>By {0} ({1})</VTE.RepayDate>
+	<VTE.RepayDateDaysLeft>By {0} ({1} left)</VTE.RepayDateDaysLeft>
+
 	<VTE.TakeLoan>Take loan</VTE.TakeLoan>
 	<VTE.RepayFromBalance>Repay from balance</VTE.RepayFromBalance>
+	<VTE.LoanExplanation>Loans can only be paid back using bank balance. Make sure to have enough money in your bank when the loan time runs out, or repay it in full beforehand. Failing to have enough silver in your bank account and stocks can result in losing goodwill of the bank faction, as well as incur other consequences until the debt is settled.</VTE.LoanExplanation>
+	<VTE.IndebtedMessage>Relations with {FACTION_name} became hostile due to being indebted to their bank.</VTE.IndebtedMessage>
+	<VTE.CollectorsLabel>Collectors</VTE.CollectorsLabel>
+	<VTE.CollectorsText>A group of mercenaries have arrived nearby.
+
+They have been hired by {FACTION_name} to encourage you to pay off your debt.</VTE.CollectorsText>
+	<VTE.CollectorsTextPartTwo>Pay off your debt using a trading terminal to stop them from coming back.</VTE.CollectorsTextPartTwo>
 </LanguageData>

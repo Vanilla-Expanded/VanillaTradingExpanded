@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Building_TradingTerminal.cs" />
     <Compile Include="JobDriver_UseTradingTerminal.cs" />
+    <Compile Include="Loan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TradingManager.cs" />
     <Compile Include="GuiHelper.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="BankExtension.cs" />
     <Compile Include="Bank.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="IncidentWorker_Collectors.cs" />
     <Compile Include="VTE_DefOf.cs" />
     <Compile Include="Window_Bank.cs" />
     <Compile Include="Window_MarketPrices.cs" />

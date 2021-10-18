@@ -130,6 +130,10 @@ namespace VanillaTradingExpanded
         public override void GameComponentTick()
         {
             base.GameComponentTick();
+            foreach (var kvp in banksByFaction)
+            {
+                kvp.Value.Tick();
+            }
             if (Find.TickManager.TicksGame % 180000 == 0) // every 3 day
             {
                 previousPriceModifiers.Clear();

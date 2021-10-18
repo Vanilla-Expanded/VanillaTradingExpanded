@@ -44,11 +44,12 @@ namespace VanillaTradingExpanded
             return Mathf.CeilToInt(loanAmount);
         }
 
-        public string GetRepayDateFor(Pawn negotiator)
+        public int GetRepayDateTicks()
         {
-            var ticks = (int)(Find.TickManager.TicksAbs + (GenDate.TicksPerDay * loanRepayPeriodDays));
-            return GenDate.DateFullStringAt(ticks, Find.WorldGrid.LongLatOf(negotiator.Map.Tile));
+            return (int)(Find.TickManager.TicksAbs + (GenDate.TicksPerDay * loanRepayPeriodDays));
         }
+
+
     }
     public class BankExtension : DefModExtension
     {

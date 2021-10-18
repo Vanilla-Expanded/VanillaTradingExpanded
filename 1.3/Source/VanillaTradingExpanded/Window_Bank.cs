@@ -20,10 +20,6 @@ namespace VanillaTradingExpanded
 	[HotSwappableAttribute]
 	public class Window_Bank : Window
 	{
-
-		[TweakValue("0TRADING", 0, 1000)] private static float maxWidth = 800;
-		[TweakValue("0TRADING", 0, 1000)] private static float maxHeight = 700;
-
 		private Pawn negotiator;
 		private Vector2 scrollPosition;
 		private Faction faction;
@@ -33,9 +29,9 @@ namespace VanillaTradingExpanded
 			this.negotiator = negotiator;
 			faction = bankFaction;
 			bank = faction.GetBank();
+			this.forcePause = true;
 		}
-
-		public override Vector2 InitialSize => new Vector2(maxWidth, Mathf.Min(maxHeight, UI.screenHeight));
+		public override Vector2 InitialSize => new Vector2(800, Mathf.Min(740, UI.screenHeight));
 		public override void DoWindowContents(Rect inRect)
 		{
 			var posY = 0f;
@@ -43,21 +39,17 @@ namespace VanillaTradingExpanded
 			DrawBankFeesInfo(inRect, ref posY);
 			DrawDepositAndWithdrawInfo(inRect, ref posY);
 			DrawLoanOptions(inRect, ref posY);
+			DrawBottom(inRect, ref posY);
 		}
-
-		[TweakValue("0TRADING", 0, 1000)] private static float testx = 5;
-		[TweakValue("0TRADING", 0, 1000)] private static float testy = 5;
-		[TweakValue("0TRADING", 0, 1000)] private static float width = 120;
-		[TweakValue("0TRADING", 0, 1000)] private static float height = 70;
 		private void DrawBankStatus(Rect inRect, float posY)
         {
 			Text.Font = GameFont.Medium;
-			var factionNameRect = new Rect(inRect.x, posY, 120, 30);
+			var factionNameRect = new Rect(inRect.x, posY, 300, 30);
 			Widgets.Label(factionNameRect, Faction.OfPlayer.Name);
 			Text.Font = GameFont.Small;
 
 			var localFundsRect = new Rect(factionNameRect.x, factionNameRect.yMax, factionNameRect.width, 24);
-			Widgets.Label(localFundsRect, "VTE.LocalFunds".Translate(bank.DepositAmount));
+			Widgets.Label(localFundsRect, "VTE.LocalFunds".Translate(AvailableSilver.Sum(x => x.stackCount)));
 
 			var bankBalanceRect = new Rect(factionNameRect.x, localFundsRect.yMax - 5, factionNameRect.width, 24);
 			Widgets.Label(bankBalanceRect, "VTE.BankBalance".Translate(bank.Balance));
@@ -226,7 +218,6 @@ namespace VanillaTradingExpanded
 					posX = inRect.x;
 				}
 				var loanBox = new Rect(posX, posY, 300, 150);
-				Widgets.DrawHighlight(loanBox);
 				DrawLoanOption(loanBox, loanOptions[i - 1]);
 				if (i % 2 == 0)
                 {
@@ -234,7 +225,7 @@ namespace VanillaTradingExpanded
 				}
 			}
 			Widgets.EndScrollView();
-        }
+		}
 
 		private void DrawLoanOption(Rect rect, LoanOption loanOption)
         {
@@ -242,37 +233,93 @@ namespace VanillaTradingExpanded
 			Widgets.Label(loanTitle, loanOption.loanNameKey.Translate());
 
 			if (bank.Balance > 0 || loanOption.fixedLoanAmount.HasValue)
-            {
-				var silverIcon = new Rect(rect.x + 90, loanTitle.yMax, 24, 24);
+			{
+				bool loanIsTaken = bank.LoanIsTaken(loanOption, out var loan);
+				if (loanIsTaken)
+                {
+					GUI.DrawTexture(rect, SolidColorMaterials.NewSolidColorTexture(new ColorInt(22, 22, 22).ToColor));
+				}
+				else
+                {
+					Widgets.DrawHighlight(rect);
+				}
+
+				var loanAmount = loanOption.GetLoanAmountFrom(bank);
+				var repayAmount = loanIsTaken ? loan.repayAmount : loanOption.GetRepayAmountFrom(bank);
+				var repayDate = loanOption.GetRepayDateTicks();
+
+				var posY = loanTitle.yMax;
+				var posX = rect.x + 90;
+				if (loanIsTaken)
+                {
+					var repayRect = new Rect(posX + 24, posY, 80, 24);
+					Widgets.Label(repayRect, "VTE.Repay".Translate());
+					posY = repayRect.yMax;
+				}
+				var silverIcon = new Rect(posX, posY, 24, 24);
 				Widgets.ThingIcon(silverIcon, ThingDefOf.Silver);
 
 				Text.Anchor = TextAnchor.MiddleLeft;
 				Text.Font = GameFont.Medium;
 				var silverLabel = new Rect(silverIcon.xMax + 5, silverIcon.y, 60, 24);
-				Widgets.Label(silverLabel, loanOption.GetLoanAmountFrom(bank).ToString());
+				Widgets.Label(silverLabel, (loanIsTaken ? repayAmount : loanAmount).ToString());
 				Text.Anchor = TextAnchor.UpperLeft;
 				Text.Font = GameFont.Small;
 
-				var repayLabel = new Rect(loanTitle.x, silverLabel.yMax, 250, 24);
-				Widgets.Label(repayLabel, "VTE.Repay".Translate() + " " + loanOption.GetRepayAmountFrom(bank));
-
-				var repayDateLabel = new Rect(repayLabel.x, repayLabel.yMax, 250, 24);
-				Widgets.Label(repayDateLabel, "VTE.RepayDate".Translate(loanOption.GetRepayDateFor(negotiator)));
-
-				var takeLoan = new Rect(rect.x + 50, repayDateLabel.yMax + 5, rect.width - 100, 30);
-				if (Widgets.ButtonText(takeLoan, "VTE.TakeLoan".Translate()))
+				if (loanIsTaken)
                 {
+					var repayDateLabel = new Rect(loanTitle.x, silverLabel.yMax, 250, 24);
+					Widgets.Label(repayDateLabel, "VTE.RepayDateDaysLeft".Translate(GenDate.DateFullStringAt(repayDate, 
+						Find.WorldGrid.LongLatOf(negotiator.Map.Tile)), (loan.repayDate - Find.TickManager.TicksAbs).ToStringTicksToPeriod()));
 
-                }
+					var repayFromBalance = new Rect(rect.x + 50, repayDateLabel.yMax + 5, rect.width - 100, 30);
+					if (Widgets.ButtonText(repayFromBalance, "VTE.RepayFromBalance".Translate()))
+					{
+						bank.TryRepayFromBalance(loan);
+					}
+				}
+				else
+                {
+					var repayLabel = new Rect(loanTitle.x, silverLabel.yMax, 250, 24);
+					Widgets.Label(repayLabel, "VTE.Repay".Translate() + " " + repayAmount);
+
+					var repayDateLabel = new Rect(repayLabel.x, repayLabel.yMax, 250, 24);
+					Widgets.Label(repayDateLabel, "VTE.RepayDate".Translate(GenDate.DateFullStringAt(repayDate, Find.WorldGrid.LongLatOf(negotiator.Map.Tile)),
+						(repayDate - Find.TickManager.TicksAbs).ToStringTicksToDays()));
+
+					var takeLoan = new Rect(rect.x + 50, repayDateLabel.yMax + 5, rect.width - 100, 30);
+					if (Widgets.ButtonText(takeLoan, "VTE.TakeLoan".Translate()))
+					{
+						bank.TakeLoan(negotiator, loanAmount, repayAmount, repayDate, loanOption);
+					}
+				}
+
 			}
 			else
 			{
+				Widgets.DrawHighlight(rect);
 				Text.Anchor = TextAnchor.MiddleCenter;
 				Text.Font = GameFont.Medium;
 				Widgets.Label(rect.ContractedBy(20), "VTE.LoanOptionsUnlockText".Translate());
 			}
 			Text.Anchor = TextAnchor.UpperLeft;
 			Text.Font = GameFont.Small;
+		}
+
+		public void DrawBottom(Rect inRect, ref float posY)
+        {
+			var bottomInfo = new Rect(inRect.x, 640, 550, 60);
+			Text.Font = GameFont.Tiny;
+			GUI.color = Color.gray;
+			Widgets.Label(bottomInfo, "VTE.LoanExplanation".Translate());
+			GUI.color = Color.white;
+			Text.Font = GameFont.Small;
+
+			var closeButton = new Rect(bottomInfo.xMax + 10, bottomInfo.y, 170, 40);
+			if (Widgets.ButtonText(closeButton, "Close".Translate()))
+            {
+				this.Close();
+            }
 		}
 
 		private List<Thing> cachedThings;
