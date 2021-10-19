@@ -11,7 +11,7 @@
 		<thingDefs>
 			<li>Apparel_CowboyHat</li>
 		</thingDefs>
-		<priceImpactRandomInRange>-0.7~0.1</priceImpactRandomInRange>
+		<priceImpactRandomInRange>0.7~0.9</priceImpactRandomInRange>
 		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
 		<commonality>0.1</commonality>
   </VanillaTradingExpanded.NewsDef>
@@ -26,7 +26,6 @@
       </rulesStrings>
     </rulePack>
   </RulePackDef>
- 
 
   <VanillaTradingExpanded.NewsDef>
 		<defName>VTE_SettlementGotPlague</defName>
@@ -35,10 +34,7 @@
 		<thingCategories>
 			<li>Medicine</li>
 		</thingCategories>
-		<thingDefs>
-			<li>Apparel_CowboyHat</li>
-		</thingDefs>
-		<priceImpactRandomInRange>-0.7~-3</priceImpactRandomInRange>
+		<priceImpactRandomInRange>-5~-3</priceImpactRandomInRange>
 		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
 		<commonality>0.1</commonality>
   </VanillaTradingExpanded.NewsDef>
@@ -47,9 +43,9 @@
     <defName>VTE_SettlementGotPlague</defName>
     <rulePack>
       <rulesStrings>
-        <li>root->[SETTLEMENT_name] text example 1</li>
-        <li>root->[SETTLEMENT_name] text example 2</li>
-        <li>root->[SETTLEMENT_name] text example 3</li>
+        <li>root->[SETTLEMENT_label] text example 1</li>
+        <li>root->[SETTLEMENT_label] text example 2</li>
+        <li>root->[SETTLEMENT_label] text example 3</li>
       </rulesStrings>
     </rulePack>
   </RulePackDef>

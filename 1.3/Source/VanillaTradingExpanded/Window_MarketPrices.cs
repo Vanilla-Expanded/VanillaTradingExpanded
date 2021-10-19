@@ -62,7 +62,7 @@ namespace VanillaTradingExpanded
 		public Window_MarketPrices()
 		{
 			SetDirty();
-			//this.forcePause = true;
+			this.forcePause = true;
 		}
 
 		private static float maxWidth = 800;
@@ -170,7 +170,7 @@ namespace VanillaTradingExpanded
 			Text.Anchor = TextAnchor.MiddleLeft;
 			Text.Font = GameFont.Small;
 			float num = 0f;
-			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = true;
+			StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
 
 			for (int j = 0; j < cachedTradeables.Count; j++)
 			{
@@ -197,11 +197,11 @@ namespace VanillaTradingExpanded
 					var thingMarketValueRect = new Rect(thingLabelRect.xMax + thingMarketValueXOffset, rect2.y, thingMarketValueWidth, rect2.height);
 
 					var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-					Widgets.Label(thingMarketValueRect, baseMarketValue.ToString());
+					Widgets.Label(thingMarketValueRect, baseMarketValue.ToStringDecimalIfSmall());
 
 					var thingCurrentValueRect = new Rect(thingMarketValueRect.xMax + thingCurrentValueXOffset, rect2.y, thingCurrentValueWidth, rect2.height);
 					var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
-					Widgets.Label(thingCurrentValueRect, currentPrice.ToString());
+					Widgets.Label(thingCurrentValueRect, currentPrice.ToStringDecimalIfSmall());
 
 					var totalChange = GetTotalChangeFor(currentPrice, baseMarketValue);
 					var thingChangeRect = new Rect(thingCurrentValueRect.xMax + thingTotalChangeXOffset, rect2.y, thingTotalChangeWidth, rect2.height);
@@ -243,7 +243,7 @@ namespace VanillaTradingExpanded
 			Text.Anchor = TextAnchor.UpperLeft;
 			Text.Font = GameFont.Small;
 			Widgets.EndScrollView();
-			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = false;
+			StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
 		}
 		private float GetTotalChangeFor(float currentPrice, float baseMarketValue)
 		{
@@ -316,9 +316,9 @@ namespace VanillaTradingExpanded
 			{
 				cachedTradeables = cachedTradeables.Where(x => x.LabelCap.ToLower().RawText.Contains(textFilter)).ToList();
 			}
-			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = true;
+			StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
 			cachedTradeables = SortByColumn(sortByColumn);
-			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = false;
+			StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
 
 		}
 

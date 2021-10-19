@@ -18,7 +18,7 @@ namespace VanillaTradingExpanded
 
         // goods
         public Dictionary<ThingDef, float> priceModifiers;
-        public Dictionary<ThingDef, float> unprocessedPriceModifiers;
+        public Dictionary<ThingDef, float> playerTransactionsBySoldPurchasedMarketValue;
 
 
         public Dictionary<ThingDef, float> previousPriceModifiers;
@@ -59,7 +59,7 @@ namespace VanillaTradingExpanded
         {
             Instance = this;
             priceModifiers ??= new Dictionary<ThingDef, float>();
-            unprocessedPriceModifiers ??= new Dictionary<ThingDef, float>();
+            playerTransactionsBySoldPurchasedMarketValue ??= new Dictionary<ThingDef, float>();
             previousPriceModifiers ??= new Dictionary<ThingDef, float>();
             banksByFaction ??= new Dictionary<Faction, Bank>();
             allNews ??= new List<News>();
@@ -98,13 +98,13 @@ namespace VanillaTradingExpanded
             if (!itemsToIgnore.Contains(soldThing.def))
             {
                 Log.Message(soldThing + " is sold by " + countToSell);
-                if (unprocessedPriceModifiers.ContainsKey(soldThing.def))
+                if (playerTransactionsBySoldPurchasedMarketValue.ContainsKey(soldThing.def))
                 {
-                    unprocessedPriceModifiers[soldThing.def] += soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    playerTransactionsBySoldPurchasedMarketValue[soldThing.def] += soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
                 else
                 {
-                    unprocessedPriceModifiers[soldThing.def] = soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    playerTransactionsBySoldPurchasedMarketValue[soldThing.def] = soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
             }
         }
@@ -113,13 +113,13 @@ namespace VanillaTradingExpanded
             if (!itemsToIgnore.Contains(soldThing.def))
             {
                 Log.Message(soldThing + " is purchased by " + countToSell);
-                if (unprocessedPriceModifiers.ContainsKey(soldThing.def))
+                if (playerTransactionsBySoldPurchasedMarketValue.ContainsKey(soldThing.def))
                 {
-                    unprocessedPriceModifiers[soldThing.def] -= soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    playerTransactionsBySoldPurchasedMarketValue[soldThing.def] -= soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
                 else
                 {
-                    unprocessedPriceModifiers[soldThing.def] = -soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    playerTransactionsBySoldPurchasedMarketValue[soldThing.def] = -soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
             }
         }
@@ -158,18 +158,39 @@ namespace VanillaTradingExpanded
         public override void GameComponentTick()
         {
             base.GameComponentTick();
+            // we tick banks here
             foreach (var kvp in banksByFaction)
             {
                 kvp.Value.Tick();
             }
-
-            if (Rand.MTBEventOccurs(7f, 60000f, 1f))
+            // create news every 7 days in average
+            if (Rand.MTBEventOccurs(7f, 60000f, 1f) )
             {
                 var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElement();
                 var news = CreateNews(newsDefs);
                 RegisterNews(news);
             }
 
+            // process news and do price impacts based on them
+            DoPriceImpactsFromNews();
+
+            // every 3 day process player transactions and do price impacts based on them
+            if (Find.TickManager.TicksGame % (GenDate.TicksPerDay * 3) == 0)
+            {
+                ProcessPlayerTransactions();
+            }
+            // price rebalance every year at day 1
+            var localMap = Find.AnyPlayerHomeMap;
+            var day = GenDate.DayOfYear(Find.TickManager.TicksAbs, Find.WorldGrid.LongLatOf(localMap.Tile).x);
+            if (prevDay != day && day == 1)
+            {
+                prevDay = day;
+                DoPriceRebalances();
+            }
+        }
+
+        private void DoPriceImpactsFromNews()
+        {
             for (int num = unProcessedNews.Count - 1; num >= 0; num--)
             {
                 var news = unProcessedNews[num];
@@ -189,41 +210,56 @@ namespace VanillaTradingExpanded
                     }
                 }
             }
-
-            if (Find.TickManager.TicksGame % 180000 == 0) // every 3 day
+        }
+        private void ProcessPlayerTransactions()
+        {
+            previousPriceModifiers.Clear();
+            foreach (var key in priceModifiers.Keys.ToList())
             {
-                previousPriceModifiers.Clear();
-                foreach (var key in priceModifiers.Keys)
+                previousPriceModifiers.Add(key, priceModifiers[key]);
+            }
+            foreach (var priceModifierKvp in playerTransactionsBySoldPurchasedMarketValue)
+            {
+                var chance = Math.Abs(priceModifierKvp.Value / 10f) / 100f;
+                Log.Message($"Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
+                if (Rand.Chance(chance))
                 {
-                    previousPriceModifiers.Add(key, priceModifiers[key]);
-                }
-                foreach (var priceModifierKvp in unprocessedPriceModifiers)
-                {
-                    var chance = Math.Abs(priceModifierKvp.Value / 10f) / 100f;
-                    Log.Message($"Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
-                    if (Rand.Chance(chance))
-                    {
-                        Log.Message($"Success: Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
-                        var priceImpactChange = Rand.Range(0.01f, 0.1f);
-                        AffectPrice(priceModifierKvp.Key, priceModifierKvp.Value, priceImpactChange);
-                    }
-                }
-                unprocessedPriceModifiers.Clear();
-
-                StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = true;
-                foreach (var data in priceModifiers)
-                {
-                    Log.Message("Price modifier: " + data.Key + " - " + data.Value + " - base market value: " + data.Key.GetStatValueAbstract(StatDefOf.MarketValue));
-                }
-                StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = false;
-                var window = Find.WindowStack.WindowOfType<Window_MarketPrices>();
-                if (window != null)
-                {
-                    window.SetDirty();
+                    Log.Message($"Success: Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
+                    var priceImpactChange = Rand.Range(0.01f, 0.1f);
+                    AffectPrice(priceModifierKvp.Key, priceModifierKvp.Value, priceImpactChange);
                 }
             }
+            playerTransactionsBySoldPurchasedMarketValue.Clear();
+
+            StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
+            foreach (var data in priceModifiers)
+            {
+                Log.Message("Price modifier: " + data.Key + " - " + data.Value + " - base market value: " + data.Key.GetStatValueAbstract(StatDefOf.MarketValue));
+            }
+            StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
+
+        }
+        private void DoPriceRebalances()
+        {
+            StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
+            foreach (var key in priceModifiers.Keys.ToList())
+            {
+                var diff = priceModifiers[key] - key.GetStatValueAbstract(StatDefOf.MarketValue);
+                if (diff > 0)
+                {
+                    var change = Rand.Range(-0.1f, -0.01f);
+                    AffectPrice(key, change, Mathf.Abs(change));
+                }
+                else if (diff < 0)
+                {
+                    var change = Rand.Range(0.01f, 0.1f);
+                    AffectPrice(key, change, change);
+                }
+            }
+            StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
         }
 
+        private int prevDay;
         private void AffectPrice(ThingDef thingDef, float priceImpactBase, float priceImpactChange)
         {
             Log.Message("Affecing price of " + thingDef + ", priceImpactBase: " + priceImpactBase + ", priceImpactChange: " + priceImpactChange);
@@ -240,7 +276,6 @@ namespace VanillaTradingExpanded
                     Log.Message("1 Before: " + priceModifiers[thingDef]);
                     priceModifiers[thingDef] /= 1 + priceImpactChange;
                     Log.Message("1 After: " + priceModifiers[thingDef]);
-
                 }
             }
             else
@@ -251,7 +286,6 @@ namespace VanillaTradingExpanded
                     Log.Message("2 Before: " + baseMarketValue);
                     priceModifiers[thingDef] = baseMarketValue * (1 + priceImpactChange);
                     Log.Message("2 After: " + priceModifiers[thingDef]);
-
                 }
                 else
                 {
@@ -261,16 +295,19 @@ namespace VanillaTradingExpanded
                     Log.Message("2 After: " + priceModifiers[thingDef]);
                 }
             }
+
+            priceModifiers[thingDef] = Mathf.Min(0.11f, priceModifiers[thingDef]);
         }
         public override void ExposeData()
         {
             base.ExposeData();
             Scribe_Collections.Look(ref priceModifiers, "priceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys1, ref floatValues1);
-            Scribe_Collections.Look(ref unprocessedPriceModifiers, "unprocessedPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys2, ref floatValues2);
+            Scribe_Collections.Look(ref playerTransactionsBySoldPurchasedMarketValue, "playerTransactionsBySoldPurchasedMarketValue", LookMode.Def, LookMode.Value, ref thingDefsKeys2, ref floatValues2);
             Scribe_Collections.Look(ref previousPriceModifiers, "previousPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys3, ref floatValues3);
             Scribe_Collections.Look(ref banksByFaction, "banksByFaction", LookMode.Reference, LookMode.Deep, ref factionKeys, ref bankValues);
             Scribe_Collections.Look(ref allNews, "allNews");
             Scribe_Collections.Look(ref unProcessedNews, "unProcessedNews");
+            Scribe_Values.Look(ref prevDay, "prevDay");
             InitVars();
         }
 

@@ -180,9 +180,9 @@ namespace VanillaTradingExpanded
 		{
 			cachedNews.Clear();
 			cachedNews.AddRange(TradingManager.Instance.AllNews);
-			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = true;
+			StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
 			cachedNews = FilteredNews(filterBy);
-			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = false;
+			StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
 		}
 
 		private List<News> FilteredNews(FilterBy filter)

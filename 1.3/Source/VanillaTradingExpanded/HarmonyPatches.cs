@@ -27,10 +27,10 @@ namespace VanillaTradingExpanded
 	[HarmonyPatch(typeof(StatWorker), "GetBaseValueFor")]
 	public class StatWorker_GetBaseValueFor_Patch
 	{
-		public static bool showOnlyVanilla;
+		public static bool outputOnlyVanilla;
 		private static bool Prefix(StatWorker __instance, StatDef ___stat, StatRequest request, ref float __result)
 		{
-			if (___stat == StatDefOf.MarketValue && !showOnlyVanilla && request.BuildableDef is ThingDef thingDef)
+			if (___stat == StatDefOf.MarketValue && !outputOnlyVanilla && request.BuildableDef is ThingDef thingDef)
 			{
 				var priceModifiers = TradingManager.Instance?.priceModifiers;
 				if (priceModifiers != null && priceModifiers.TryGetValue(thingDef, out float value))
