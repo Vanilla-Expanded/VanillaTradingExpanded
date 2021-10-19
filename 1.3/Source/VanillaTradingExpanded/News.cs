@@ -15,6 +15,28 @@ namespace VanillaTradingExpanded
         public List<ThingCategoryDef> affectedThingCategories;
         public List<ThingDef> affectedThingDefs;
         public string Date => GenDate.DateFullStringAt(creationTick, Find.WorldGrid.LongLatOf(Find.CurrentMap?.Tile ?? Find.Maps.FirstOrFallback().Tile));
+        
+        public HashSet<ThingDef> AffectedThingDefs()
+        {
+            var thingDefs = new HashSet<ThingDef>();
+            if (affectedThingCategories != null)
+            {
+                foreach (var category in affectedThingCategories)
+                {
+                    thingDefs.AddRange(category.DescendantThingDefs);
+                }
+            }
+            if (affectedThingDefs != null)
+            {
+                thingDefs.AddRange(affectedThingDefs);
+            }
+            return thingDefs;
+        }
+
+        public bool MatchesCategory(ThingCategoryDef categoryDef)
+        {
+            return affectedThingCategories?.Contains(categoryDef) == true || affectedThingDefs?.Any(thingDef => thingDef?.thingCategories?.Contains(categoryDef) ?? false) == true;
+        }
         public void ExposeData()
         {
             Scribe_Values.Look(ref text, "text");

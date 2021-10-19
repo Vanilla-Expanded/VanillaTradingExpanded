@@ -31,7 +31,7 @@ namespace VanillaTradingExpanded
         {
             return new NewsContext
             {
-                faction = Find.FactionManager.AllFactions.Where(x => !x.defeated && !x.Hidden && x.def.humanlikeFaction).RandomElement()
+                faction = Find.FactionManager.AllFactions.Where(x => !x.defeated && !x.Hidden && x.def.humanlikeFaction && !x.IsPlayer).RandomElement()
             };
         }
         public override GrammarRequest GetGrammarRequest(NewsContext context)
@@ -48,7 +48,7 @@ namespace VanillaTradingExpanded
         {
             return new NewsContext
             {
-                settlement = Find.World.worldObjects.Settlements.Where(x => !x.Faction.defeated && !x.Faction.Hidden && x.Faction.def.humanlikeFaction).RandomElement()
+                settlement = Find.World.worldObjects.Settlements.Where(x => !x.Faction.defeated && !x.Faction.Hidden && x.Faction.def.humanlikeFaction && !x.Faction.IsPlayer).RandomElement()
             };
         }
         public override GrammarRequest GetGrammarRequest(NewsContext context)

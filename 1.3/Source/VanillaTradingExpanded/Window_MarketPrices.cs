@@ -62,7 +62,7 @@ namespace VanillaTradingExpanded
 		public Window_MarketPrices()
 		{
 			SetDirty();
-			this.forcePause = true;
+			//this.forcePause = true;
 		}
 
 		private static float maxWidth = 800;

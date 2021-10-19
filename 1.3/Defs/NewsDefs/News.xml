@@ -6,13 +6,13 @@
 		<textRulePack>VTE_FactionPreparesToWar</textRulePack>
 		<newsWorker>VanillaTradingExpanded.NewsWorker_FactionAction</newsWorker>
 		<thingCategories>
-			<li></li>
+			<li>ApparelArmor</li>
 		</thingCategories>
 		<thingDefs>
-			<li></li>
+			<li>Apparel_CowboyHat</li>
 		</thingDefs>
-		<priceImpactRandomInRange>0.5~3</priceImpactRandomInRange> <!-- 50%-300% -->
-		<priceImpactTicksDelay>30000~120000</priceImpactTicksDelay> 
+		<priceImpactRandomInRange>-0.7~0.1</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
 		<commonality>0.1</commonality>
   </VanillaTradingExpanded.NewsDef>
 
@@ -27,4 +27,30 @@
     </rulePack>
   </RulePackDef>
  
+
+  <VanillaTradingExpanded.NewsDef>
+		<defName>VTE_SettlementGotPlague</defName>
+		<textRulePack>VTE_SettlementGotPlague</textRulePack>
+		<newsWorker>VanillaTradingExpanded.NewsWorker_SettlementAction</newsWorker>
+		<thingCategories>
+			<li>Medicine</li>
+		</thingCategories>
+		<thingDefs>
+			<li>Apparel_CowboyHat</li>
+		</thingDefs>
+		<priceImpactRandomInRange>-0.7~-3</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>0.1</commonality>
+  </VanillaTradingExpanded.NewsDef>
+
+  <RulePackDef>
+    <defName>VTE_SettlementGotPlague</defName>
+    <rulePack>
+      <rulesStrings>
+        <li>root->[SETTLEMENT_name] text example 1</li>
+        <li>root->[SETTLEMENT_name] text example 2</li>
+        <li>root->[SETTLEMENT_name] text example 3</li>
+      </rulesStrings>
+    </rulePack>
+  </RulePackDef>
 </Defs>

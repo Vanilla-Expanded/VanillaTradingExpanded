@@ -49,10 +49,7 @@ namespace VanillaTradingExpanded
 
 		private static float headerPosYInitial = 70;
 		private static float tablePosInitialYOffset = 30;
-
-
 		public override Vector2 InitialSize => new Vector2(1200, Mathf.Min(800, UI.screenHeight));
-
 		public override void DoWindowContents(Rect inRect)
 		{
 			RecacheIfDirty();
@@ -72,7 +69,12 @@ namespace VanillaTradingExpanded
 			for (int i = 0; i < filterByKeys.Count; i++)
 			{
 				Rect buttonRect = new Rect(filterByPos.x, filterByPos.y, 160, cachedFilterByButtonHeight);
-				if (Widgets.ButtonText(buttonRect, filterByButtons[filterByKeys[i]]))
+				var label = filterByButtons[filterByKeys[i]];
+				if (filterByKeys[i] == FilterBy.OnlySpecificCategory && specificCategory != null)
+                {
+					label = specificCategory.LabelCap;
+				}
+				if (Widgets.ButtonText(buttonRect, label))
                 {
 					Filter(filterByKeys[i]);
                 }
@@ -134,71 +136,64 @@ namespace VanillaTradingExpanded
 			Text.Font = GameFont.Small;
 			Widgets.EndScrollView();
 		}
-		private float GetTotalChangeFor(float currentPrice, float baseMarketValue)
-		{
-			var change = currentPrice - baseMarketValue;
-			return (change / baseMarketValue) * 100f;
-		}
-		private float GetRecentChangeFor(ThingDef thingDef, float currentPrice, float baseMarketValue)
-        {
-			var previousPrice = TradingManager.Instance.previousPriceModifiers.TryGetValue(thingDef, out var prevPrice) ? prevPrice : baseMarketValue;
-			var change = currentPrice - previousPrice;
-			return (change / previousPrice) * 100f;
-		}
 
-		private float GetTotalChangeFor(ThingDef thingDef)
-		{
-			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
-			var change = currentPrice - baseMarketValue;
-			return (change / baseMarketValue) * 100f;
-		}
-		private float GetRecentChangeFor(ThingDef thingDef)
-		{
-			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
-			var previousPrice = TradingManager.Instance.previousPriceModifiers.TryGetValue(thingDef, out var prevPrice) ? prevPrice : baseMarketValue;
-			var change = currentPrice - previousPrice;
-			return (change / previousPrice) * 100f;
-		}
-		private float GetCurrentValueFor(ThingDef thingDef)
-		{
-			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
-			return currentPrice;;
-		}
 		public void SetDirty()
 		{
 			dirty = true;
 		}
 
 		private FilterBy filterBy;
+
+		private ThingCategoryDef specificCategory;
 		private void Filter(FilterBy filterBy)
 		{
 			this.filterBy = filterBy;
-			SetDirty();
+			if (filterBy == FilterBy.OnlySpecificCategory)
+            {
+				var floatList = new List<FloatMenuOption>();
+				foreach (var child in ThingCategoryDefOf.Root.childCategories)
+                {
+					floatList.Add(new FloatMenuOption(child.LabelCap, delegate
+					{
+						specificCategory = child;
+						SetDirty();
+					}));
+                }
+				Find.WindowStack.Add(new FloatMenu(floatList));
+            }
+			else
+            {
+				SetDirty();
+			}
 		}
 		private void RecacheIfDirty()
 		{
 			if (dirty)
 			{
 				dirty = false;
-				RecacheTradeables();
+				RecacheNews();
 			}
 		}
 
 		private List<News> cachedNews = new List<News>();
-		private void RecacheTradeables()
+		private void RecacheNews()
 		{
 			cachedNews.Clear();
-			cachedNews.AddRange(TradingManager.Instance.allNews);
+			cachedNews.AddRange(TradingManager.Instance.AllNews);
 			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = true;
 			cachedNews = FilteredNews(filterBy);
 			StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = false;
 		}
 
-		private List<News> FilteredNews(FilterBy column)
+		private List<News> FilteredNews(FilterBy filter)
         {
+			switch (filter)
+            {
+				case FilterBy.All: return cachedNews;
+				case FilterBy.OnlySpecificCategory: return cachedNews.Where(x => x.MatchesCategory(specificCategory)).ToList();
+				case FilterBy.OnlyBullish: return cachedNews.Where(x => x.priceImpact > 0).ToList();
+				case FilterBy.OnlyBearish: return cachedNews.Where(x => x.priceImpact < 0).ToList();
+			}
 			return cachedNews;
 		}
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -17,7 +18,7 @@ namespace VanillaTradingExpanded
 
         // goods
         public Dictionary<ThingDef, float> priceModifiers;
-        public Dictionary<ThingDef, float> rawUnprocessedPriceModifiers;
+        public Dictionary<ThingDef, float> unprocessedPriceModifiers;
 
 
         public Dictionary<ThingDef, float> previousPriceModifiers;
@@ -27,7 +28,9 @@ namespace VanillaTradingExpanded
         public Dictionary<Faction, Bank> banksByFaction;
 
         // news
-        public List<News> allNews;
+        private List<News> allNews;
+        private List<News> unProcessedNews;
+        public List<News> AllNews => allNews.Concat(unProcessedNews).ToList();
         public TradingManager()
         {
             Instance = this;
@@ -52,14 +55,15 @@ namespace VanillaTradingExpanded
             }
         }
 
-        public void PreInit()
+        public void InitVars()
         {
             Instance = this;
             priceModifiers ??= new Dictionary<ThingDef, float>();
-            rawUnprocessedPriceModifiers ??= new Dictionary<ThingDef, float>();
+            unprocessedPriceModifiers ??= new Dictionary<ThingDef, float>();
             previousPriceModifiers ??= new Dictionary<ThingDef, float>();
             banksByFaction ??= new Dictionary<Faction, Bank>();
             allNews ??= new List<News>();
+            unProcessedNews ??= new List<News>();
             if (Find.World != null)
             {
                 RecheckBanks();
@@ -94,13 +98,13 @@ namespace VanillaTradingExpanded
             if (!itemsToIgnore.Contains(soldThing.def))
             {
                 Log.Message(soldThing + " is sold by " + countToSell);
-                if (rawUnprocessedPriceModifiers.ContainsKey(soldThing.def))
+                if (unprocessedPriceModifiers.ContainsKey(soldThing.def))
                 {
-                    rawUnprocessedPriceModifiers[soldThing.def] += soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    unprocessedPriceModifiers[soldThing.def] += soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
                 else
                 {
-                    rawUnprocessedPriceModifiers[soldThing.def] = soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    unprocessedPriceModifiers[soldThing.def] = soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
             }
         }
@@ -109,13 +113,13 @@ namespace VanillaTradingExpanded
             if (!itemsToIgnore.Contains(soldThing.def))
             {
                 Log.Message(soldThing + " is purchased by " + countToSell);
-                if (rawUnprocessedPriceModifiers.ContainsKey(soldThing.def))
+                if (unprocessedPriceModifiers.ContainsKey(soldThing.def))
                 {
-                    rawUnprocessedPriceModifiers[soldThing.def] -= soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    unprocessedPriceModifiers[soldThing.def] -= soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
                 else
                 {
-                    rawUnprocessedPriceModifiers[soldThing.def] = -soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    unprocessedPriceModifiers[soldThing.def] = -soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
             }
         }
@@ -130,24 +134,24 @@ namespace VanillaTradingExpanded
                 text = GrammarResolver.Resolve("root", nameRequest),
                 creationTick = Find.TickManager.TicksGame,
                 priceImpact = newsDef.priceImpactRandomInRange.RandomInRange,
-                priceImpactStartTick = newsDef.priceImpactTicksDelay.RandomInRange + Find.TickManager.TicksGame,
+                priceImpactStartTick = Find.TickManager.TicksGame + newsDef.priceImpactTicksDelay.RandomInRange,
                 affectedThingCategories = newsDef.thingCategories,
                 affectedThingDefs = newsDef.thingDefs
             };
         }
         public void RegisterNews(News news)
         {
-            allNews.Add(news);
+            unProcessedNews.Add(news);
         }
         public override void StartedNewGame()
         {
-            PreInit();
+            InitVars();
             base.StartedNewGame();
         }
 
         public override void LoadedGame()
         {
-            PreInit();
+            InitVars();
             base.LoadedGame();
         }
 
@@ -159,13 +163,31 @@ namespace VanillaTradingExpanded
                 kvp.Value.Tick();
             }
 
-            if (Find.TickManager.TicksGame % 60 == 0)
+            if (Rand.MTBEventOccurs(7f, 60000f, 1f))
             {
                 var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElement();
                 var news = CreateNews(newsDefs);
                 RegisterNews(news);
+            }
 
-                Log.Message("News: " + news.text);
+            for (int num = unProcessedNews.Count - 1; num >= 0; num--)
+            {
+                var news = unProcessedNews[num];
+                if (Find.TickManager.TicksGame >= news.priceImpactStartTick)
+                {
+                    allNews.Add(news);
+                    unProcessedNews.RemoveAt(num);
+                    var priceImpactChange = Mathf.Abs(news.priceImpact);
+                    foreach (var thingDef in news.AffectedThingDefs())
+                    {
+                        AffectPrice(thingDef, news.priceImpact, priceImpactChange);
+                    }
+                    var window = Find.WindowStack.WindowOfType<Window_MarketPrices>();
+                    if (window != null)
+                    {
+                        window.SetDirty();
+                    }
+                }
             }
 
             if (Find.TickManager.TicksGame % 180000 == 0) // every 3 day
@@ -175,41 +197,19 @@ namespace VanillaTradingExpanded
                 {
                     previousPriceModifiers.Add(key, priceModifiers[key]);
                 }
-                foreach (var thingDefData in rawUnprocessedPriceModifiers)
+                foreach (var priceModifierKvp in unprocessedPriceModifiers)
                 {
-                    var chance = Math.Abs(thingDefData.Value / 10f) / 100f;
-                    Log.Message($"Chance for {thingDefData.Key} is {chance}. amount of spent silver is {thingDefData.Value}");
+                    var chance = Math.Abs(priceModifierKvp.Value / 10f) / 100f;
+                    Log.Message($"Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
                     if (Rand.Chance(chance))
                     {
-                        Log.Message($"Success: Chance for {thingDefData.Key} is {chance}. amount of spent silver is {thingDefData.Value}");
-                        var change = Rand.Range(0.01f, 0.1f);
-                        if (priceModifiers.ContainsKey(thingDefData.Key))
-                        {
-                            if (thingDefData.Value > 0)
-                            {
-                                priceModifiers[thingDefData.Key] *= 1 + change;
-                            }
-                            else
-                            {
-                                priceModifiers[thingDefData.Key] /= 1 + change;
-                            }
-                        }
-                        else
-                        {
-                            if (thingDefData.Value > 0)
-                            {
-                                var baseMarketValue = thingDefData.Key.GetStatValueAbstract(StatDefOf.MarketValue);
-                                priceModifiers[thingDefData.Key] = baseMarketValue * (1 + change);
-                            }
-                            else
-                            {
-                                var baseMarketValue = thingDefData.Key.GetStatValueAbstract(StatDefOf.MarketValue);
-                                priceModifiers[thingDefData.Key] = baseMarketValue / (1 + change);
-                            }
-                        }
+                        Log.Message($"Success: Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
+                        var priceImpactChange = Rand.Range(0.01f, 0.1f);
+                        AffectPrice(priceModifierKvp.Key, priceModifierKvp.Value, priceImpactChange);
                     }
                 }
-                rawUnprocessedPriceModifiers.Clear();
+                unprocessedPriceModifiers.Clear();
+
                 StatWorker_GetBaseValueFor_Patch.showOnlyVanilla = true;
                 foreach (var data in priceModifiers)
                 {
@@ -223,15 +223,55 @@ namespace VanillaTradingExpanded
                 }
             }
         }
+
+        private void AffectPrice(ThingDef thingDef, float priceImpactBase, float priceImpactChange)
+        {
+            Log.Message("Affecing price of " + thingDef + ", priceImpactBase: " + priceImpactBase + ", priceImpactChange: " + priceImpactChange);
+            if (priceModifiers.ContainsKey(thingDef))
+            {
+                if (priceImpactBase > 0)
+                {
+                    Log.Message("1 Before: " + priceModifiers[thingDef]);
+                    priceModifiers[thingDef] *= 1 + priceImpactChange;
+                    Log.Message("1 After: " + priceModifiers[thingDef]);
+                }
+                else
+                {
+                    Log.Message("1 Before: " + priceModifiers[thingDef]);
+                    priceModifiers[thingDef] /= 1 + priceImpactChange;
+                    Log.Message("1 After: " + priceModifiers[thingDef]);
+
+                }
+            }
+            else
+            {
+                if (priceImpactBase > 0)
+                {
+                    var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+                    Log.Message("2 Before: " + baseMarketValue);
+                    priceModifiers[thingDef] = baseMarketValue * (1 + priceImpactChange);
+                    Log.Message("2 After: " + priceModifiers[thingDef]);
+
+                }
+                else
+                {
+                    var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+                    Log.Message("2 Before: " + baseMarketValue);
+                    priceModifiers[thingDef] = baseMarketValue / (1 + priceImpactChange);
+                    Log.Message("2 After: " + priceModifiers[thingDef]);
+                }
+            }
+        }
         public override void ExposeData()
         {
             base.ExposeData();
             Scribe_Collections.Look(ref priceModifiers, "priceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys1, ref floatValues1);
-            Scribe_Collections.Look(ref rawUnprocessedPriceModifiers, "rawUnprocessedPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys2, ref floatValues2);
+            Scribe_Collections.Look(ref unprocessedPriceModifiers, "unprocessedPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys2, ref floatValues2);
             Scribe_Collections.Look(ref previousPriceModifiers, "previousPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys3, ref floatValues3);
             Scribe_Collections.Look(ref banksByFaction, "banksByFaction", LookMode.Reference, LookMode.Deep, ref factionKeys, ref bankValues);
-            Scribe_Collections.Look(ref allNews, "news");
-            PreInit();
+            Scribe_Collections.Look(ref allNews, "allNews");
+            Scribe_Collections.Look(ref unProcessedNews, "unProcessedNews");
+            InitVars();
         }
 
         private List<ThingDef> thingDefsKeys1;
