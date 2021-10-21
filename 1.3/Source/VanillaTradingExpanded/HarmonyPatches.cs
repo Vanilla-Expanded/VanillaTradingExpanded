@@ -32,10 +32,8 @@ namespace VanillaTradingExpanded
 		{
 			if (___stat == StatDefOf.MarketValue && !outputOnlyVanilla && request.BuildableDef is ThingDef thingDef)
 			{
-				var priceModifiers = TradingManager.Instance?.priceModifiers;
-				if (priceModifiers != null && priceModifiers.TryGetValue(thingDef, out float value))
+				if (TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out __result))
                 {
-					__result = value;
 					Log.Message("Result for " + thingDef + ": " + __result);
 					return false;
 				}
@@ -92,6 +90,58 @@ namespace VanillaTradingExpanded
 		private static void Prefix(Thing __0, int __1, Pawn __2) // (Thing toGive, int countToGive, Pawn playerNegotiator)
 		{
 			TradingManager.Instance.RegisterPurchasedThing(__0, __1);
+		}
+	}
+
+	[HarmonyPatch(typeof(SimpleCurveDrawer), "DrawCurvesLegend")]
+	public class SimpleCurveDrawer_Patch
+	{
+		public static bool modify;
+		private static bool Prefix(Rect rect, List<SimpleCurveDrawInfo> curves)
+		{
+			if (modify)
+			{
+				DrawCurvesLegend(rect, curves);
+				return false;
+			}
+			return true;
+		}
+
+		public static void DrawCurvesLegend(Rect rect, List<SimpleCurveDrawInfo> curves)
+		{
+			Text.Anchor = TextAnchor.UpperLeft;
+			Text.Font = GameFont.Small;
+			Text.WordWrap = false;
+			GUI.BeginGroup(rect);
+			float num = 0f;
+			float num2 = 0f;
+			int num3 = (int)(rect.width / 140f);
+			int num4 = 0;
+			foreach (SimpleCurveDrawInfo curf in curves)
+			{
+				GUI.color = curf.color;
+				GUI.DrawTexture(new Rect(num, num2 + 2f, 15f, 15f), BaseContent.WhiteTex);
+				GUI.color = Color.white;
+				num += 20f;
+				if (curf.label != null)
+				{
+					Widgets.Label(new Rect(num, num2, 300, 100f), curf.label);
+				}
+				num4++;
+				if (num4 == num3)
+				{
+					num4 = 0;
+					num = 0f;
+					num2 += 20f;
+				}
+				else
+				{
+					num += 300;
+				}
+			}
+			GUI.EndGroup();
+			GUI.color = Color.white;
+			Text.WordWrap = true;
 		}
 	}
 }

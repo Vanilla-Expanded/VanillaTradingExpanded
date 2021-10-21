@@ -12,9 +12,13 @@ using Verse.Sound;
 
 namespace VanillaTradingExpanded
 {
-
+	[HotSwappable]
+	[StaticConstructorOnStartup]
 	public class Window_MarketPrices : Window
 	{
+		private static List<CurveMark> marks = new List<CurveMark>();
+
+		public static readonly Texture2D ChartIcon = ContentFinder<Texture2D>.Get("UI/Chart");
 		private enum Column
         {
 			None,
@@ -34,13 +38,13 @@ namespace VanillaTradingExpanded
 			{Column.RecentChange, "VTE.RecentChange".Translate()},
 		};
 
-		private static Dictionary<Column, Tuple<int, string>> headers = new Dictionary<Column, Tuple<int, string>>
+		private static Dictionary<Column, Tuple<int, string>> headers => new Dictionary<Column, Tuple<int, string>>
 		{
-			{Column.Item, new Tuple<int, string>(70, "VTE.Item".Translate())},
-			{Column.MarketValue, new Tuple<int, string>(100, "VTE.MarketValue".Translate())},
+			{Column.Item, new Tuple<int, string>(120, "VTE.Item".Translate())},
+			{Column.MarketValue, new Tuple<int, string>(60, "VTE.MarketValue".Translate())},
 			{Column.CurrentValue, new Tuple<int, string>(50, "VTE.CurrentValue".Translate())},
-			{Column.Change, new Tuple<int, string>(50, "VTE.Change".Translate())},
-			{Column.RecentChange, new Tuple<int, string>(50, "VTE.RecentChange".Translate())},
+			{Column.Change, new Tuple<int, string>(60, "VTE.Change".Translate())},
+			{Column.RecentChange, new Tuple<int, string>(40, "VTE.RecentChange".Translate())},
 		};
 
 		private bool dirty;
@@ -88,15 +92,10 @@ namespace VanillaTradingExpanded
 		private static int cachedHeaderWidth = 80;
 		private static float headerPosYInitial = 70;
 		private static float tablePosInitialYOffset = 30;
-
-		private static float thingIconXOffset = 30;
 		private static float thingIconWidth = 30;
 
 		private static float infoCardXOffset = 5;
 		private static float infoCardYOffset = 5;
-
-		private static float thingLabelXOffset = 35;
-		private static float thingLabelWidth = 120;
 
 		private static float thingMarketValueXOffset = 35;
 		private static float thingMarketValueWidth = 120;
@@ -189,10 +188,44 @@ namespace VanillaTradingExpanded
 						Widgets.DrawBox(rect2);
 						GUI.DrawTexture(rect2, TexUI.HighlightTex);
 					}
-					var thingIconRect = new Rect(rect2.x + thingIconXOffset, rect2.y, thingIconWidth, rect2.height);
+					var thingIconRect = new Rect(rect2.x, rect2.y, thingIconWidth, rect2.height);
 					GuiHelper.ThingIcon(thingIconRect, thingDef);
 					Widgets.InfoCardButton(thingIconRect.xMax + infoCardXOffset, rect2.y + infoCardYOffset, thingDef);
-					var thingLabelRect = new Rect(thingIconRect.xMax + thingLabelXOffset, rect2.y, thingLabelWidth, rect2.height);
+
+					var chartIconRect = new Rect(thingIconRect.xMax + 25 + (infoCardXOffset * 2), rect2.y + 5, rect2.height - 10, rect2.height - 10);
+					GUI.DrawTexture(chartIconRect, ChartIcon);
+					if (Mouse.IsOver(chartIconRect))
+                    {
+						marks.Clear();
+						List<Tale> allTalesListForReading = Find.TaleManager.AllTalesListForReading;
+						for (int i = 0; i < allTalesListForReading.Count; i++)
+						{
+							Tale tale = allTalesListForReading[i];
+							if (tale.def.type == TaleType.PermanentHistorical)
+							{
+								float x = (float)GenDate.TickAbsToGame(tale.date) / 60000f;
+								marks.Add(new CurveMark(x, tale.ShortSummary, tale.def.historyGraphColor));
+							}
+						}
+
+						var graphRect = new Rect(UI.MousePositionOnUIInverted.x + 15, UI.MousePositionOnUIInverted.y + 15, 800, 400);
+						Find.WindowStack.ImmediateWindow(thingDef.GetHashCode(), graphRect, WindowLayer.Dialog, delegate
+						{
+							Text.Font = GameFont.Small;
+							Rect rect = graphRect.AtZero();
+							Widgets.DrawWindowBackground(rect);
+							Rect position = rect.ContractedBy(10f);
+							GUI.BeginGroup(position);
+							Rect legendRect = new Rect(0, 0, graphRect.width, graphRect.height);
+							var graphSection = new FloatRange(0f, 60f);
+							SimpleCurveDrawer_Patch.modify = true;
+							TradingManager.Instance.GetRecorder(thingDef).DrawGraph(position, legendRect, graphSection, marks);
+							SimpleCurveDrawer_Patch.modify = false;
+							GUI.EndGroup();
+						}, doBackground: false);
+					}
+
+					var thingLabelRect = new Rect(chartIconRect.xMax + 10, rect2.y, 150, rect2.height);
 					Widgets.Label(thingLabelRect, thingDef.LabelCap);
 					var thingMarketValueRect = new Rect(thingLabelRect.xMax + thingMarketValueXOffset, rect2.y, thingMarketValueWidth, rect2.height);
 
@@ -200,7 +233,7 @@ namespace VanillaTradingExpanded
 					Widgets.Label(thingMarketValueRect, baseMarketValue.ToStringDecimalIfSmall());
 
 					var thingCurrentValueRect = new Rect(thingMarketValueRect.xMax + thingCurrentValueXOffset, rect2.y, thingCurrentValueWidth, rect2.height);
-					var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+					var currentPrice = TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out var curPrice) ? curPrice : baseMarketValue;
 					Widgets.Label(thingCurrentValueRect, currentPrice.ToStringDecimalIfSmall());
 
 					var totalChange = GetTotalChangeFor(currentPrice, baseMarketValue);
@@ -260,14 +293,14 @@ namespace VanillaTradingExpanded
 		private float GetTotalChangeFor(ThingDef thingDef)
 		{
 			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+			var currentPrice = TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out var curPrice) ? curPrice : baseMarketValue;
 			var change = currentPrice - baseMarketValue;
 			return (change / baseMarketValue) * 100f;
 		}
 		private float GetRecentChangeFor(ThingDef thingDef)
 		{
 			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+			var currentPrice = TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out var curPrice) ? curPrice : baseMarketValue;
 			var previousPrice = TradingManager.Instance.previousPriceModifiers.TryGetValue(thingDef, out var prevPrice) ? prevPrice : baseMarketValue;
 			var change = currentPrice - previousPrice;
 			return (change / previousPrice) * 100f;
@@ -275,7 +308,7 @@ namespace VanillaTradingExpanded
 		private float GetCurrentValueFor(ThingDef thingDef)
 		{
 			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-			var currentPrice = TradingManager.Instance.priceModifiers.TryGetValue(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+			var currentPrice = TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out var curPrice) ? curPrice : baseMarketValue;
 			return currentPrice;;
 		}
 		public void SetDirty()
