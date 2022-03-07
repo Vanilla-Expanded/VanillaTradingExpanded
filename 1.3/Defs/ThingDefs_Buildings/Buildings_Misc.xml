@@ -7,7 +7,7 @@
     <description>Allows radio contact with other factions and orbital traders.</description>
     <thingClass>VanillaTradingExpanded.Building_TradingTerminal</thingClass>
     <graphicData>
-      <texPath>Things/Building/Misc/CommsConsole</texPath>
+      <texPath>Structures/TradingConsole/TradingConsole</texPath>
       <graphicClass>Graphic_Multi</graphicClass>
       <drawSize>(5,4)</drawSize>
       <damageData>

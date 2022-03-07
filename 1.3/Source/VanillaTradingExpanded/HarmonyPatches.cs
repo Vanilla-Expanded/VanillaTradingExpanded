@@ -32,9 +32,8 @@ namespace VanillaTradingExpanded
 		{
 			if (___stat == StatDefOf.MarketValue && !outputOnlyVanilla && request.BuildableDef is ThingDef thingDef)
 			{
-				if (TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out __result))
+				if (TradingManager.Instance?.TryGetModifiedPriceFor(thingDef, out __result) ?? false)
                 {
-					Log.Message("Result for " + thingDef + ": " + __result);
 					return false;
 				}
 			}

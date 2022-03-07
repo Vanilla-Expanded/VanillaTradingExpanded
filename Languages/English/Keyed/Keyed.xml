@@ -12,6 +12,7 @@
 	
 	<VTE.ViewMarketPrices>View prices</VTE.ViewMarketPrices>
 	<VTE.ViewNews>View news</VTE.ViewNews>
+	<VTE.Contact>Contact {0}</VTE.Contact>
 	<VTE.EmpireBankName>Empire bank</VTE.EmpireBankName>
 	<VTE.OutlanderCivilBankName>Bank of {FACTION_name}</VTE.OutlanderCivilBankName>
 	

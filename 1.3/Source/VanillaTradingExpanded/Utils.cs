@@ -11,6 +11,7 @@ using Verse.AI;
 
 namespace VanillaTradingExpanded
 {
+    [StaticConstructorOnStartup]
     public static class Utils
     {
         public static Bank GetBank(this Faction faction)

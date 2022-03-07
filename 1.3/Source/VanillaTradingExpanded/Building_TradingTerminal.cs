@@ -105,7 +105,7 @@ namespace VanillaTradingExpanded
 			foreach (var kvp in TradingManager.Instance.banksByFaction)
             {
 				var extension = kvp.Key.def.GetModExtension<BankExtension>();
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(extension.bankNameKey.Translate(kvp.Key.Named("FACTION")), delegate
+				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("VTE.Contact".Translate(extension.bankNameKey.Translate(kvp.Key.Named("FACTION"))), delegate
 				{
 					Job job = JobMaker.MakeJob(VTE_DefOf.VTE_ContactBank, this);
 					currentVisitableFactionBank = kvp.Key;
