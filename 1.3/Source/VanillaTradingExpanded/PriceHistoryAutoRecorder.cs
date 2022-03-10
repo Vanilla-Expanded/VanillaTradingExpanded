@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -17,6 +18,8 @@ namespace VanillaTradingExpanded
 		public ThingDef thingDef;
 		public List<float> records = new List<float>();
 		public SimpleCurveDrawerStyle curveDrawerStyle;
+		public bool squeezeOccured;
+		public bool crashOccured;
 		public PriceHistoryAutoRecorder()
         {
 			curveDrawerStyle = new SimpleCurveDrawerStyle();
@@ -35,9 +38,22 @@ namespace VanillaTradingExpanded
 			curveDrawerStyle.XIntegersOnly = true;
 			curveDrawerStyle.LabelX = "Day".Translate();
 		}
-		public void Record()
+		public void RecordCurrentPrice()
 		{
 			records.Add(thingDef.GetStatValueAbstract(StatDefOf.MarketValue));
+		}
+
+		public float GetPriceInPreviousDays(int lastDay, bool returnCurrentValueAsFallback = true)
+        {
+			if (records.Count >= lastDay)
+            {
+				return records[records.Count - lastDay];
+            }
+			if (returnCurrentValueAsFallback)
+            {
+				return records.Last();
+			}
+			return -1f;
 		}
 
 		private List<SimpleCurveDrawInfo> curves = new List<SimpleCurveDrawInfo>();
@@ -57,11 +73,16 @@ namespace VanillaTradingExpanded
 				simpleCurveDrawInfo.label = "VTE.PriceHistory".Translate(thingDef.label);
 				simpleCurveDrawInfo.valueFormat = "${0}";
 				simpleCurveDrawInfo.curve = new SimpleCurve();
-				var recordsLast60 = records.TakeLast(60).ToList();
+				var recordsLast60 = records.TakeLast(59).ToList();
 				for (int j = 0; j < recordsLast60.Count; j++)
 				{
 					simpleCurveDrawInfo.curve.Add(new CurvePoint(j, recordsLast60[j]), sort: false);
 				}
+
+				var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+				var currentPrice = TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+				simpleCurveDrawInfo.curve.Add(new CurvePoint(recordsLast60.Count, currentPrice), sort: false);
+
 				simpleCurveDrawInfo.curve.SortPoints();
 				if (recordsLast60.Count == 1)
 				{
@@ -96,6 +117,8 @@ namespace VanillaTradingExpanded
 			{
 				SetRecordsFromBytes(arr);
 			}
+			Scribe_Values.Look(ref squeezeOccured, "squeezeOccured");
+			Scribe_Values.Look(ref crashOccured, "crashOccured");
 		}
 
 		private byte[] RecordsToBytes()

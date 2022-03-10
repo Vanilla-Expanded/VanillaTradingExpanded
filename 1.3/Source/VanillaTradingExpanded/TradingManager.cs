@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -21,8 +22,8 @@ namespace VanillaTradingExpanded
 
         private Dictionary<ThingDef, PriceHistoryAutoRecorder> priceHistoryRecorders;
 
-        public Dictionary<ThingDef, float> previousPriceModifiers;
-        public HashSet<ThingDef> cachedTradeables;
+        public List<ThingDef> cachedTradeables;
+        public List<ThingDef> cachedFoodItems;
         public float minTradePrice;
         // banks
         public Dictionary<Faction, Bank> banksByFaction;
@@ -30,6 +31,9 @@ namespace VanillaTradingExpanded
         private List<News> allNews;
         private List<News> unProcessedNews;
         public List<News> AllNews => allNews.Concat(unProcessedNews).ToList();
+
+        public Dictionary<ThingDef, int> itemsToBeCrashedInTicks;
+        public Dictionary<ThingDef, int> itemsToBeSqueezedInTicks;
         public TradingManager()
         {
             Instance = this;
@@ -60,9 +64,16 @@ namespace VanillaTradingExpanded
                     if (!priceHistoryRecorders.ContainsKey(thingDef))
                     {
                         var recorder = new PriceHistoryAutoRecorder { thingDef = thingDef };
-                        recorder.Record();
+                        recorder.RecordCurrentPrice();
                         priceHistoryRecorders[thingDef] = recorder;
                     }
+                }
+            }
+            foreach (var thing in cachedTradeables)
+            {
+                if (thing.IsNutritionGivingIngestible)
+                {
+                    cachedFoodItems.Add(thing);
                 }
             }
         }
@@ -72,12 +83,14 @@ namespace VanillaTradingExpanded
             Instance = this;
             priceModifiers ??= new Dictionary<ThingDef, float>();
             thingsAffectedBySoldPurchasedMarketValue ??= new Dictionary<ThingDef, float>();
-            previousPriceModifiers ??= new Dictionary<ThingDef, float>();
             banksByFaction ??= new Dictionary<Faction, Bank>();
             allNews ??= new List<News>();
             unProcessedNews ??= new List<News>();
             priceHistoryRecorders ??= new Dictionary<ThingDef, PriceHistoryAutoRecorder>();
-            cachedTradeables ??= new HashSet<ThingDef>();
+            cachedTradeables ??= new List<ThingDef>();
+            cachedFoodItems ??= new List<ThingDef>();
+            itemsToBeCrashedInTicks ??= new Dictionary<ThingDef, int>();
+            itemsToBeSqueezedInTicks ??= new Dictionary<ThingDef, int>();
             if (Find.World != null)
             {
                 RecheckBanks();
@@ -182,18 +195,85 @@ namespace VanillaTradingExpanded
             {
                 kvp.Value.Tick();
             }
-
             // we record prices every day
             if (Find.TickManager.TicksGame % GenDate.TicksPerDay == 0)
             {
                 foreach (var kvp in priceHistoryRecorders)
                 {
-                    kvp.Value.Record();
+                    var recorder = kvp.Value;
+                    recorder.RecordCurrentPrice();
+
+                    // here we check prices for last 30 days and see how they changed. if price fell down by 25%, there is 50% chance of squeezing. and vice versa 
+                    if (!itemsToBeCrashedInTicks.ContainsKey(kvp.Key) && !itemsToBeSqueezedInTicks.ContainsKey(kvp.Key) && (!recorder.squeezeOccured || !recorder.crashOccured))
+                    {
+                        var priceIn30Days = recorder.GetPriceInPreviousDays(30, false);
+                        if (priceIn30Days != -1f)
+                        {
+                            var pct = recorder.records.Last() / priceIn30Days;
+                            if (!recorder.squeezeOccured && pct >= 1.25f)
+                            {
+                                if (Rand.Bool)
+                                {
+                                    recorder.squeezeOccured = true;
+                                    AffectPrice(kvp.Key, true, Rand.Range(0.01f, 1f), true);
+                                    itemsToBeCrashedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
+                                }
+                            }
+                            else if (!recorder.crashOccured && pct <= 0.75f)
+                            {
+                                if (Rand.Bool)
+                                {
+                                    recorder.crashOccured = true;
+                                    AffectPrice(kvp.Key, false, Rand.Range(0.01f, 1f), true);
+                                    itemsToBeSqueezedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
+            foreach (var key in itemsToBeCrashedInTicks.Keys.ToList())
+            {
+                if (Find.TickManager.TicksGame > itemsToBeCrashedInTicks[key])
+                {
+                    if (!priceHistoryRecorders[key].crashOccured)
+                    {
+                        AffectPrice(key, false, Rand.Range(0.01f, 1f), true);
+                        priceHistoryRecorders[key].crashOccured = true;
+                    }
+                    itemsToBeCrashedInTicks.Remove(key);
+                }
+            }
+
+            foreach (var key in itemsToBeSqueezedInTicks.Keys.ToList())
+            {
+                if (Find.TickManager.TicksGame > itemsToBeSqueezedInTicks[key])
+                {
+                    if (!priceHistoryRecorders[key].squeezeOccured)
+                    {
+                        AffectPrice(key, true, Rand.Range(0.01f, 1f), true);
+                        priceHistoryRecorders[key].squeezeOccured = true;
+                    }
+                    itemsToBeSqueezedInTicks.Remove(key);
+                }
+            }
+
+            // process every 3 day 
+            if (Find.TickManager.TicksGame % (GenDate.TicksPerDay * 3) == 0)
+            {
+                // process player transactions and do price impacts based on them
+                ProcessPlayerTransactions();
+
+                // handles prices on seasonal items, such as food
+                SeasonalPriceUpdates();
+
+                // simulate world trading, by trading 20% of whole tradeable items
+                SimulateWorldTrading();
+            }
+
             // create news every 7 days in average
-            if (Rand.MTBEventOccurs(7f, 60000f, 1f) )
+            if (Rand.MTBEventOccurs(7f, 60000f, 1f))
             {
                 var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElement();
                 var news = CreateNews(newsDefs);
@@ -203,15 +283,6 @@ namespace VanillaTradingExpanded
             // process news and do price impacts based on them
             DoPriceImpactsFromNews();
 
-            // every 3 day 
-            if (Find.TickManager.TicksGame % (GenDate.TicksPerDay * 3) == 0)
-            {
-                // process player transactions and do price impacts based on them
-                ProcessPlayerTransactions();
-
-                // simulate world trading, by trading 20% of whole tradeable items
-                SimulateWorldTrading();
-            }
             // price rebalance every year at day 1
             var localMap = Find.AnyPlayerHomeMap;
             var day = GenDate.DayOfYear(Find.TickManager.TicksAbs, Find.WorldGrid.LongLatOf(localMap.Tile).x);
@@ -222,6 +293,50 @@ namespace VanillaTradingExpanded
             }
         }
 
+        private void SeasonalPriceUpdates()
+        {
+            var baseMap = Find.AnyPlayerHomeMap;
+            if (baseMap != null)
+            {
+                var season = GenLocalDate.Season(baseMap);
+                var actions = new List<Pair<Action, float>>();
+                if (season == Season.Winter || season == Season.PermanentWinter)
+                {
+                    actions.Add(new Pair<Action, float>(delegate
+                    {
+                        // do nothing
+                    }, 0.70f));
+                    actions.Add(new Pair<Action, float>(delegate
+                    {
+                        AffectPrice(cachedFoodItems, true, () => 0.01f);
+                    }, 0.20f));
+                    actions.Add(new Pair<Action, float>(delegate
+                    {
+                        AffectPrice(cachedFoodItems, true, () => Rand.Range(0.01f, 0.03f));
+                    }, 0.10f));
+                }
+                else if (season == Season.Summer || season == Season.PermanentSummer)
+                {
+                    actions.Add(new Pair<Action, float>(delegate
+                    {
+                        // do nothing
+                    }, 0.70f));
+                    actions.Add(new Pair<Action, float>(delegate
+                    {
+                        AffectPrice(cachedFoodItems, false, () => 0.01f);
+                    }, 0.20f));
+                    actions.Add(new Pair<Action, float>(delegate
+                    {
+                        AffectPrice(cachedFoodItems, false, () => Rand.Range(0.01f, 0.03f));
+                    }, 0.10f));
+                }
+
+                if (actions.TryRandomElementByWeight(x => x.Second, out var result))
+                {
+                    result.First();
+                }
+            }
+        }
         private void SimulateWorldTrading()
         {
             var affectedItems = this.cachedTradeables.InRandomOrder().Take((int)(this.cachedTradeables.Count * 0.2f)).ToList();
@@ -240,7 +355,6 @@ namespace VanillaTradingExpanded
                 {
                     AffectPrice(item, false, 0.01f);
                 }, 0.20f));
-
                 actions.Add(new Pair<Action, float>(delegate
                 {
                     AffectPrice(item, true, 0.01f);
@@ -284,11 +398,6 @@ namespace VanillaTradingExpanded
         }
         private void ProcessPlayerTransactions()
         {
-            previousPriceModifiers.Clear();
-            foreach (var key in priceModifiers.Keys.ToList())
-            {
-                previousPriceModifiers.Add(key, priceModifiers[key]);
-            }
             foreach (var priceModifierKvp in thingsAffectedBySoldPurchasedMarketValue)
             {
                 var chance = Math.Abs(priceModifierKvp.Value / 10f) / 100f;
@@ -300,12 +409,6 @@ namespace VanillaTradingExpanded
                 }
             }
             thingsAffectedBySoldPurchasedMarketValue.Clear();
-            StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
-            foreach (var data in priceModifiers)
-            {
-                Log.Message("Price modifier: " + data.Key + " - " + data.Value + " - base market value: " + data.Key.GetStatValueAbstract(StatDefOf.MarketValue));
-            }
-            StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
         }
         private void DoPriceRebalances()
         {
@@ -317,12 +420,26 @@ namespace VanillaTradingExpanded
                 AffectPrice(key, diff > 0, change);
             }
             StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
+
+            foreach (var recorder in priceHistoryRecorders)
+            {
+                recorder.Value.squeezeOccured = false;
+                recorder.Value.crashOccured = false;
+            }
         }
 
         private int prevDay;
-        private void AffectPrice(ThingDef thingDef, bool priceIncrease, float priceImpactChange)
+
+        private void AffectPrice(List<ThingDef> thingDefs, bool priceIncrease, Func<float> priceImpactChangeGetter)
         {
-            Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange);
+            foreach (var thingDef in thingDefs)
+            {
+                AffectPrice(thingDef, priceIncrease, priceImpactChangeGetter());
+            }
+        }
+
+        private void AffectPrice(ThingDef thingDef, bool priceIncrease, float priceImpactChange, bool issueMessage = false)
+        {
             var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
             if (priceModifiers.ContainsKey(thingDef))
             {
@@ -346,12 +463,26 @@ namespace VanillaTradingExpanded
                     priceModifiers[thingDef] = baseMarketValue / (1f + priceImpactChange);
                 }
             }
-            Log.ResetMessageCount();
             if (priceModifiers[thingDef] < 0.0000001f)
             {
-                priceModifiers[thingDef] = 0.0000001f;
+                priceModifiers[thingDef] = 0.0000001f; // we set minimal price to avoid situations with endless minimal prices
             }
-            Log.Message(thingDef + " - new price: " + priceModifiers[thingDef]);
+            if (issueMessage)
+            {
+                if (Find.Maps.Where(x => x.IsPlayerHome).Any(x => x.listerThings.ThingsOfDef(VTE_DefOf.VTE_TradingTerminal).Any(x => x.TryGetComp<CompPowerTrader>().PowerOn)))
+                {
+                    if (priceIncrease)
+                    {
+                        Messages.Message("VTE.SqueezeMessage".Translate(thingDef.label), MessageTypeDefOf.NeutralEvent);
+                    }
+                    else
+                    {
+                        Messages.Message("VTE.CrashMessage".Translate(thingDef.label), MessageTypeDefOf.NeutralEvent);
+                    }
+                }
+            }
+            Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
+            Log.ResetMessageCount();
         }
 
         public bool TryGetModifiedPriceFor(ThingDef thingDef, out float price)
@@ -367,13 +498,13 @@ namespace VanillaTradingExpanded
             base.ExposeData();
             Scribe_Collections.Look(ref priceModifiers, "priceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys1, ref floatValues1);
             Scribe_Collections.Look(ref thingsAffectedBySoldPurchasedMarketValue, "playerTransactionsBySoldPurchasedMarketValue", LookMode.Def, LookMode.Value, ref thingDefsKeys2, ref floatValues2);
-            Scribe_Collections.Look(ref previousPriceModifiers, "previousPriceModifiers", LookMode.Def, LookMode.Value, ref thingDefsKeys3, ref floatValues3);
+            Scribe_Collections.Look(ref itemsToBeCrashedInTicks, "itemsToBeCrashedByTicks", LookMode.Def, LookMode.Value, ref thingDefsKeys3, ref intValues1);
+            Scribe_Collections.Look(ref itemsToBeSqueezedInTicks, "itemsToBeSqueezeByTicks", LookMode.Def, LookMode.Value, ref thingDefsKeys4, ref intValues2);
             Scribe_Collections.Look(ref banksByFaction, "banksByFaction", LookMode.Reference, LookMode.Deep, ref factionKeys, ref bankValues);
             Scribe_Collections.Look(ref allNews, "allNews");
             Scribe_Collections.Look(ref unProcessedNews, "unProcessedNews");
             Scribe_Values.Look(ref prevDay, "prevDay");
             Scribe_Collections.Look(ref priceHistoryRecorders, "priceHistoryRecorders", LookMode.Def, LookMode.Deep);
-
             InitVars();
         }
 
@@ -381,10 +512,12 @@ namespace VanillaTradingExpanded
         private List<float> floatValues1;
         private List<ThingDef> thingDefsKeys2;
         private List<float> floatValues2;
-        private List<ThingDef> thingDefsKeys3;
-        private List<float> floatValues3;
-
         private List<Faction> factionKeys;
         private List<Bank> bankValues;
+
+        private List<ThingDef> thingDefsKeys3;
+        private List<int> intValues1;
+        private List<ThingDef> thingDefsKeys4;
+        private List<int> intValues2;
     }
 }

@@ -19,5 +19,6 @@ namespace VanillaTradingExpanded
         public static JobDef VTE_ViewNews;
         public static HistoryEventDef VTE_Indebted;
         public static IncidentDef VTE_Collectors;
+        public static ThingDef VTE_TradingTerminal;
     }
 }

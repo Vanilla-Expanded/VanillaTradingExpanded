@@ -66,6 +66,7 @@ namespace VanillaTradingExpanded
 		public Window_MarketPrices()
 		{
 			SetDirty();
+			this.absorbInputAroundWindow = false;
 			this.forcePause = true;
 		}
 
@@ -217,9 +218,10 @@ namespace VanillaTradingExpanded
 							Rect position = rect.ContractedBy(10f);
 							GUI.BeginGroup(position);
 							Rect legendRect = new Rect(0, 0, graphRect.width, graphRect.height);
-							var graphSection = new FloatRange(0f, 60f);
+							var recorder = TradingManager.Instance.GetRecorder(thingDef);
+							var graphSection = new FloatRange(0f, Mathf.Min(60f, recorder.records.Count));
 							SimpleCurveDrawer_Patch.modify = true;
-							TradingManager.Instance.GetRecorder(thingDef).DrawGraph(position, legendRect, graphSection, marks);
+							recorder.DrawGraph(position, legendRect, graphSection, marks);
 							SimpleCurveDrawer_Patch.modify = false;
 							GUI.EndGroup();
 						}, doBackground: false);
@@ -285,7 +287,7 @@ namespace VanillaTradingExpanded
 		}
 		private float GetRecentChangeFor(ThingDef thingDef, float currentPrice, float baseMarketValue)
         {
-			var previousPrice = TradingManager.Instance.previousPriceModifiers.TryGetValue(thingDef, out var prevPrice) ? prevPrice : baseMarketValue;
+			var previousPrice = TradingManager.Instance.GetRecorder(thingDef).GetPriceInPreviousDays(3);
 			var change = currentPrice - previousPrice;
 			return (change / previousPrice) * 100f;
 		}
@@ -301,7 +303,7 @@ namespace VanillaTradingExpanded
 		{
 			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
 			var currentPrice = TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out var curPrice) ? curPrice : baseMarketValue;
-			var previousPrice = TradingManager.Instance.previousPriceModifiers.TryGetValue(thingDef, out var prevPrice) ? prevPrice : baseMarketValue;
+			var previousPrice = TradingManager.Instance.GetRecorder(thingDef).GetPriceInPreviousDays(3);
 			var change = currentPrice - previousPrice;
 			return (change / previousPrice) * 100f;
 		}

@@ -61,4 +61,6 @@ They have been hired by {FACTION_name} to encourage you to pay off your debt.</V
 	<VTE.News>News</VTE.News>
 	<VTE.Date>Date</VTE.Date>
 	<VTE.PriceHistory>Price history of {0}</VTE.PriceHistory>
+	<VTE.SqueezeMessage>Price of {0} is squeezing.</VTE.SqueezeMessage>
+	<VTE.CrashMessage>Price of {0} is crashing.</VTE.CrashMessage>
 </LanguageData>
