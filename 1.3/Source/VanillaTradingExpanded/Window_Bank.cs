@@ -159,7 +159,7 @@ namespace VanillaTradingExpanded
 			Text.Font = GameFont.Tiny;
 			GUI.color = Color.gray;
 			var breakdownLabelDescRect = new Rect(breakdownLabelRect.xMax + 180, posY + 3, 400, 24);
-			Widgets.Label(breakdownLabelDescRect, "VTE.BreakdownDesc".Translate());
+			Widgets.Label(breakdownLabelDescRect, "VTE.BreakdownBankDesc".Translate());
 			GUI.color = Color.white;
 			Text.Font = GameFont.Small;
 

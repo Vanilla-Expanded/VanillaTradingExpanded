@@ -17,8 +17,6 @@ namespace VanillaTradingExpanded
 	public class Window_MarketPrices : Window
 	{
 		private static List<CurveMark> marks = new List<CurveMark>();
-
-		public static readonly Texture2D ChartIcon = ContentFinder<Texture2D>.Get("UI/Chart");
 		private enum Column
         {
 			None,
@@ -194,21 +192,10 @@ namespace VanillaTradingExpanded
 					Widgets.InfoCardButton(thingIconRect.xMax + infoCardXOffset, rect2.y + infoCardYOffset, thingDef);
 
 					var chartIconRect = new Rect(thingIconRect.xMax + 25 + (infoCardXOffset * 2), rect2.y + 5, rect2.height - 10, rect2.height - 10);
-					GUI.DrawTexture(chartIconRect, ChartIcon);
+					GUI.DrawTexture(chartIconRect, GuiHelper.ChartIcon);
 					if (Mouse.IsOver(chartIconRect))
                     {
 						marks.Clear();
-						List<Tale> allTalesListForReading = Find.TaleManager.AllTalesListForReading;
-						for (int i = 0; i < allTalesListForReading.Count; i++)
-						{
-							Tale tale = allTalesListForReading[i];
-							if (tale.def.type == TaleType.PermanentHistorical)
-							{
-								float x = (float)GenDate.TickAbsToGame(tale.date) / 60000f;
-								marks.Add(new CurveMark(x, tale.ShortSummary, tale.def.historyGraphColor));
-							}
-						}
-
 						var graphRect = new Rect(UI.MousePositionOnUIInverted.x + 15, UI.MousePositionOnUIInverted.y + 15, 800, 400);
 						Find.WindowStack.ImmediateWindow(thingDef.GetHashCode(), graphRect, WindowLayer.Dialog, delegate
 						{

@@ -41,12 +41,19 @@ namespace VanillaTradingExpanded
 			Find.WindowStack.Add(new Window_MarketPrices());
 		}
 	}
+	public class JobDriver_ContactBank : JobDriver_UseTradingTerminal
+	{
+		protected override void DoAction(Pawn actor)
+		{
+			Find.WindowStack.Add(new Window_Bank(actor, TradingTerminal.currentVisitableFactionBank));
+		}
+	}
 
-    public class JobDriver_ContactBank : JobDriver_UseTradingTerminal
+	public class JobDriver_OpenStockMarket : JobDriver_UseTradingTerminal
     {
         protected override void DoAction(Pawn actor)
         {
-			Find.WindowStack.Add(new Window_Bank(actor, TradingTerminal.currentVisitableFactionBank));
+			Find.WindowStack.Add(new Window_StockMarket());
 		}
 	}
 

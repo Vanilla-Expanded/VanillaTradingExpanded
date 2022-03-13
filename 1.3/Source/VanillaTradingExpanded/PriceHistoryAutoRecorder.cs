@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -13,15 +14,81 @@ using Verse.Grammar;
 
 namespace VanillaTradingExpanded
 {
-	public class PriceHistoryAutoRecorder : IExposable
-	{
+	public class PriceHistoryAutoRecorderThing : PriceHistoryAutoRecorder
+    {
 		public ThingDef thingDef;
-		public List<float> records = new List<float>();
-		public SimpleCurveDrawerStyle curveDrawerStyle;
 		public bool squeezeOccured;
 		public bool crashOccured;
+        public override float GetCurrentValue()
+        {
+			var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+			var currentPrice = TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out var curPrice) ? curPrice : baseMarketValue;
+			return currentPrice;
+		}
+		public override void RecordCurrentPrice()
+        {
+			records.Add(thingDef.GetStatValueAbstract(StatDefOf.MarketValue));
+		}
+
+        public override string Name()
+        {
+			return thingDef.label;
+		}
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+			Scribe_Defs.Look(ref thingDef, "thingDef");
+			Scribe_Values.Look(ref squeezeOccured, "squeezeOccured");
+			Scribe_Values.Look(ref crashOccured, "crashOccured");
+		}
+
+        public override string TitleName()
+        {
+			return "VTE.PriceHistory".Translate(Name());
+		}
+    }
+
+	public class PriceHistoryAutoRecorderCompany : PriceHistoryAutoRecorder
+	{
+		public Company company;
+		public bool squeezeOccured;
+		public bool crashOccured;
+		public override float GetCurrentValue()
+		{
+			return company.currentValue;
+		}
+		public override void RecordCurrentPrice()
+		{
+			records.Add(company.currentValue);
+		}
+
+		public override string Name()
+		{
+			return company.name;
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_References.Look(ref company, "thingDef");
+			Scribe_Values.Look(ref squeezeOccured, "squeezeOccured");
+			Scribe_Values.Look(ref crashOccured, "crashOccured");
+		}
+
+		public override string TitleName()
+		{
+			return "VTE.ChartHistory".Translate(Name());
+		}
+	}
+
+	public abstract class PriceHistoryAutoRecorder : IExposable
+	{
+		public List<float> records = new List<float>();
+		public SimpleCurveDrawerStyle curveDrawerStyle;
 		public PriceHistoryAutoRecorder()
         {
+			records = new List<float>();
 			curveDrawerStyle = new SimpleCurveDrawerStyle();
 			curveDrawerStyle.DrawMeasures = true;
 			curveDrawerStyle.DrawPoints = false;
@@ -38,11 +105,8 @@ namespace VanillaTradingExpanded
 			curveDrawerStyle.XIntegersOnly = true;
 			curveDrawerStyle.LabelX = "Day".Translate();
 		}
-		public void RecordCurrentPrice()
-		{
-			records.Add(thingDef.GetStatValueAbstract(StatDefOf.MarketValue));
-		}
-
+		public abstract void RecordCurrentPrice();
+		public abstract string Name();
 		public float GetPriceInPreviousDays(int lastDay, bool returnCurrentValueAsFallback = true)
         {
 			if (records.Count >= lastDay)
@@ -60,6 +124,8 @@ namespace VanillaTradingExpanded
 
 		private int cachedGraphTickCount = -1;
 
+		public abstract string TitleName();
+		public abstract float GetCurrentValue();
 		public void DrawGraph(Rect graphRect, Rect legendRect, FloatRange section, List<CurveMark> marks)
 		{
 			int ticksGame = Find.TickManager.TicksGame;
@@ -70,7 +136,7 @@ namespace VanillaTradingExpanded
 
 				SimpleCurveDrawInfo simpleCurveDrawInfo = new SimpleCurveDrawInfo();
 				simpleCurveDrawInfo.color = new Color(1, 1, 0, 1);
-				simpleCurveDrawInfo.label = "VTE.PriceHistory".Translate(thingDef.label);
+				simpleCurveDrawInfo.label = TitleName();
 				simpleCurveDrawInfo.valueFormat = "${0}";
 				simpleCurveDrawInfo.curve = new SimpleCurve();
 				var recordsLast60 = records.TakeLast(59).ToList();
@@ -78,11 +144,7 @@ namespace VanillaTradingExpanded
 				{
 					simpleCurveDrawInfo.curve.Add(new CurvePoint(j, recordsLast60[j]), sort: false);
 				}
-
-				var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-				var currentPrice = TradingManager.Instance.TryGetModifiedPriceFor(thingDef, out var curPrice) ? curPrice : baseMarketValue;
-				simpleCurveDrawInfo.curve.Add(new CurvePoint(recordsLast60.Count, currentPrice), sort: false);
-
+				simpleCurveDrawInfo.curve.Add(new CurvePoint(recordsLast60.Count, GetCurrentValue()), sort: false);
 				simpleCurveDrawInfo.curve.SortPoints();
 				if (recordsLast60.Count == 1)
 				{
@@ -104,9 +166,8 @@ namespace VanillaTradingExpanded
 			Text.Anchor = TextAnchor.UpperLeft;
 		}
 
-		public void ExposeData()
+		public virtual void ExposeData()
 		{
-			Scribe_Defs.Look(ref thingDef, "thingDef");
 			byte[] arr = null;
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{
@@ -117,8 +178,6 @@ namespace VanillaTradingExpanded
 			{
 				SetRecordsFromBytes(arr);
 			}
-			Scribe_Values.Look(ref squeezeOccured, "squeezeOccured");
-			Scribe_Values.Look(ref crashOccured, "crashOccured");
 		}
 
 		private byte[] RecordsToBytes()

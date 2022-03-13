@@ -13,6 +13,7 @@ using Verse.Grammar;
 
 namespace VanillaTradingExpanded
 {
+
     public class TradingManager : GameComponent
     {
         public static TradingManager Instance;
@@ -20,17 +21,20 @@ namespace VanillaTradingExpanded
         private Dictionary<ThingDef, float> priceModifiers;
         public Dictionary<ThingDef, float> thingsAffectedBySoldPurchasedMarketValue;
 
-        private Dictionary<ThingDef, PriceHistoryAutoRecorder> priceHistoryRecorders;
+        private Dictionary<ThingDef, PriceHistoryAutoRecorderThing> priceHistoryRecorders;
 
         public List<ThingDef> cachedTradeables;
         public List<ThingDef> cachedFoodItems;
         public float minTradePrice;
         // banks
         public Dictionary<Faction, Bank> banksByFaction;
+        public List<Bank> Banks => banksByFaction.Values.ToList();
         // news
         private List<News> allNews;
         private List<News> unProcessedNews;
         public List<News> AllNews => allNews.Concat(unProcessedNews).ToList();
+
+        public List<Company> companies;
 
         public Dictionary<ThingDef, int> itemsToBeCrashedInTicks;
         public Dictionary<ThingDef, int> itemsToBeSqueezedInTicks;
@@ -63,7 +67,7 @@ namespace VanillaTradingExpanded
 
                     if (!priceHistoryRecorders.ContainsKey(thingDef))
                     {
-                        var recorder = new PriceHistoryAutoRecorder { thingDef = thingDef };
+                        var recorder = new PriceHistoryAutoRecorderThing { thingDef = thingDef };
                         recorder.RecordCurrentPrice();
                         priceHistoryRecorders[thingDef] = recorder;
                     }
@@ -76,7 +80,30 @@ namespace VanillaTradingExpanded
                     cachedFoodItems.Add(thing);
                 }
             }
+
+            var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();
+            var companiesToGenerate = 30 - companies.Count;
+            for (var i = 0; i < companiesToGenerate; i++)
+            {
+                var tradeKind = orbitalTraders.RandomElement();
+                var company = new Company(GetFaction(tradeKind), tradeKind, companies.Count);
+                companies.Add(company);
+            }
         }
+
+        private Faction GetFaction(TraderKindDef trader)
+        {
+            if (trader.faction == null)
+            {
+                return null;
+            }
+            if (!Find.FactionManager.AllFactions.Where((Faction f) => f.def == trader.faction).TryRandomElement(out var result))
+            {
+                return null;
+            }
+            return result;
+        }
+
 
         public void InitVars()
         {
@@ -86,11 +113,12 @@ namespace VanillaTradingExpanded
             banksByFaction ??= new Dictionary<Faction, Bank>();
             allNews ??= new List<News>();
             unProcessedNews ??= new List<News>();
-            priceHistoryRecorders ??= new Dictionary<ThingDef, PriceHistoryAutoRecorder>();
+            priceHistoryRecorders ??= new Dictionary<ThingDef, PriceHistoryAutoRecorderThing>();
             cachedTradeables ??= new List<ThingDef>();
             cachedFoodItems ??= new List<ThingDef>();
             itemsToBeCrashedInTicks ??= new Dictionary<ThingDef, int>();
             itemsToBeSqueezedInTicks ??= new Dictionary<ThingDef, int>();
+            companies ??= new List<Company>();
             if (Find.World != null)
             {
                 RecheckBanks();
@@ -505,7 +533,9 @@ namespace VanillaTradingExpanded
             Scribe_Collections.Look(ref unProcessedNews, "unProcessedNews");
             Scribe_Values.Look(ref prevDay, "prevDay");
             Scribe_Collections.Look(ref priceHistoryRecorders, "priceHistoryRecorders", LookMode.Def, LookMode.Deep);
+            Scribe_Collections.Look(ref companies, "companies", LookMode.Deep);
             InitVars();
+            companies.RemoveAll(x => x.traderKind is null);
         }
 
         private List<ThingDef> thingDefsKeys1;

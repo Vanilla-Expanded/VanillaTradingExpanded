@@ -22,10 +22,12 @@
 	<VTE.BankFeesBasedOn>Based on {0} goodwill with {FACTION_name}</VTE.BankFeesBasedOn>
 	<VTE.DepositOrWithdraw>Deposit or Withdraw</VTE.DepositOrWithdraw>
 	<VTE.DepositOrWithdrawDesc>Positive numbers deposit. Negative numbers withdraw.</VTE.DepositOrWithdrawDesc>
-	<VTE.AreYouSureYouWantToDeposit>Are you sure that you want to deposit {0}?</VTE.AreYouSureYouWantToDeposit>
-	<VTE.AreYouSureYouWantToWithdraw>Are you sure that you want to withdraw {0}?</VTE.AreYouSureYouWantToWithdraw>
+	<VTE.AreYouSureYouWantToDeposit>Are you sure that you want to deposit {0} silver?</VTE.AreYouSureYouWantToDeposit>
+	<VTE.AreYouSureYouWantToWithdraw>Are you sure that you want to withdraw {0} silver?</VTE.AreYouSureYouWantToWithdraw>
 	<VTE.Breakdown>Breakdown</VTE.Breakdown>
-	<VTE.BreakdownDesc>Performing transactions will incur a charge based on current Bank fee</VTE.BreakdownDesc>
+	<VTE.BreakdownBankDesc>Performing transactions will incur a charge based on current Bank fee</VTE.BreakdownBankDesc>
+	<VTE.BreakdownStockMarketDesc>Buying shares of Trading ships can be risky. Follow the news closely to know how the company you're invested in is doing.</VTE.BreakdownStockMarketDesc>
+	
 	<VTE.AmountToDepositWithdraw>Amount to deposit / withdraw</VTE.AmountToDepositWithdraw>
 	<VTE.AmountToDeposit>Amount to deposit</VTE.AmountToDeposit>
 	<VTE.AmountToWithdraw>Amount to withdraw</VTE.AmountToWithdraw>
@@ -63,4 +65,25 @@ They have been hired by {FACTION_name} to encourage you to pay off your debt.</V
 	<VTE.PriceHistory>Price history of {0}</VTE.PriceHistory>
 	<VTE.SqueezeMessage>Price of {0} is squeezing.</VTE.SqueezeMessage>
 	<VTE.CrashMessage>Price of {0} is crashing.</VTE.CrashMessage>
+	<VTE.OpenStockMarket>Open stock market</VTE.OpenStockMarket>
+	<VTE.Company>Company</VTE.Company>
+	<VTE.Value>Value</VTE.Value>
+	<VTE.SharesHeld>Shares held</VTE.SharesHeld>
+	<VTE.Shares>Shares</VTE.Shares>
+	<VTE.Profit>Profit</VTE.Profit>
+	<VTE.ProfitLoss>Profit/Loss</VTE.ProfitLoss>
+	<VTE.ChartHistory>Chart history of {0}</VTE.ChartHistory>
+	<VTE.SharesTransactionHeader>Positive numbers buy.
+Negative numbers sell.</VTE.SharesTransactionHeader>
+	<VTE.FollowNews>Follow news</VTE.FollowNews>
+	<VTE.MoneyInBanks>Money in banks: {0}</VTE.MoneyInBanks>
+	<VTE.TransactionCost>Transaction cost</VTE.TransactionCost>
+	<VTE.TransactionGain>Transaction gain</VTE.TransactionGain>
+	<VTE.MoneyInBanksAfter>Money in banks after</VTE.MoneyInBanksAfter>
+	<VTE.BankDepositsToSpend>Select bank deposits to pay for shares</VTE.BankDepositsToSpend>
+	<VTE.BankDepositsToGain>Select bank deposits to put money from shares</VTE.BankDepositsToGain>
+	<VTE.TransactionCostToPay>Transaction cost to pay: {0}</VTE.TransactionCostToPay>
+	<VTE.MoneyToSpend>Money to spend: {0}</VTE.MoneyToSpend>
+	<VTE.TransactionGainToTransfer>Transaction gain to transfer: {0}</VTE.TransactionGainToTransfer>
+	<VTE.MoneyToTransfer>Money to transfer: {0}</VTE.MoneyToTransfer>
 </LanguageData>

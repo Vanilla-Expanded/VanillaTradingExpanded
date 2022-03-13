@@ -17,6 +17,7 @@ namespace VanillaTradingExpanded
         public static JobDef VTE_ViewPrices;
         public static JobDef VTE_ContactBank;
         public static JobDef VTE_ViewNews;
+        public static JobDef VTE_OpenStockMarket;
         public static HistoryEventDef VTE_Indebted;
         public static IncidentDef VTE_Collectors;
         public static ThingDef VTE_TradingTerminal;

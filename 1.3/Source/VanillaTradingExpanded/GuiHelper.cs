@@ -14,6 +14,8 @@ namespace VanillaTradingExpanded
 	[StaticConstructorOnStartup]
 	public static class GuiHelper
 	{
+		public static readonly Texture2D ChartIcon = ContentFinder<Texture2D>.Get("UI/Chart");
+
 		private static readonly Rect DefaultTexCoords;
 		private static readonly Rect LinkedTexCoords;
 		static GuiHelper()

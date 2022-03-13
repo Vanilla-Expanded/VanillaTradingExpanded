@@ -28,11 +28,23 @@ namespace VanillaTradingExpanded
             this.parentFaction = faction;
             this.bankExtension = faction.def.GetModExtension<BankExtension>();
         }
-        public int DepositAmount => depositAmount;
+        public int DepositAmount
+        {
+            get
+            {
+                return this.depositAmount;
+            }
+            set
+            {
+                this.depositAmount = value;
+            }
+        }
         public float Balance => depositAmount;
 
         public BankExtension bankExtension;
         public float Fees => bankExtension.feesByGoodwill.Evaluate(this.parentFaction.GoodwillWith(Faction.OfPlayer));
+
+        public string Name => bankExtension.bankNameKey.Translate(this.parentFaction.Named("FACTION"));
         public void DepositSilver(List<Thing> silvers, int amountToDeposit)
         {
             while (amountToDeposit > 0)

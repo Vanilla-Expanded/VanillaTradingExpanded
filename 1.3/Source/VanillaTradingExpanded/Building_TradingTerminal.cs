@@ -72,6 +72,7 @@ namespace VanillaTradingExpanded
 			{
 				yield return GetViewMarketPricesOption(myPawn);
 				yield return GetViewNewsOption(myPawn);
+				yield return GetOpenStockMarketOption(myPawn);
 				foreach (var floatOption2 in GetBankOptions(myPawn))
                 {
 					yield return floatOption2;
@@ -99,13 +100,22 @@ namespace VanillaTradingExpanded
 			}, MenuOptionPriority.Default), negotiator, this);
 		}
 
+		private FloatMenuOption GetOpenStockMarketOption(Pawn negotiator)
+		{
+			string text = "VTE.OpenStockMarket".Translate();
+			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, delegate
+			{
+				Job job = JobMaker.MakeJob(VTE_DefOf.VTE_OpenStockMarket, this);
+				negotiator.jobs.TryTakeOrderedJob(job);
+			}, MenuOptionPriority.Default), negotiator, this);
+		}
+
 		public Faction currentVisitableFactionBank;
 		private IEnumerable<FloatMenuOption> GetBankOptions(Pawn negotiator)
 		{
 			foreach (var kvp in TradingManager.Instance.banksByFaction)
             {
-				var extension = kvp.Key.def.GetModExtension<BankExtension>();
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("VTE.Contact".Translate(extension.bankNameKey.Translate(kvp.Key.Named("FACTION"))), delegate
+				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("VTE.Contact".Translate(kvp.Value.Name), delegate
 				{
 					Job job = JobMaker.MakeJob(VTE_DefOf.VTE_ContactBank, this);
 					currentVisitableFactionBank = kvp.Key;
