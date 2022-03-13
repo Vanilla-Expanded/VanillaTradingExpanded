@@ -191,8 +191,9 @@ namespace VanillaTradingExpanded
             {
 				case FilterBy.All: return cachedNews;
 				case FilterBy.OnlySpecificCategory: return cachedNews.Where(x => x.MatchesCategory(specificCategory)).ToList();
-				case FilterBy.OnlyBullish: return cachedNews.Where(x => x.priceImpact > 0).ToList();
-				case FilterBy.OnlyBearish: return cachedNews.Where(x => x.priceImpact < 0).ToList();
+				case FilterBy.OnlyBullish: return cachedNews.Where(x => x.newsContext.company is null && x.priceImpact > 0).ToList();
+				case FilterBy.OnlyBearish: return cachedNews.Where(x => x.newsContext.company is null && x.priceImpact < 0).ToList();
+				case FilterBy.OnlyTradeShips: return cachedNews.Where(x => x.newsContext.company != null).ToList();
 			}
 			return cachedNews;
 		}

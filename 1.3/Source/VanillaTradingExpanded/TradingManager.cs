@@ -191,13 +191,24 @@ namespace VanillaTradingExpanded
             nameRequest.Includes.Add(newsDef.textRulePack);
             return new News
             {
+                def = newsDef,
                 text = GrammarResolver.Resolve("root", nameRequest),
+                newsContext = context,
                 creationTick = Find.TickManager.TicksGame,
-                priceImpact = newsDef.priceImpactRandomInRange.RandomInRange,
+                priceImpact = RandomPriceImpact(newsDef.priceImpactRandomInRange),
                 priceImpactStartTick = Find.TickManager.TicksGame + newsDef.priceImpactTicksDelay.RandomInRange,
                 affectedThingCategories = newsDef.thingCategories,
                 affectedThingDefs = newsDef.thingDefs
             };
+        }
+
+        public float RandomPriceImpact(FloatRange floatRange)
+        {
+            if (floatRange.min > floatRange.max)
+            {
+                return Rand.Range(floatRange.max, floatRange.min);
+            }
+            return Rand.Range(floatRange.min, floatRange.max);
         }
         public void RegisterNews(News news)
         {
@@ -300,12 +311,16 @@ namespace VanillaTradingExpanded
                 SimulateWorldTrading();
             }
 
-            // create news every 7 days in average
-            if (Rand.MTBEventOccurs(7f, 60000f, 1f))
+            // create news every 3 days in average
+            if (Rand.MTBEventOccurs(3f, 60000f, 1f))
             {
-                var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElement();
+                var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
                 var news = CreateNews(newsDefs);
-                RegisterNews(news);
+                //Log.Message(news.text + " - " + news.priceImpact);
+                if (news.def.Worker.VisibleToPlayer(news))
+                {
+                    RegisterNews(news);
+                }
             }
 
             // process news and do price impacts based on them
@@ -411,11 +426,7 @@ namespace VanillaTradingExpanded
                 {
                     allNews.Add(news);
                     unProcessedNews.RemoveAt(num);
-                    var priceImpactChange = Mathf.Abs(news.priceImpact);
-                    foreach (var thingDef in news.AffectedThingDefs())
-                    {
-                        AffectPrice(thingDef, news.priceImpact > 0, priceImpactChange);
-                    }
+                    news.def.Worker.AffectPrices(news);
                     var window = Find.WindowStack.WindowOfType<Window_MarketPrices>();
                     if (window != null)
                     {
@@ -457,8 +468,7 @@ namespace VanillaTradingExpanded
         }
 
         private int prevDay;
-
-        private void AffectPrice(List<ThingDef> thingDefs, bool priceIncrease, Func<float> priceImpactChangeGetter)
+        public void AffectPrice(List<ThingDef> thingDefs, bool priceIncrease, Func<float> priceImpactChangeGetter)
         {
             foreach (var thingDef in thingDefs)
             {
@@ -466,7 +476,7 @@ namespace VanillaTradingExpanded
             }
         }
 
-        private void AffectPrice(ThingDef thingDef, bool priceIncrease, float priceImpactChange, bool issueMessage = false)
+        public void AffectPrice(ThingDef thingDef, bool priceIncrease, float priceImpactChange, bool issueMessage = false)
         {
             var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
             if (priceModifiers.ContainsKey(thingDef))
@@ -509,8 +519,8 @@ namespace VanillaTradingExpanded
                     }
                 }
             }
-            Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
-            Log.ResetMessageCount();
+            //Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
+            //Log.ResetMessageCount();
         }
 
         public bool TryGetModifiedPriceFor(ThingDef thingDef, out float price)

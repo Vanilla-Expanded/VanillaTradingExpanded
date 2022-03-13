@@ -11,6 +11,8 @@ namespace VanillaTradingExpanded
         public int creationTick;
         public float priceImpact;
         public int priceImpactStartTick;
+        public NewsDef def;
+        public NewsContext newsContext;
 
         public List<ThingCategoryDef> affectedThingCategories;
         public List<ThingDef> affectedThingDefs;
@@ -43,8 +45,10 @@ namespace VanillaTradingExpanded
             Scribe_Values.Look(ref creationTick, "creationTick");
             Scribe_Values.Look(ref priceImpact, "priceImpact");
             Scribe_Values.Look(ref priceImpactStartTick, "priceImpactStartTick");
+            Scribe_Defs.Look(ref def, "def");
             Scribe_Collections.Look(ref affectedThingCategories, "affectedThingCategories", LookMode.Def);
             Scribe_Collections.Look(ref affectedThingDefs, "affectedThingDefs", LookMode.Def);
+            Scribe_Deep.Look(ref newsContext, "newsContext");
         }
     }
 }

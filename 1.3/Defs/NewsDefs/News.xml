@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-
-  <VanillaTradingExpanded.NewsDef>
+	
+	<VanillaTradingExpanded.NewsDef Name="VTE_FactionNewsBase" Abstract="True">
+		<newsWorker>VanillaTradingExpanded.NewsWorker_FactionAction</newsWorker>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<VanillaTradingExpanded.NewsDef Name="VTE_SettlementNewsBase" Abstract="True">
+		<newsWorker>VanillaTradingExpanded.NewsWorker_SettlementAction</newsWorker>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<VanillaTradingExpanded.NewsDef Name="VTE_CompanyNewsBase" Abstract="True">
+		<newsWorker>VanillaTradingExpanded.NewsWorker_CompanyAction</newsWorker>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_FactionNewsBase">
 		<defName>VTE_FactionWar</defName>
 		<textRulePack>VTE_FactionPreparesToWar</textRulePack>
-		<newsWorker>VanillaTradingExpanded.NewsWorker_FactionAction</newsWorker>
 		<thingCategories>
 			<li>ApparelArmor</li>
 		</thingCategories>
@@ -14,39 +25,57 @@
 		<priceImpactRandomInRange>0.7~0.9</priceImpactRandomInRange>
 		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
 		<commonality>0.1</commonality>
-  </VanillaTradingExpanded.NewsDef>
-
-  <RulePackDef>
-    <defName>VTE_FactionPreparesToWar</defName>
-    <rulePack>
-      <rulesStrings>
-        <li>root->[FACTION_name] text example 1</li>
-        <li>root->[FACTION_name] text example 2</li>
-        <li>root->[FACTION_name] text example 3</li>
-      </rulesStrings>
-    </rulePack>
-  </RulePackDef>
-
-  <VanillaTradingExpanded.NewsDef>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_FactionPreparesToWar</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[FACTION_name] prepares to war 1</li>
+				<li>root->[FACTION_name] prepares to war 2</li>
+				<li>root->[FACTION_name] prepares to war 3</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
 		<defName>VTE_SettlementGotPlague</defName>
 		<textRulePack>VTE_SettlementGotPlague</textRulePack>
-		<newsWorker>VanillaTradingExpanded.NewsWorker_SettlementAction</newsWorker>
 		<thingCategories>
 			<li>Medicine</li>
 		</thingCategories>
 		<priceImpactRandomInRange>-5~-3</priceImpactRandomInRange>
 		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
 		<commonality>0.1</commonality>
-  </VanillaTradingExpanded.NewsDef>
-
-  <RulePackDef>
-    <defName>VTE_SettlementGotPlague</defName>
-    <rulePack>
-      <rulesStrings>
-        <li>root->[SETTLEMENT_label] text example 1</li>
-        <li>root->[SETTLEMENT_label] text example 2</li>
-        <li>root->[SETTLEMENT_label] text example 3</li>
-      </rulesStrings>
-    </rulePack>
-  </RulePackDef>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementGotPlague</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] settlement got plague 1</li>
+				<li>root->[SETTLEMENT_label] settlement got plague 2</li>
+				<li>root->[SETTLEMENT_label] settlement got plague 3</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_MediocreEarnings</defName>
+		<textRulePack>VTE_MediocreEarnings</textRulePack>
+		<priceImpactRandomInRange>-0.01~-0.03</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>0.1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_MediocreEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] mediocre earnings 1</li>
+				<li>root->[COMPANY] mediocre earnings 2</li>
+				<li>root->[COMPANY] mediocre earnings 3</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
 </Defs>
