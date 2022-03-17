@@ -18,7 +18,7 @@ namespace VanillaTradingExpanded
 		{
 			return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
 		}
-		protected override IEnumerable<Toil> MakeNewToils()
+		public override IEnumerable<Toil> MakeNewToils()
 		{
 			this.FailOnDespawnedOrNull(TargetIndex.A);
 			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.InteractionCell).FailOn((Toil to) => !TradingTerminal.CanUseTerminalNow);
@@ -54,6 +54,14 @@ namespace VanillaTradingExpanded
         protected override void DoAction(Pawn actor)
         {
 			Find.WindowStack.Add(new Window_StockMarket());
+		}
+	}
+
+	public class JobDriver_OpenContracts : JobDriver_UseTradingTerminal
+	{
+		protected override void DoAction(Pawn actor)
+		{
+			Find.WindowStack.Add(new Window_Contracts(actor));
 		}
 	}
 

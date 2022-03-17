@@ -38,8 +38,8 @@ namespace VanillaTradingExpanded
 
 		private static Dictionary<Column, Tuple<int, string>> headers => new Dictionary<Column, Tuple<int, string>>
 		{
-			{Column.Item, new Tuple<int, string>(120, "VTE.Item".Translate())},
-			{Column.MarketValue, new Tuple<int, string>(60, "VTE.MarketValue".Translate())},
+			{Column.Item, new Tuple<int, string>(75, "VTE.Item".Translate())},
+			{Column.MarketValue, new Tuple<int, string>(105, "VTE.MarketValue".Translate())},
 			{Column.CurrentValue, new Tuple<int, string>(50, "VTE.CurrentValue".Translate())},
 			{Column.Change, new Tuple<int, string>(60, "VTE.Change".Translate())},
 			{Column.RecentChange, new Tuple<int, string>(40, "VTE.RecentChange".Translate())},
@@ -64,7 +64,6 @@ namespace VanillaTradingExpanded
 		public Window_MarketPrices()
 		{
 			SetDirty();
-			this.absorbInputAroundWindow = false;
 			this.forcePause = true;
 		}
 
@@ -152,8 +151,6 @@ namespace VanillaTradingExpanded
 				Widgets.Label(labelRect, headers[headersKeys[i]].Item2);
 				headerPos.x += cachedHeaderWidth + headers[headersKeys[i]].Item1;
 			}
-
-
 
 			Vector2 tablePos = Vector2.zero;
 			tablePos.y = headerPosYInitial + tablePosInitialYOffset;
@@ -333,7 +330,7 @@ namespace VanillaTradingExpanded
 		private void RecacheTradeables()
 		{
 			cachedTradeables.Clear();
-			cachedTradeables.AddRange(TradingManager.Instance.cachedTradeables);
+			cachedTradeables.AddRange(Utils.cachedTradeableItems);
 			if (!textFilter.NullOrEmpty())
 			{
 				cachedTradeables = cachedTradeables.Where(x => x.LabelCap.ToLower().RawText.Contains(textFilter)).ToList();

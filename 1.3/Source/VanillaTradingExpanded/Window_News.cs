@@ -12,7 +12,7 @@ using Verse.Sound;
 
 namespace VanillaTradingExpanded
 {
-	[HotSwappable]
+    [HotSwappable]
 	public class Window_News : Window
 	{
 		private enum FilterBy
@@ -49,7 +49,7 @@ namespace VanillaTradingExpanded
 
 		private static float headerPosYInitial = 70;
 		private static float tablePosInitialYOffset = 30;
-		public override Vector2 InitialSize => new Vector2(1200, Mathf.Min(800, UI.screenHeight));
+		public override Vector2 InitialSize => new Vector2(1000, Mathf.Min(800, UI.screenHeight));
 		public override void DoWindowContents(Rect inRect)
 		{
 			RecacheIfDirty();
@@ -90,7 +90,7 @@ namespace VanillaTradingExpanded
 			Widgets.Label(newsTitle, "VTE.News".Translate());
 			Text.Font = GameFont.Small;
 
-			var dateTitle = new Rect(945, filterByLabelRect.yMax + 10, 120, 24);
+			var dateTitle = new Rect(785, filterByLabelRect.yMax + 10, 120, 24);
 			Text.Font = GameFont.Tiny;
 			Widgets.Label(dateTitle, "VTE.Date".Translate());
 			Text.Font = GameFont.Small;

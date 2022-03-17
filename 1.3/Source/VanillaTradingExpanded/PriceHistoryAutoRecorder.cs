@@ -139,16 +139,16 @@ namespace VanillaTradingExpanded
 				simpleCurveDrawInfo.label = TitleName();
 				simpleCurveDrawInfo.valueFormat = "${0}";
 				simpleCurveDrawInfo.curve = new SimpleCurve();
-				var recordsLast60 = records.TakeLast(59).ToList();
-				for (int j = 0; j < recordsLast60.Count; j++)
+				var recordsLast59 = records.TakeLast(59).ToList();
+				for (int j = 0; j < recordsLast59.Count; j++)
 				{
-					simpleCurveDrawInfo.curve.Add(new CurvePoint(j, recordsLast60[j]), sort: false);
+					simpleCurveDrawInfo.curve.Add(new CurvePoint(j, recordsLast59[j]), sort: false);
 				}
-				simpleCurveDrawInfo.curve.Add(new CurvePoint(recordsLast60.Count, GetCurrentValue()), sort: false);
+				simpleCurveDrawInfo.curve.Add(new CurvePoint(recordsLast59.Count, GetCurrentValue()), sort: false);
 				simpleCurveDrawInfo.curve.SortPoints();
-				if (recordsLast60.Count == 1)
+				if (recordsLast59.Count == 1)
 				{
-					simpleCurveDrawInfo.curve.Add(new CurvePoint(1.66666669E-05f, recordsLast60[0]));
+					simpleCurveDrawInfo.curve.Add(new CurvePoint(1.66666669E-05f, recordsLast59[0]));
 				}
 				curves.Add(simpleCurveDrawInfo);
 			}

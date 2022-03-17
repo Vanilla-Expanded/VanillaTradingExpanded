@@ -111,15 +111,12 @@ namespace VanillaTradingExpanded
 			}
 		}
 
-		public List<Bank> allBanks;
-		public Dictionary<Bank, int> amountToTransfer;
-		public Dictionary<Bank, int> amountToSpend;
+		public TransactionProcess transactionProcess;
 		public Window_StockMarket()
 		{
 			SetDirty();
-			this.absorbInputAroundWindow = false;
 			this.forcePause = true;
-			allBanks = TradingManager.Instance.Banks;
+			transactionProcess = new TransactionProcess();
 		}
 
 		[TweakValue("0Trading", 0, 1200)] private static float maxWidth = 960;
@@ -137,11 +134,6 @@ namespace VanillaTradingExpanded
 
 		private static float thingRecentChangeWidth = 60;
 		public override Vector2 InitialSize => new Vector2(maxWidth, Mathf.Min(maxHeight, UI.screenHeight));
-
-		public int allMoneyInBanks;
-		public int totalTransaction;
-		public int transactionGain;
-		public int transactionCost;
 		public override void DoWindowContents(Rect inRect)
 		{
 			RecacheIfDirty();
@@ -155,12 +147,12 @@ namespace VanillaTradingExpanded
 			Text.Font = GameFont.Small;
 			Text.Anchor = TextAnchor.MiddleCenter;
 
-			allMoneyInBanks = allBanks.Sum(x => x.DepositAmount);
-			transactionGain = (int)Mathf.Abs(companySharesToBuyOrSell.Where(x => x.Value < 0).Sum(x => x.Value * x.Key.currentValue));
-			transactionCost = (int)companySharesToBuyOrSell.Where(x => x.Value > 0).Sum(x => x.Value * x.Key.currentValue);
-			totalTransaction = transactionGain - transactionCost;
+			transactionProcess.allMoneyInBanks = transactionProcess.allBanks.Sum(x => x.DepositAmount);
+			transactionProcess.transactionGain = (int)Mathf.Abs(transactionProcess.companySharesToBuyOrSell.Where(x => x.Value < 0).Sum(x => x.Value * x.Key.currentValue));
+			transactionProcess.transactionCost = (int)transactionProcess.companySharesToBuyOrSell.Where(x => x.Value > 0).Sum(x => x.Value * x.Key.currentValue);
+			transactionProcess.totalTransaction = transactionProcess.transactionGain - transactionProcess.transactionCost;
 
-			var moneyStatus = "VTE.MoneyInBanks".Translate(allMoneyInBanks);
+			var moneyStatus = "VTE.MoneyInBanks".Translate(transactionProcess.allMoneyInBanks);
 			var size = Text.CalcSize(moneyStatus);
 			var moneyInBanksRect = new Rect(colonyNameRect.xMax + 20, colonyNameRect.y + (colonyNameRect.height / 2f) - (size.y / 2f) - 3f, size.x, size.y);
 			Widgets.Label(moneyInBanksRect, moneyStatus);
@@ -285,10 +277,9 @@ namespace VanillaTradingExpanded
 					Widgets.Label(profitLossChangeRect, recentChangeString);
 					GUI.color = Color.white;
 
-					if (!companySharesToBuyOrSell.TryGetValue(company, out var amount))
+					if (!transactionProcess.companySharesToBuyOrSell.TryGetValue(company, out var amount))
                     {
-						companySharesToBuyOrSell[company] = amount = 0;
-
+						transactionProcess.companySharesToBuyOrSell[company] = amount = 0;
 					}
 					var shareBuyRect = new Rect(profitLossChangeRect.xMax + 55, rect2.y + 1, rect2.height - 2, rect2.height - 2);
 					if (Widgets.ButtonText(shareBuyRect, "<"))
@@ -309,7 +300,7 @@ namespace VanillaTradingExpanded
 					var followNewsBox = new Rect(shareSellRect.xMax + 40, rect2.y + 2.5f, rect2.height - 5, rect2.height - 5);
 					GUI.DrawTexture(followNewsBox, checkBox);
 					Widgets.Checkbox(new Vector2(followNewsBox.x + 3f, followNewsBox.y + 3f), ref company.playerFollowsNews, size: followNewsBox.height - 5, paintable: true);
-					companySharesToBuyOrSell[company] = amount;
+					transactionProcess.companySharesToBuyOrSell[company] = amount;
 					GUI.color = Color.white;
 				}
 				pos.y += cellHeight;
@@ -329,14 +320,14 @@ namespace VanillaTradingExpanded
 			var transactionCostLabelRect = new Rect(transactionCostRect.x + 100, transactionCostRect.y, 150, transactionCostRect.height);
 			Widgets.Label(transactionCostLabelRect, "VTE.TransactionCost".Translate());
 			var transactionCostAmountRect = new Rect(500, transactionCostRect.y, 120, transactionCostRect.height);
-			Widgets.Label(transactionCostAmountRect, transactionCost.ToString());
+			Widgets.Label(transactionCostAmountRect, transactionProcess.transactionCost.ToString());
 			pos.y += 30;
 
 			var transactionGainRect = new Rect(pos.x, pos.y, inRect.width - 30f, 30);
 			var transactionGainLabelRect = new Rect(transactionGainRect.x + 100, transactionGainRect.y, 150, transactionGainRect.height);
 			Widgets.Label(transactionGainLabelRect, "VTE.TransactionGain".Translate());
 			var transactionGainAmountRect = new Rect(500, transactionGainRect.y, 120, transactionGainRect.height);
-			Widgets.Label(transactionGainAmountRect, transactionGain.ToString());
+			Widgets.Label(transactionGainAmountRect, transactionProcess.transactionGain.ToString());
 			pos.y += 30;
 
 			var totalRect = new Rect(pos.x, pos.y, inRect.width - 30f, 30);
@@ -344,14 +335,14 @@ namespace VanillaTradingExpanded
 			var totalLabelRect = new Rect(totalRect.x + 100, totalRect.y, 150, totalRect.height);
 			Widgets.Label(totalLabelRect, "VTE.Total".Translate());
 			var totalAmountRect = new Rect(500, totalRect.y, 120, totalRect.height);
-			Widgets.Label(totalAmountRect, totalTransaction.ToString());
+			Widgets.Label(totalAmountRect, transactionProcess.totalTransaction.ToString());
 			pos.y += 30;
 
 			var moneyInBanksAfterRect = new Rect(pos.x, pos.y, inRect.width - 30f, 30);
 			var moneyInBanksAfterLabelRect = new Rect(moneyInBanksAfterRect.x + 100, moneyInBanksAfterRect.y, 150, moneyInBanksAfterRect.height);
 			Widgets.Label(moneyInBanksAfterLabelRect, "VTE.MoneyInBanksAfter".Translate());
 			var moneyInBanksAfterAmountRect = new Rect(500, moneyInBanksAfterRect.y, 120, moneyInBanksAfterRect.height);
-			Widgets.Label(moneyInBanksAfterAmountRect, (totalTransaction + allMoneyInBanks).ToString());
+			Widgets.Label(moneyInBanksAfterAmountRect, (transactionProcess.totalTransaction + transactionProcess.allMoneyInBanks).ToString());
 			pos.y += 30;
 
 			GUI.color = Color.grey;
@@ -361,18 +352,18 @@ namespace VanillaTradingExpanded
 
 			Text.Font = GameFont.Small;
 			Text.Anchor = TextAnchor.UpperLeft;
-			bool canPay = (totalTransaction + allMoneyInBanks) >= 0;
+			bool canPay = (transactionProcess.totalTransaction + transactionProcess.allMoneyInBanks) >= 0;
 			GUI.color = canPay ? Color.white : Color.grey;
 			var confirmButtonRect = new Rect(breakdownDescriptionRect.xMax + 150, breakdownDescriptionRect.y + 10, 170, 32f);
 			if (Widgets.ButtonText(confirmButtonRect, "Confirm".Translate(), active: canPay))
             {
-				if (this.transactionGain > 0)
+				if (transactionProcess.transactionGain > 0)
                 {
-					Find.WindowStack.Add(new Window_PerformTransactionGains(this));
+					Find.WindowStack.Add(new Window_PerformTransactionGains("VTE.BankDepositsToGain".Translate(), transactionProcess));
 				}
-				else if (this.transactionCost > 0)
+				else if (transactionProcess.transactionCost > 0)
                 {
-					Find.WindowStack.Add(new Window_PerformTransactionCosts(this));
+					Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.BankDepositsToSpend".Translate(), transactionProcess));
 				}
                 else
                 {
@@ -387,60 +378,7 @@ namespace VanillaTradingExpanded
 			}
 		}
 
-		public void PerformTransaction()
-        {
-			Log.Message("Performing transaction");
-			Log.Message("this.sharesToBuyOrSell: " + this.companySharesToBuyOrSell.Count);
-			if (this.amountToTransfer != null)
-            {
-				var companySharesToSell = this.companySharesToBuyOrSell.Where(x => x.Value < 0).Select(x => x.Key).ToList();
-				foreach (var company in companySharesToSell)
-				{
-					company.sharesHeldByPlayer = company.sharesHeldByPlayer.InRandomOrder().ToList(); // so the profit loss rate won't be off,
-																									  // since it will calculate based on bought value in the past
-					var shareAmount = -this.companySharesToBuyOrSell[company];
-					for (var i = shareAmount - 1; i >= 0; i--)
-					{
-						company.sharesHeldByPlayer.RemoveAt(i);
-						Log.Message("Sold share from " + company.name + " for " + company.currentValue);
-					}
-					this.companySharesToBuyOrSell.Remove(company);
-				}
-				foreach (var kvp in this.amountToTransfer)
-				{
-					kvp.Key.DepositAmount += kvp.Value;
-				}
-				this.amountToTransfer.Clear();
-			}
-
-			if (this.amountToSpend != null)
-            {
-				var companySharesToBuy = this.companySharesToBuyOrSell.Where(x => x.Value > 0).Select(x => x.Key).ToList();
-				foreach (var company in companySharesToBuy)
-				{
-					var shareAmount = this.companySharesToBuyOrSell[company];
-					for (var i = 0; i < shareAmount; i++)
-					{
-						var share = new Share
-						{
-							valueBought = company.currentValue,
-						};
-						company.sharesHeldByPlayer.Add(share);
-						Log.Message("Bought share from " + company.name + " for " + company.currentValue);
-					}
-					this.companySharesToBuyOrSell.Remove(company);
-				}
-				foreach (var kvp in this.amountToSpend)
-				{
-					kvp.Key.DepositAmount -= kvp.Value;
-				}
-				this.amountToSpend.Clear();
-			}
-			Log.Message("this.sharesToBuyOrSell: " + this.companySharesToBuyOrSell.Count);
-		}
-
 		public static readonly Texture2D checkBox = ContentFinder<Texture2D>.Get("UI/Widgets/WorkBoxBG_Bad");
-		public Dictionary<Company, int> companySharesToBuyOrSell = new Dictionary<Company, int>();
 		public string textEntryBuffer;
 		private float GetRecentChangeFor(Company company)
         {

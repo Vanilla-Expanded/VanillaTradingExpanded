@@ -13,7 +13,6 @@ using Verse.Grammar;
 
 namespace VanillaTradingExpanded
 {
-
     public class TradingManager : GameComponent
     {
         public static TradingManager Instance;
@@ -22,10 +21,6 @@ namespace VanillaTradingExpanded
         public Dictionary<ThingDef, float> thingsAffectedBySoldPurchasedMarketValue;
 
         private Dictionary<ThingDef, PriceHistoryAutoRecorderThing> priceHistoryRecorders;
-
-        public List<ThingDef> cachedTradeables;
-        public List<ThingDef> cachedFoodItems;
-        public float minTradePrice;
         // banks
         public Dictionary<Faction, Bank> banksByFaction;
         public List<Bank> Banks => banksByFaction.Values.ToList();
@@ -38,6 +33,12 @@ namespace VanillaTradingExpanded
 
         public Dictionary<ThingDef, int> itemsToBeCrashedInTicks;
         public Dictionary<ThingDef, int> itemsToBeSqueezedInTicks;
+
+        public List<Contract> playerSubmittedContracts;
+        public List<Contract> npcSubmittedContracts;
+        public List<Contract> npcContractsToBeCompleted;
+
+        public bool initialized;
         public TradingManager()
         {
             Instance = this;
@@ -52,32 +53,13 @@ namespace VanillaTradingExpanded
         {
             base.FinalizeInit();
             InitVars();
-            minTradePrice = float.MaxValue;
-            foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
+            foreach (var thingDef in Utils.cachedTradeableItems)
             {
-                var marketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-                if (thingDef.tradeability != Tradeability.None && marketValue > 0 && !itemsToIgnore.Contains(thingDef))
+                if (!priceHistoryRecorders.ContainsKey(thingDef))
                 {
-                    if (marketValue > minTradePrice)
-                    {
-                        minTradePrice = marketValue;
-                    }
-                    //Log.Message($"Adding: {thingDef}, {thingDef.tradeability}, {thingDef.GetStatValueAbstract(StatDefOf.MarketValue)}, {string.Join(", ", thingDef.tradeTags ?? new List<string>())}");
-                    cachedTradeables.Add(thingDef);
-
-                    if (!priceHistoryRecorders.ContainsKey(thingDef))
-                    {
-                        var recorder = new PriceHistoryAutoRecorderThing { thingDef = thingDef };
-                        recorder.RecordCurrentPrice();
-                        priceHistoryRecorders[thingDef] = recorder;
-                    }
-                }
-            }
-            foreach (var thing in cachedTradeables)
-            {
-                if (thing.IsNutritionGivingIngestible)
-                {
-                    cachedFoodItems.Add(thing);
+                    var recorder = new PriceHistoryAutoRecorderThing { thingDef = thingDef };
+                    recorder.RecordCurrentPrice();
+                    priceHistoryRecorders[thingDef] = recorder;
                 }
             }
 
@@ -89,8 +71,38 @@ namespace VanillaTradingExpanded
                 var company = new Company(GetFaction(tradeKind), tradeKind, companies.Count);
                 companies.Add(company);
             }
-        }
 
+            if (!initialized)
+            {
+                initialized = true;
+                var randomAmount = Rand.RangeInclusive(20, 30);
+                for (var i = 0; i < randomAmount; i++)
+                {
+                    npcSubmittedContracts.Add(GenerateRandomContract());
+                }
+            }
+        }
+        public Contract GenerateRandomContract()
+        {
+            var baseMap = Find.AnyPlayerHomeMap;
+            var wealth = baseMap.wealthWatcher.WealthTotal;
+            var targetMarketValue = new FloatRange(wealth * 0.01f, wealth * 0.05f);
+            var contract = new Contract
+            {
+                creationTick = Find.TickManager.TicksGame,
+                expiresInTicks = Find.TickManager.TicksGame + (GenDate.TicksPerDay * Rand.Range(15, 60))
+            };
+            contract.GenerateItem(targetMarketValue);
+            contract.GenerateReward();
+            return contract;
+        }
+        public void CompleteContract(Contract contract)
+        {
+            npcSubmittedContracts.Remove(contract);
+            npcContractsToBeCompleted.Add(contract);
+            contract.arrivesInTicks = Find.TickManager.TicksGame + 60;
+            Find.WindowStack.Add(new Dialog_MessageBox("VTE.ContractCompletedMessage".Translate()));
+        }
         private Faction GetFaction(TraderKindDef trader)
         {
             if (trader.faction == null)
@@ -103,8 +115,6 @@ namespace VanillaTradingExpanded
             }
             return result;
         }
-
-
         public void InitVars()
         {
             Instance = this;
@@ -114,11 +124,12 @@ namespace VanillaTradingExpanded
             allNews ??= new List<News>();
             unProcessedNews ??= new List<News>();
             priceHistoryRecorders ??= new Dictionary<ThingDef, PriceHistoryAutoRecorderThing>();
-            cachedTradeables ??= new List<ThingDef>();
-            cachedFoodItems ??= new List<ThingDef>();
             itemsToBeCrashedInTicks ??= new Dictionary<ThingDef, int>();
             itemsToBeSqueezedInTicks ??= new Dictionary<ThingDef, int>();
             companies ??= new List<Company>();
+            playerSubmittedContracts ??= new List<Contract>();
+            npcSubmittedContracts ??= new List<Contract>();
+            npcContractsToBeCompleted ??= new List<Contract>();
             if (Find.World != null)
             {
                 RecheckBanks();
@@ -148,14 +159,9 @@ namespace VanillaTradingExpanded
         {
             return priceHistoryRecorders[thingDef];
         }
-
-        private static HashSet<ThingDef> itemsToIgnore = new HashSet<ThingDef>
-        {
-            ThingDefOf.Silver,
-        };
         public void RegisterSoldThing(Thing soldThing, int countToSell)
         {
-            if (!itemsToIgnore.Contains(soldThing.def))
+            if (!Utils.tradeableItemsToIgnore.Contains(soldThing.def))
             {
                 Log.Message(soldThing + " is sold by " + countToSell);
                 if (thingsAffectedBySoldPurchasedMarketValue.ContainsKey(soldThing.def))
@@ -170,7 +176,7 @@ namespace VanillaTradingExpanded
         }
         public void RegisterPurchasedThing(Thing soldThing, int countToSell)
         {
-            if (!itemsToIgnore.Contains(soldThing.def))
+            if (!Utils.tradeableItemsToIgnore.Contains(soldThing.def))
             {
                 Log.Message(soldThing + " is purchased by " + countToSell);
                 if (thingsAffectedBySoldPurchasedMarketValue.ContainsKey(soldThing.def))
@@ -334,6 +340,23 @@ namespace VanillaTradingExpanded
                 prevDay = day;
                 DoPriceRebalances();
             }
+
+            // iterate over completed npc contracts and make sure to spawn caravans to pick up things
+            for (var i = npcContractsToBeCompleted.Count - 1; i >= 0; i--)
+            {
+                var contract = npcContractsToBeCompleted[i];
+                if (Find.TickManager.TicksGame > contract.arrivesInTicks)
+                {
+                    var map = contract.mapToTakeItems ?? localMap;
+                    var parms = StorytellerUtility.DefaultParmsNow(VTE_DefOf.VTE_CaravanArriveForItems.category, map);
+                    IncidentWorker_CaravanArriveForItems.contract = contract;
+                    if (VTE_DefOf.VTE_CaravanArriveForItems.Worker.TryExecute(parms))
+                    {
+                        npcContractsToBeCompleted.RemoveAt(i);
+                    }
+                    IncidentWorker_CaravanArriveForItems.contract = null;
+                }
+            }
         }
 
         private void SeasonalPriceUpdates()
@@ -351,11 +374,11 @@ namespace VanillaTradingExpanded
                     }, 0.70f));
                     actions.Add(new Pair<Action, float>(delegate
                     {
-                        AffectPrice(cachedFoodItems, true, () => 0.01f);
+                        AffectPrice(Utils.cachedFoodItems, true, () => 0.01f);
                     }, 0.20f));
                     actions.Add(new Pair<Action, float>(delegate
                     {
-                        AffectPrice(cachedFoodItems, true, () => Rand.Range(0.01f, 0.03f));
+                        AffectPrice(Utils.cachedFoodItems, true, () => Rand.Range(0.01f, 0.03f));
                     }, 0.10f));
                 }
                 else if (season == Season.Summer || season == Season.PermanentSummer)
@@ -366,11 +389,11 @@ namespace VanillaTradingExpanded
                     }, 0.70f));
                     actions.Add(new Pair<Action, float>(delegate
                     {
-                        AffectPrice(cachedFoodItems, false, () => 0.01f);
+                        AffectPrice(Utils.cachedFoodItems, false, () => 0.01f);
                     }, 0.20f));
                     actions.Add(new Pair<Action, float>(delegate
                     {
-                        AffectPrice(cachedFoodItems, false, () => Rand.Range(0.01f, 0.03f));
+                        AffectPrice(Utils.cachedFoodItems, false, () => Rand.Range(0.01f, 0.03f));
                     }, 0.10f));
                 }
 
@@ -382,7 +405,7 @@ namespace VanillaTradingExpanded
         }
         private void SimulateWorldTrading()
         {
-            var affectedItems = this.cachedTradeables.InRandomOrder().Take((int)(this.cachedTradeables.Count * 0.2f)).ToList();
+            var affectedItems = Utils.cachedTradeableItems.InRandomOrder().Take((int)(Utils.cachedTradeableItems.Count * 0.2f)).ToList();
             foreach (var item in affectedItems)
             {
                 var actions = new List<Pair<Action, float>>();
@@ -544,6 +567,9 @@ namespace VanillaTradingExpanded
             Scribe_Values.Look(ref prevDay, "prevDay");
             Scribe_Collections.Look(ref priceHistoryRecorders, "priceHistoryRecorders", LookMode.Def, LookMode.Deep);
             Scribe_Collections.Look(ref companies, "companies", LookMode.Deep);
+            Scribe_Collections.Look(ref playerSubmittedContracts, "playerSubmittedContracts", LookMode.Deep);
+            Scribe_Collections.Look(ref npcSubmittedContracts, "npcSubmittedContracts", LookMode.Deep);
+            Scribe_Collections.Look(ref npcContractsToBeCompleted, "npcContractsToBeCompleted", LookMode.Deep);
             InitVars();
             companies.RemoveAll(x => x.traderKind is null);
         }

@@ -29,4 +29,11 @@
     <reportString>using trading terminal to open stock market.</reportString>
     <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
   </JobDef>
+  
+   <JobDef>
+    <defName>VTE_OpenContracts</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_OpenContracts</driverClass>
+    <reportString>using trading terminal to open contracts.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
 </Defs>

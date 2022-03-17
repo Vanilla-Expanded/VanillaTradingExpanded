@@ -18,8 +18,10 @@ namespace VanillaTradingExpanded
         public static JobDef VTE_ContactBank;
         public static JobDef VTE_ViewNews;
         public static JobDef VTE_OpenStockMarket;
+        public static JobDef VTE_OpenContracts;
         public static HistoryEventDef VTE_Indebted;
         public static IncidentDef VTE_Collectors;
         public static ThingDef VTE_TradingTerminal;
+        public static IncidentDef VTE_CaravanArriveForItems;
     }
 }

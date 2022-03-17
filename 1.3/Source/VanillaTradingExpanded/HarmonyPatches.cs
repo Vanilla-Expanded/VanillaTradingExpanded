@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using Verse.AI.Group;
 
 namespace VanillaTradingExpanded
 {
@@ -21,6 +22,87 @@ namespace VanillaTradingExpanded
 		{
 			harmony = new Harmony("OskarPotocki.VanillaTradingExpanded");
 			harmony.PatchAll();
+			//var postfix = AccessTools.Method(typeof(HarmonyPatches), "Postfix");
+			//foreach (var type2 in typeof(ThinkNode_JobGiver).AllSubclassesNonAbstract())
+			//{
+			//    var methodToPatch2 = AccessTools.Method(type2, "TryGiveJob");
+			//    try
+			//    {
+			//        harmony.Patch(methodToPatch2, new HarmonyMethod(postfix));
+			//    }
+			//    catch { }
+			//}
+		}
+		private static void Postfix(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
+		{
+			if (pawn.RaceProps.Humanlike && pawn.Faction != Faction.OfPlayer)
+			{
+				Log.Message(pawn + " gets " + __result + " from " + __instance + " with duty: " + pawn.mindState.duty);
+			}
+		}
+	}
+
+	//[HarmonyPatch(typeof(Pawn_JobTracker), "StartJob")]
+	//public class StartJobPatch
+	//{
+	//    private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
+	//    {
+	//		if (___pawn.RaceProps.Humanlike && ___pawn.Faction != Faction.OfPlayer)
+	//		{
+	//			Log.Message(___pawn + " is starting " + newJob);
+	//		}
+	//	}
+	//}
+	//
+	//
+	//[HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
+	//public class EndCurrentJobPatch2
+	//{
+	//    private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
+	//    {
+	//		if (___pawn.RaceProps.Humanlike && ___pawn.Faction != Faction.OfPlayer)
+	//		{
+	//			Log.Message(___pawn + " is ending " + ___pawn.CurJob);
+	//		}
+	//	}
+	//}
+	//
+	//[HarmonyPatch(typeof(ThinkNode_JobGiver), "TryIssueJobPackage")]
+	//public class TryIssueJobPackage
+	//{
+	//	private static void Postfix(ThinkNode_JobGiver __instance, ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
+	//	{
+	//		if (pawn.RaceProps.Humanlike && pawn.Faction != Faction.OfPlayer)
+	//		{
+	//			Log.Message(pawn + " gets " + __result.Job + " from " + __instance);
+	//		}
+	//	}
+	//}
+
+	[HarmonyPatch(typeof(Pawn), "GetInspectString")]
+	public class GetInspectString_Patch
+	{
+		private static void Postfix(Pawn __instance, ref string __result)
+		{
+			__result += "\n";
+			__result += "job: " + __instance.CurJob + "\n";
+			__result += "driver: " + __instance.jobs.curDriver + "\n";
+			__result += "duty: " + __instance.mindState.duty + "\n";
+			__result += "lord: " + __instance.GetLord()?.LordJob + "\n";
+			__result += "lord toil: " + __instance.GetLord()?.CurLordToil;
+		}
+	}
+
+	[HarmonyPatch(typeof(LordJob_FormAndSendCaravan), "GatheringItemsNow", MethodType.Getter)]
+	public class GatheringItemsNowPatch
+	{
+		private static bool Prefix(LordJob_FormAndSendCaravan __instance)
+		{
+			if (__instance is LordJob_GrabItemsAndLeave)
+			{
+				return false;
+			}
+			return true;
 		}
 	}
 

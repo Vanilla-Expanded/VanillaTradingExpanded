@@ -77,7 +77,7 @@ namespace VanillaTradingExpanded
                 {
 					yield return floatOption2;
                 }
-
+				yield return GetOpenContractsOption(myPawn);
 			}
 		}
 		private FloatMenuOption GetViewMarketPricesOption(Pawn negotiator)
@@ -106,6 +106,16 @@ namespace VanillaTradingExpanded
 			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, delegate
 			{
 				Job job = JobMaker.MakeJob(VTE_DefOf.VTE_OpenStockMarket, this);
+				negotiator.jobs.TryTakeOrderedJob(job);
+			}, MenuOptionPriority.Default), negotiator, this);
+		}
+
+		private FloatMenuOption GetOpenContractsOption(Pawn negotiator)
+		{
+			string text = "VTE.OpenContracts".Translate();
+			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, delegate
+			{
+				Job job = JobMaker.MakeJob(VTE_DefOf.VTE_OpenContracts, this);
 				negotiator.jobs.TryTakeOrderedJob(job);
 			}, MenuOptionPriority.Default), negotiator, this);
 		}
