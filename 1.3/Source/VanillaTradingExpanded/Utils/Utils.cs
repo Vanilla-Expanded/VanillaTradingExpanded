@@ -81,7 +81,7 @@ namespace VanillaTradingExpanded
             }
             foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
             {
-                if (thingDef.category == ThingCategory.Item)
+                if (thingDef.category == ThingCategory.Item && thingDef != ThingDefOf.Silver)
                 {
                     if (IsSuitableForContracts(thingDef))
                     {

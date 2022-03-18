@@ -104,5 +104,11 @@ Negative numbers sell.</VTE.SharesTransactionHeader>
 	<VTE.LetterTraderCaravanArrival>A caravan from {0} is approaching. They are collecting contracted items.</VTE.LetterTraderCaravanArrival>
 	<VTE.CaravanDidNotCollectAllItems>The caravan didn’t find the promised goods and leaves the area. Only {0} of {1} were collected. You will not receive any payment.</VTE.CaravanDidNotCollectAllItems>
 	<VTE.BankDepositsToPutContractReward>Select bank deposits to put reward for completed contract</VTE.BankDepositsToPutContractReward>
-
+	<VTE.Select>Select</VTE.Select>
+	<VTE.SelectStuff>Select stuff</VTE.SelectStuff>
+	<VTE.PayMoneyForContract>Contract on {0} is fulfilled. Pay money from bank deposits to retrieve the goods.</VTE.PayMoneyForContract>
+	<VTE.ContractFullfilled>Contract fulfilled</VTE.ContractFullfilled>
+	<VTE.ContractFullfilledDesc>A contract has been fulfilled by an interested party. The funds required have been transferred to them.
+Cargo pods are arriving containing:
+</VTE.ContractFullfilledDesc>
 </LanguageData>

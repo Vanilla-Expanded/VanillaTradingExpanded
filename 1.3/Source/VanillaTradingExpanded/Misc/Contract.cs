@@ -11,6 +11,7 @@ namespace VanillaTradingExpanded
     public class Contract : IExposable
     {
         public int reward;
+        public float rewardAsFloat;
         public ThingDef item;
         public ThingDef stuff;
         public int amount;
@@ -18,20 +19,13 @@ namespace VanillaTradingExpanded
         public int expiresInTicks;
         public int arrivesInTicks;
         public Map mapToTakeItems;
-        public string Name
+        public string Name => "x" + BaseName;
+        public string BaseName => amount + " " + ItemName;
+        public string ItemName
         {
             get
             {
-                var name = "x" + BaseName;
-                return name;
-            }
-        }
-
-        public string BaseName
-        {
-            get
-            {
-                var name = amount + " ";
+                var name = "";
                 if (stuff != null)
                 {
                     name += stuff.label + " ";
@@ -41,7 +35,6 @@ namespace VanillaTradingExpanded
             }
         }
         public float BaseMarketValue => item.GetStatValueAbstract(StatDefOf.MarketValue, stuff) * amount;
-
         public void GenerateItem(FloatRange targetMarketValue)
         {
             int tries = 0;
@@ -124,6 +117,7 @@ namespace VanillaTradingExpanded
         public void ExposeData()
         {
             Scribe_Values.Look(ref reward, "reward");
+            Scribe_Values.Look(ref rewardAsFloat, "rewardAsFloat");
             Scribe_Defs.Look(ref item, "item");
             Scribe_Defs.Look(ref stuff, "stuff");
             Scribe_Values.Look(ref amount, "amount");

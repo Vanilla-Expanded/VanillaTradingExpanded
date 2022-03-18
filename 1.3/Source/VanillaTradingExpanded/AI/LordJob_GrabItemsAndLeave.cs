@@ -208,14 +208,14 @@ namespace VanillaTradingExpanded
 			transition.AddPreAction(new TransitionAction_Message("MessageVisitorsDangerousTemperature".Translate(faction.def.pawnsPlural.CapitalizeFirst(), faction.Name)));
 			transition.AddPostAction(new TransitionAction_EndAllJobs());
 			transition.AddTrigger(new Trigger_PawnExperiencingDangerousTemperatures());
-			transition.AddPreAction(new TransitionAction_Message("Transition"));
+			//transition.AddPreAction(new TransitionAction_Message("Transition"));
 			stateGraph.AddTransition(transition);
 
 			Transition transition2 = new Transition(lordToil_Travel, lordToil_ExitMap2);
 			transition2.AddSources(lordToil_DefendTraderCaravan, lordToil_DefendTraderCaravan2, lordToil_ExitMapAndEscortCarriers, lordToil_ExitMap);
 			transition2.AddTrigger(new Trigger_PawnCannotReachMapEdge());
 			transition2.AddPostAction(new TransitionAction_Message("MessageVisitorsTrappedLeaving".Translate(faction.def.pawnsPlural.CapitalizeFirst(), faction.Name)));
-			transition2.AddPostAction(new TransitionAction_Message("Transition2"));
+			//transition2.AddPostAction(new TransitionAction_Message("Transition2"));
 			transition2.AddPostAction(new TransitionAction_WakeAll());
 			transition2.AddPostAction(new TransitionAction_EndAllJobs());
 			stateGraph.AddTransition(transition2);
@@ -223,7 +223,7 @@ namespace VanillaTradingExpanded
 			Transition transition3 = new Transition(lordToil_Travel, lordToil_ExitMapTraderFighting);
 			transition3.AddSources(lordToil_DefendTraderCaravan, lordToil_DefendTraderCaravan2, lordToil_ExitMapAndEscortCarriers, lordToil_ExitMap);
 			transition3.AddTrigger(new Trigger_FractionPawnsLost(0.2f));
-			transition3.AddPreAction(new TransitionAction_Message("Transition3"));
+			//transition3.AddPreAction(new TransitionAction_Message("Transition3"));
 			transition3.AddPostAction(new TransitionAction_EndAllJobs());
 			stateGraph.AddTransition(transition3);
 
@@ -232,12 +232,12 @@ namespace VanillaTradingExpanded
 			transition4.AddPreAction(new TransitionAction_SetDefendTrader());
 			transition4.AddPostAction(new TransitionAction_WakeAll());
 			transition4.AddPostAction(new TransitionAction_EndAllJobs());
-			transition4.AddPreAction(new TransitionAction_Message("Transition4"));
+			//transition4.AddPreAction(new TransitionAction_Message("Transition4"));
 
 			stateGraph.AddTransition(transition4);
 			Transition transition5 = new Transition(lordToil_DefendTraderCaravan, lordToil_Travel);
 			transition5.AddTrigger(new Trigger_TicksPassedWithoutHarm(60));
-			transition5.AddPreAction(new TransitionAction_Message("Transition5"));
+			//transition5.AddPreAction(new TransitionAction_Message("Transition5"));
 
 			stateGraph.AddTransition(transition5);
 			gatherItems = new LordToil_PrepareCaravan_GatherItemsNPC(meetingPoint);
@@ -250,23 +250,23 @@ namespace VanillaTradingExpanded
 			stateGraph.AddToil(lordToil_End);
 			Transition transition6 = new Transition(lordToil_Travel, gatherItems);
 			transition6.AddTrigger(new Trigger_Memo("TravelArrived"));
-			transition6.AddPreAction(new TransitionAction_Message("Transition6"));
+			//transition6.AddPreAction(new TransitionAction_Message("Transition6"));
 			stateGraph.AddTransition(transition6);
 			Transition transition7 = new Transition(gatherItems, leave);
 			transition7.AddTrigger(new Trigger_Memo("AllItemsGathered"));
 			transition7.AddPostAction(new TransitionAction_EndAllJobs());
-			transition7.AddPreAction(new TransitionAction_Message("Transition7"));
+			//transition7.AddPreAction(new TransitionAction_Message("Transition7"));
 			stateGraph.AddTransition(transition7);
 			Transition transition8 = new Transition(leave, lordToil_End);
 			transition8.AddTrigger(new Trigger_Memo("ReadyToExitMap"));
-			transition8.AddPreAction(new TransitionAction_Message("Transition8"));
+			//transition8.AddPreAction(new TransitionAction_Message("Transition8"));
 			transition8.AddPreAction(new TransitionAction_Custom(ExitCaravan));
 			stateGraph.AddTransition(transition8);
 			Transition transition11 = PauseTransition(gatherItems, gatherItems_pause);
-			transition11.AddPreAction(new TransitionAction_Message("Transition11"));
+			//transition11.AddPreAction(new TransitionAction_Message("Transition11"));
 			stateGraph.AddTransition(transition11);
 			Transition transition12 = UnpauseTransition(gatherItems_pause, gatherItems);
-			transition12.AddPreAction(new TransitionAction_Message("Transition12"));
+			//transition12.AddPreAction(new TransitionAction_Message("Transition12"));
 			stateGraph.AddTransition(transition12);
 			return stateGraph;
 		}
@@ -303,6 +303,14 @@ namespace VanillaTradingExpanded
             }
         }
 
+        public override void PostCleanup()
+        {
+            base.PostCleanup();
+			if (TradingManager.Instance.npcSubmittedContracts.Count < TradingManager.MaxNPCContractCount)
+            {
+				TradingManager.Instance.npcSubmittedContracts.Add(TradingManager.Instance.GenerateRandomContract());
+			}
+		}
 		public override void Notify_PawnLost(Pawn p, PawnLostCondition condition)
 		{
 

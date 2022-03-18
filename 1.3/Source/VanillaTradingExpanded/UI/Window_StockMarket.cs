@@ -119,10 +119,9 @@ namespace VanillaTradingExpanded
 			transactionProcess = new TransactionProcess();
 		}
 
-		[TweakValue("0Trading", 0, 1200)] private static float maxWidth = 960;
-		[TweakValue("0Trading", 0, 1200)] private static float maxHeight = 700;
-
-		[TweakValue("0Trading", 0, 120)] private static float cellHeight = 32f;
+		private static float maxWidth = 960;
+		private static float maxHeight = 700;
+		private static float cellHeight = 32f;
 
 		private static int cachedSortByLabelHeight = 35;
 		private static int cachedSortByLabelWidth = 50;
@@ -130,8 +129,7 @@ namespace VanillaTradingExpanded
 		private static int cachedSortByButtonWidth = 125;
 		private static float sortByXOffset = 10;
 		private static float thingMarketValueXOffset = 35;
-		[TweakValue("0Trading", 0, 500)] private static float entryWidth = 50;
-
+		private static float entryWidth = 50;
 		private static float thingRecentChangeWidth = 60;
 		public override Vector2 InitialSize => new Vector2(maxWidth, Mathf.Min(maxHeight, UI.screenHeight));
 		public override void DoWindowContents(Rect inRect)

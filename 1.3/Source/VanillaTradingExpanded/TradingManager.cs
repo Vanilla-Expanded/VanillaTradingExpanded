@@ -15,6 +15,8 @@ namespace VanillaTradingExpanded
 {
     public class TradingManager : GameComponent
     {
+        public const int MaxNPCContractCount = 30;
+        public const int MaxCompanyCount = 30;
         public static TradingManager Instance;
         // goods
         private Dictionary<ThingDef, float> priceModifiers;
@@ -64,7 +66,7 @@ namespace VanillaTradingExpanded
             }
 
             var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();
-            var companiesToGenerate = 30 - companies.Count;
+            var companiesToGenerate = MaxCompanyCount - companies.Count;
             for (var i = 0; i < companiesToGenerate; i++)
             {
                 var tradeKind = orbitalTraders.RandomElement();
@@ -72,11 +74,29 @@ namespace VanillaTradingExpanded
                 companies.Add(company);
             }
 
+            if (Find.World != null)
+            {
+                foreach (var faction in Find.FactionManager.AllFactions)
+                {
+                    var bankExtension = faction.def.GetModExtension<BankExtension>();
+                    if (bankExtension != null)
+                    {
+                        if (!banksByFaction.ContainsKey(faction))
+                        {
+                            banksByFaction[faction] = new Bank(faction);
+                        }
+                    }
+                    else if (banksByFaction.ContainsKey(faction))
+                    {
+                        banksByFaction.Remove(faction);
+                    }
+                }
+            }
+
             if (!initialized)
             {
                 initialized = true;
-                var randomAmount = Rand.RangeInclusive(20, 30);
-                for (var i = 0; i < randomAmount; i++)
+                for (var i = 0; i < MaxNPCContractCount; i++)
                 {
                     npcSubmittedContracts.Add(GenerateRandomContract());
                 }
@@ -100,7 +120,7 @@ namespace VanillaTradingExpanded
         {
             npcSubmittedContracts.Remove(contract);
             npcContractsToBeCompleted.Add(contract);
-            contract.arrivesInTicks = Find.TickManager.TicksGame + 60;
+            contract.arrivesInTicks = Find.TickManager.TicksGame + (GenDate.TicksPerDay * 3);
             Find.WindowStack.Add(new Dialog_MessageBox("VTE.ContractCompletedMessage".Translate()));
         }
         private Faction GetFaction(TraderKindDef trader)
@@ -130,29 +150,6 @@ namespace VanillaTradingExpanded
             playerSubmittedContracts ??= new List<Contract>();
             npcSubmittedContracts ??= new List<Contract>();
             npcContractsToBeCompleted ??= new List<Contract>();
-            if (Find.World != null)
-            {
-                RecheckBanks();
-            }
-        }
-
-        private void RecheckBanks()
-        {
-            foreach (var faction in Find.FactionManager.AllFactions)
-            {
-                var bankExtension = faction.def.GetModExtension<BankExtension>();
-                if (bankExtension != null)
-                {
-                    if (!banksByFaction.ContainsKey(faction))
-                    {
-                        banksByFaction[faction] = new Bank(faction);
-                    }
-                }
-                else if (banksByFaction.ContainsKey(faction))
-                {
-                    banksByFaction.Remove(faction);
-                }
-            }
         }
 
         public PriceHistoryAutoRecorder GetRecorder(ThingDef thingDef)
@@ -240,6 +237,7 @@ namespace VanillaTradingExpanded
             {
                 kvp.Value.Tick();
             }
+
             // we record prices every day
             if (Find.TickManager.TicksGame % GenDate.TicksPerDay == 0)
             {
@@ -341,6 +339,21 @@ namespace VanillaTradingExpanded
                 DoPriceRebalances();
             }
 
+            ProcessContracts(localMap);
+        }
+
+        private void ProcessContracts(Map localMap)
+        {
+            // iterate over npc submitted contracts and make sure to remove them after expiring
+            for (var i = npcSubmittedContracts.Count - 1; i >= 0; i--)
+            {
+                var contract = npcSubmittedContracts[i];
+                if (Find.TickManager.TicksGame > contract.expiresInTicks)
+                {
+                    npcSubmittedContracts.RemoveAt(i);
+                }
+            }
+
             // iterate over completed npc contracts and make sure to spawn caravans to pick up things
             for (var i = npcContractsToBeCompleted.Count - 1; i >= 0; i--)
             {
@@ -355,6 +368,54 @@ namespace VanillaTradingExpanded
                         npcContractsToBeCompleted.RemoveAt(i);
                     }
                     IncidentWorker_CaravanArriveForItems.contract = null;
+                }
+            }
+
+            // every 2 hours iterate over player submitted contracts and do rolls on them
+            if (Find.TickManager.TicksGame % GenDate.TicksPerHour * 2 == 0)
+            {
+                for (var i = playerSubmittedContracts.Count - 1; i >= 0; i--)
+                {
+                    var contract = playerSubmittedContracts[i];
+                    if (Find.TickManager.TicksGame > contract.expiresInTicks)
+                    {
+                        playerSubmittedContracts.Remove(contract);
+                    }
+                    else
+                    {
+                        var markup = (contract.reward / contract.BaseMarketValue) * 100f;
+                        var chance = markup / ((float)contract.reward);
+                        if (Rand.Chance(chance))
+                        {
+                            Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.PayMoneyForContract".Translate(contract.Name), new TransactionProcess
+                            {
+                                transactionCost = contract.reward,
+                                postTransactionAction = delegate
+                                {
+                                    var things = new List<Thing>();
+                                    while (contract.amount > 0)
+                                    {
+                                        var thing = ThingMaker.MakeThing(contract.item, contract.stuff);
+                                        thing.stackCount = Mathf.Min(contract.item.stackLimit, contract.amount);
+                                        contract.amount -= thing.stackCount;
+                                        things.Add(thing);
+                                    }
+                                    IntVec3 intVec = DropCellFinder.RandomDropSpot(localMap);
+                                    DropPodUtility.DropThingsNear(intVec, localMap, things, 110, canInstaDropDuringInit: false, leaveSlag: true);
+                                    var list = "";
+                                    foreach (var thing in things)
+                                    {
+                                        list += "x" + thing.stackCount + " " + thing.LabelNoCount + "\n";
+                                    }
+                                    Find.LetterStack.ReceiveLetter("VTE.ContractFullfilled".Translate(), "VTE.ContractFullfilledDesc".Translate() + list.TrimEndNewlines(), LetterDefOf.PositiveEvent, things);
+                                },
+                                postCloseAction = delegate
+                                {
+                                    playerSubmittedContracts.Remove(contract);
+                                }
+                            }));
+                        }
+                    }
                 }
             }
         }

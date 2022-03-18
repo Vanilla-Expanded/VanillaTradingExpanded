@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
@@ -14,14 +15,14 @@ namespace VanillaTradingExpanded
 		public int transactionGain;
 		public int transactionCost;
 		public Dictionary<Company, int> companySharesToBuyOrSell = new Dictionary<Company, int>();
+		public Action postTransactionAction;
+		public Action postCloseAction;
 		public TransactionProcess()
         {
 			allBanks = TradingManager.Instance.Banks;
 		}
 		public void PerformTransaction()
 		{
-			Log.Message("Performing transaction");
-			Log.Message("this.sharesToBuyOrSell: " + this.companySharesToBuyOrSell.Count);
 			if (this.amountToTransfer != null)
 			{
 				if (this.companySharesToBuyOrSell != null)
@@ -35,7 +36,6 @@ namespace VanillaTradingExpanded
 						for (var i = shareAmount - 1; i >= 0; i--)
 						{
 							company.sharesHeldByPlayer.RemoveAt(i);
-							Log.Message("Sold share from " + company.name + " for " + company.currentValue);
 						}
 						this.companySharesToBuyOrSell.Remove(company);
 					}
@@ -63,7 +63,6 @@ namespace VanillaTradingExpanded
 								valueBought = company.currentValue,
 							};
 							company.sharesHeldByPlayer.Add(share);
-							Log.Message("Bought share from " + company.name + " for " + company.currentValue);
 						}
 						this.companySharesToBuyOrSell.Remove(company);
 					}
@@ -73,9 +72,20 @@ namespace VanillaTradingExpanded
 					}
 					this.amountToSpend.Clear();
 				}
-
 			}
-			Log.Message("this.sharesToBuyOrSell: " + this.companySharesToBuyOrSell.Count);
+
+			if (postTransactionAction != null)
+            {
+				postTransactionAction();
+			}
 		}
+
+		public void PostClose()
+        {
+			if (this.postCloseAction != null)
+            {
+				this.postCloseAction();
+            }
+        }
 	}
 }

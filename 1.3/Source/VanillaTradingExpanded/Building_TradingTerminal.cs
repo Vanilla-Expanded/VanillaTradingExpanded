@@ -73,11 +73,11 @@ namespace VanillaTradingExpanded
 				yield return GetViewMarketPricesOption(myPawn);
 				yield return GetViewNewsOption(myPawn);
 				yield return GetOpenStockMarketOption(myPawn);
+				yield return GetOpenContractsOption(myPawn);
 				foreach (var floatOption2 in GetBankOptions(myPawn))
                 {
 					yield return floatOption2;
                 }
-				yield return GetOpenContractsOption(myPawn);
 			}
 		}
 		private FloatMenuOption GetViewMarketPricesOption(Pawn negotiator)

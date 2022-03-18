@@ -5,40 +5,39 @@ using Verse;
 
 namespace VanillaTradingExpanded
 {
-
     [HotSwappable]
     [StaticConstructorOnStartup]
-    public class Window_PerformTransactionGains : Window
+    public class Window_PerformTransactionCosts : Window
 	{
 		public TransactionProcess transactionProcess;
-        public override Vector2 InitialSize => new Vector2(450, 430);
+		public override Vector2 InitialSize => new Vector2(450, 430);
 
 		public string title;
-        public Window_PerformTransactionGains(string title, TransactionProcess parent)
+        public Window_PerformTransactionCosts(string title, TransactionProcess parent)
         {
 			this.title = title;
 			this.transactionProcess = parent;
 			this.forcePause = true;
-			this.transactionProcess.amountToTransfer = new Dictionary<Bank, int>();
+			this.transactionProcess.amountToSpend = new Dictionary<Bank, int>();
 			foreach (var bank in parent.allBanks)
             {
-				this.transactionProcess.amountToTransfer[bank] = 0;
+				this.transactionProcess.amountToSpend[bank] = 0;
 			}
 		}
 
 		public string textEntryBuffer;
 		private Vector2 scrollPosition;
-		private float allMoneyToGain;
+		private float allMoneyToSpend;
 		public override void DoWindowContents(Rect inRect)
 		{
 			Text.Font = GameFont.Small;
 			Text.Anchor = TextAnchor.UpperLeft;
 			GUI.color = Color.white;
-			allMoneyToGain = this.transactionProcess.amountToTransfer.Sum(x => x.Value);
+			allMoneyToSpend = this.transactionProcess.amountToSpend.Sum(x => x.Value);
 			var pos = new Vector2(inRect.x, inRect.y);
-			var bankDeposits = new Rect(pos.x, pos.y, inRect.width, 24f);
-			Widgets.Label(bankDeposits, title);
-			pos.y += 30;
+			var titleRect = new Rect(pos.x, pos.y, inRect.width, 48f);
+			Widgets.Label(titleRect, title);
+			pos.y += 48f;
 			float listHeight = transactionProcess.allBanks.Count * 28f;
 			Rect viewRect = new Rect(pos.x, pos.y, inRect.width, (inRect.height - pos.y) - 90);
 			Rect scrollRect = new Rect(pos.x, pos.y, inRect.width - 16f, listHeight);
@@ -60,35 +59,44 @@ namespace VanillaTradingExpanded
 				var silverLabel = new Rect(silverIcon.xMax + 10, pos.y, 130, 24);
 				Widgets.Label(silverLabel, bank.Name);
 
+				var bankMoney = bank.DepositAmount;
+				if (this.transactionProcess.amountToTransfer != null && this.transactionProcess.amountToTransfer.TryGetValue(bank, out var amount))
+                {
+					bankMoney += amount;
+				}
+
 				var depositAmountRect = new Rect(silverLabel.xMax, pos.y, 55, 24);
-				Widgets.Label(depositAmountRect, bank.DepositAmount.ToStringMoney());
+				Widgets.Label(depositAmountRect, bankMoney.ToStringMoney());
+
 				var withdrawFullyRect = new Rect(depositAmountRect.xMax + 10, pos.y, 24, 24);
-				var amountMoneyExceptThisBank = this.transactionProcess.amountToTransfer.Where(x => x.Key != bank).Sum(x => x.Value);
-				if (Widgets.ButtonText(withdrawFullyRect, "<<") && transactionProcess.transactionGain > this.transactionProcess.amountToTransfer.Where(x => x.Key != bank).Sum(x => x.Value))
+				if (bankMoney == 0 && this.transactionProcess.amountToSpend[bank] == 0)
 				{
-					this.transactionProcess.amountToTransfer[bank] = transactionProcess.transactionGain - amountMoneyExceptThisBank;
+					GUI.color = Widgets.InactiveColor;
+				}
+				if (Widgets.ButtonText(withdrawFullyRect, "<<"))
+				{
+					this.transactionProcess.amountToSpend[bank] = 0;
 				}
 				var withdrawRect = new Rect(withdrawFullyRect.xMax, pos.y, 24, 24);
-				if (Widgets.ButtonText(withdrawRect, "<") && this.transactionProcess.transactionGain - allMoneyToGain > 0)
+				if (Widgets.ButtonText(withdrawRect, "<") && this.transactionProcess.amountToSpend[bank] > 0)
 				{
-					this.transactionProcess.amountToTransfer[bank]++;
+					this.transactionProcess.amountToSpend[bank]--;
 				}
-
 				var textEntry = new Rect(withdrawRect.xMax + 5, pos.y, 60, 24);
-				textEntryBuffer = this.transactionProcess.amountToTransfer[bank].ToString();
-				var value = this.transactionProcess.amountToTransfer[bank];
-				Widgets.TextFieldNumeric<int>(textEntry, ref value, ref textEntryBuffer, 0, (transactionProcess.transactionGain - amountMoneyExceptThisBank));
-				this.transactionProcess.amountToTransfer[bank] = value;
+				textEntryBuffer = this.transactionProcess.amountToSpend[bank].ToString();
+				var value = this.transactionProcess.amountToSpend[bank];
+				Widgets.TextFieldNumeric<int>(textEntry, ref value, ref textEntryBuffer, 0, Mathf.Min(bankMoney, transactionProcess.transactionCost));
+				this.transactionProcess.amountToSpend[bank] = value;
 
 				var depositRect = new Rect(textEntry.xMax + 5, pos.y, 24, 24);
-				if (Widgets.ButtonText(depositRect, ">") && this.transactionProcess.amountToTransfer[bank] > 0)
+				if (Widgets.ButtonText(depositRect, ">") && bankMoney > 0 && transactionProcess.transactionCost > allMoneyToSpend)
 				{
-					this.transactionProcess.amountToTransfer[bank]--;
+					this.transactionProcess.amountToSpend[bank]++;
 				}
 				var depositFullyRect = new Rect(depositRect.xMax, pos.y, 24, 24);
-				if (Widgets.ButtonText(depositFullyRect, ">>"))
+				if (Widgets.ButtonText(depositFullyRect, ">>") && bankMoney > 0 && transactionProcess.transactionCost > this.transactionProcess.amountToSpend.Where(x => x.Key != bank).Sum(x => x.Value))
 				{
-					this.transactionProcess.amountToTransfer[bank] = 0;
+					this.transactionProcess.amountToSpend[bank] = (int)Mathf.Min(bankMoney, transactionProcess.transactionCost - this.transactionProcess.amountToSpend.Where(x => x.Key != bank).Sum(x => x.Value));
 				}
 				GUI.color = Color.white;
 				pos.y += 28f;
@@ -100,27 +108,20 @@ namespace VanillaTradingExpanded
 			GUI.color = Color.white;
 
 			pos.y = inRect.height - 60;
-			var transactionGainToExtract = new Rect(pos.x, pos.y, 250, 24);
-			Widgets.Label(transactionGainToExtract, "VTE.TransactionGainToTransfer".Translate(transactionProcess.transactionGain));
+			var transactionCostToPay = new Rect(pos.x, pos.y, 250, 24);
+			Widgets.Label(transactionCostToPay, "VTE.TransactionCostToPay".Translate(transactionProcess.transactionCost));
 			
-			var moneyToBePaid = new Rect(transactionGainToExtract.xMax, pos.y, 250, 24);
-			Widgets.Label(moneyToBePaid, "VTE.MoneyToTransfer".Translate(allMoneyToGain));
+			var moneyToBePaid = new Rect(transactionCostToPay.xMax, pos.y, 250, 24);
+			Widgets.Label(moneyToBePaid, "VTE.MoneyToSpend".Translate(allMoneyToSpend));
 
 			pos.y += 30;
-			bool canPay = allMoneyToGain == transactionProcess.transactionGain;
+			bool canPay = allMoneyToSpend == transactionProcess.transactionCost;
 			GUI.color = canPay ? Color.white : Color.grey;
 			var confirmButtonRect = new Rect(pos.x + 15, pos.y, 170, 32f);
 			if (Widgets.ButtonText(confirmButtonRect, "Confirm".Translate(), active: canPay))
 			{
+				this.transactionProcess.PerformTransaction();
 				this.Close();
-				if (this.transactionProcess.transactionCost > 0)
-                {
-					Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.BankDepositsToSpend".Translate(), this.transactionProcess));
-				}
-				else
-                {
-					this.transactionProcess.PerformTransaction();
-                }
 			}
 			GUI.color = Color.white;
 			var closeButtonRect = new Rect(confirmButtonRect.xMax + 25, confirmButtonRect.y, confirmButtonRect.width, confirmButtonRect.height);
@@ -128,7 +129,12 @@ namespace VanillaTradingExpanded
 			{
 				this.Close();
 			}
-
 		}
+
+        public override void PostClose()
+        {
+            base.PostClose();
+			transactionProcess.PostClose();
+        }
     }
 }
