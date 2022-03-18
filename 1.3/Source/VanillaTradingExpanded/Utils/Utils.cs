@@ -28,12 +28,38 @@ namespace VanillaTradingExpanded
         public static HashSet<ThingDef> collectableThings = new HashSet<ThingDef>();
         public static List<ThingDef> cachedTradeableItems = new List<ThingDef>();
         public static List<ThingDef> cachedFoodItems = new List<ThingDef>();
+        public static Dictionary<string, List<ThingDef>> itemsByThingSetMakerTags = new Dictionary<string, List<ThingDef>>();
+        public static Dictionary<string, List<ThingDef>> itemsByTradeTags = new Dictionary<string, List<ThingDef>>();
         public static float minTradePrice;
         static Utils()
         {
             minTradePrice = float.MaxValue;
             foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
             {
+                if (thingDef.thingSetMakerTags != null)
+                {
+                    foreach (var tag in thingDef.thingSetMakerTags)
+                    {
+                        if (!itemsByThingSetMakerTags.TryGetValue(tag, out List<ThingDef> items))
+                        {
+                            itemsByThingSetMakerTags[tag] = items = new List<ThingDef>();
+                        }
+                        items.Add(thingDef);
+                    }
+                }
+
+                if (thingDef.tradeTags != null)
+                {
+                    foreach (var tag in thingDef.tradeTags)
+                    {
+                        if (!itemsByTradeTags.TryGetValue(tag, out List<ThingDef> items))
+                        {
+                            itemsByTradeTags[tag] = items = new List<ThingDef>();
+                        }
+                        items.Add(thingDef);
+                    }
+                }
+
                 if (thingDef.plant?.harvestedThingDef != null)
                 {
                     collectableThings.Add(thingDef.plant.harvestedThingDef);

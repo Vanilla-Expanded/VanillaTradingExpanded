@@ -13,31 +13,50 @@ namespace VanillaTradingExpanded
         public int priceImpactStartTick;
         public NewsDef def;
         public NewsContext newsContext;
-
-        public List<ThingCategoryDef> affectedThingCategories;
-        public List<ThingDef> affectedThingDefs;
         public string Date => GenDate.DateFullStringAt(creationTick, Find.WorldGrid.LongLatOf(Find.CurrentMap?.Tile ?? Find.Maps.FirstOrFallback().Tile));
         
         public HashSet<ThingDef> AffectedThingDefs()
         {
             var thingDefs = new HashSet<ThingDef>();
-            if (affectedThingCategories != null)
+            if (this.def.thingCategories != null)
             {
-                foreach (var category in affectedThingCategories)
+                foreach (var category in this.def.thingCategories)
                 {
                     thingDefs.AddRange(category.DescendantThingDefs);
                 }
             }
-            if (affectedThingDefs != null)
+            if (this.def.thingDefs != null)
             {
-                thingDefs.AddRange(affectedThingDefs);
+                thingDefs.AddRange(this.def.thingDefs);
             }
+            if (def.tradeTags != null)
+            {
+                foreach (var tag in def.tradeTags)
+                {
+                    if (Utils.itemsByTradeTags.TryGetValue(tag, out var list))
+                    {
+                        thingDefs.AddRange(list);
+                    }
+                }
+            }
+
+            if (def.thingSetMakerTags != null)
+            {
+                foreach (var tag in def.thingSetMakerTags)
+                {
+                    if (Utils.itemsByThingSetMakerTags.TryGetValue(tag, out var list))
+                    {
+                        thingDefs.AddRange(list);
+                    }
+                }
+            }
+
             return thingDefs;
         }
 
         public bool MatchesCategory(ThingCategoryDef categoryDef)
         {
-            return affectedThingCategories?.Contains(categoryDef) == true || affectedThingDefs?.Any(thingDef => thingDef?.thingCategories?.Contains(categoryDef) ?? false) == true;
+            return this.def.thingCategories?.Contains(categoryDef) == true || this.def.thingDefs?.Any(thingDef => thingDef?.thingCategories?.Contains(categoryDef) ?? false) == true;
         }
         public void ExposeData()
         {
@@ -46,8 +65,6 @@ namespace VanillaTradingExpanded
             Scribe_Values.Look(ref priceImpact, "priceImpact");
             Scribe_Values.Look(ref priceImpactStartTick, "priceImpactStartTick");
             Scribe_Defs.Look(ref def, "def");
-            Scribe_Collections.Look(ref affectedThingCategories, "affectedThingCategories", LookMode.Def);
-            Scribe_Collections.Look(ref affectedThingDefs, "affectedThingDefs", LookMode.Def);
             Scribe_Deep.Look(ref newsContext, "newsContext");
         }
     }

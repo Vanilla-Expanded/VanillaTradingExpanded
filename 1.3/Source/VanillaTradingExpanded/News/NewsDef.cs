@@ -16,6 +16,8 @@ namespace VanillaTradingExpanded
         public RulePackDef textRulePack;
         public List<ThingCategoryDef> thingCategories;
         public List<ThingDef> thingDefs;
+        public List<string> thingSetMakerTags;
+        public List<string> tradeTags;
         public FloatRange priceImpactRandomInRange;
         public IntRange priceImpactTicksDelay;
         public Type newsWorker = typeof(NewsWorker);

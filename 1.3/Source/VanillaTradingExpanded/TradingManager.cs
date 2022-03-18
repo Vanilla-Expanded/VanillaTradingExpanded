@@ -200,8 +200,6 @@ namespace VanillaTradingExpanded
                 creationTick = Find.TickManager.TicksGame,
                 priceImpact = RandomPriceImpact(newsDef.priceImpactRandomInRange),
                 priceImpactStartTick = Find.TickManager.TicksGame + newsDef.priceImpactTicksDelay.RandomInRange,
-                affectedThingCategories = newsDef.thingCategories,
-                affectedThingDefs = newsDef.thingDefs
             };
         }
 
