@@ -111,7 +111,6 @@ namespace VanillaTradingExpanded
 			var confirmButtonRect = new Rect(pos.x + 15, pos.y, 170, 32f);
 			if (Widgets.ButtonText(confirmButtonRect, "Confirm".Translate(), active: canPay))
 			{
-				this.Close();
 				if (this.transactionProcess.transactionCost > 0)
                 {
 					Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.BankDepositsToSpend".Translate(), this.transactionProcess));
@@ -120,11 +119,13 @@ namespace VanillaTradingExpanded
                 {
 					this.transactionProcess.PerformTransaction();
                 }
+				this.Close();
 			}
 			GUI.color = Color.white;
 			var closeButtonRect = new Rect(confirmButtonRect.xMax + 25, confirmButtonRect.y, confirmButtonRect.width, confirmButtonRect.height);
 			if (Widgets.ButtonText(closeButtonRect, "Close".Translate()))
 			{
+				transactionProcess.PostCancel();
 				this.Close();
 			}
 		}

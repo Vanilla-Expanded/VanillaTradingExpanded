@@ -127,6 +127,7 @@ namespace VanillaTradingExpanded
 			var closeButtonRect = new Rect(confirmButtonRect.xMax + 25, confirmButtonRect.y, confirmButtonRect.width, confirmButtonRect.height);
 			if (Widgets.ButtonText(closeButtonRect, "Close".Translate()))
 			{
+				transactionProcess.PostCancel();
 				this.Close();
 			}
 		}

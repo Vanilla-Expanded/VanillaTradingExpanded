@@ -17,6 +17,7 @@ namespace VanillaTradingExpanded
 		public Dictionary<Company, int> companySharesToBuyOrSell = new Dictionary<Company, int>();
 		public Action postTransactionAction;
 		public Action postCloseAction;
+		public Action postCancelAction;
 		public TransactionProcess()
         {
 			allBanks = TradingManager.Instance.Banks;
@@ -80,6 +81,13 @@ namespace VanillaTradingExpanded
 			}
 		}
 
+		public void PostCancel()
+        {
+			if (this.postCancelAction != null)
+            {
+				this.postCancelAction();
+            }
+        }
 		public void PostClose()
         {
 			if (this.postCloseAction != null)

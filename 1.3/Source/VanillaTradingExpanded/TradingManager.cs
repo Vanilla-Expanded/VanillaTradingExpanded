@@ -344,16 +344,6 @@ namespace VanillaTradingExpanded
 
         private void ProcessContracts(Map localMap)
         {
-            // iterate over npc submitted contracts and make sure to remove them after expiring
-            for (var i = npcSubmittedContracts.Count - 1; i >= 0; i--)
-            {
-                var contract = npcSubmittedContracts[i];
-                if (Find.TickManager.TicksGame > contract.expiresInTicks)
-                {
-                    npcSubmittedContracts.RemoveAt(i);
-                }
-            }
-
             // iterate over completed npc contracts and make sure to spawn caravans to pick up things
             for (var i = npcContractsToBeCompleted.Count - 1; i >= 0; i--)
             {
@@ -371,50 +361,69 @@ namespace VanillaTradingExpanded
                 }
             }
 
-            // every 2 hours iterate over player submitted contracts and do rolls on them
-            if (Find.TickManager.TicksGame % GenDate.TicksPerHour * 2 == 0)
+            bool twoHoursIntervalThisTick = Find.TickManager.TicksGame % GenDate.TicksPerHour * 2 == 0;
+            for (var i = npcSubmittedContracts.Count - 1; i >= 0; i--)
             {
-                for (var i = playerSubmittedContracts.Count - 1; i >= 0; i--)
+                var contract = npcSubmittedContracts[i];
+                if (Find.TickManager.TicksGame > contract.expiresInTicks)
                 {
-                    var contract = playerSubmittedContracts[i];
-                    if (Find.TickManager.TicksGame > contract.expiresInTicks)
+                    npcSubmittedContracts.RemoveAt(i);
+                }
+                else if (twoHoursIntervalThisTick)
+                {
+                    var markup = (contract.reward / contract.BaseMarketValue) * 100f;
+                    var chance = markup / ((float)contract.reward);
+                    if (Rand.Chance(chance))
                     {
-                        playerSubmittedContracts.Remove(contract);
-                    }
-                    else
-                    {
-                        var markup = (contract.reward / contract.BaseMarketValue) * 100f;
-                        var chance = markup / ((float)contract.reward);
-                        if (Rand.Chance(chance))
+                        npcSubmittedContracts.RemoveAt(i); 
+                        if (npcSubmittedContracts.Count < MaxNPCContractCount)
                         {
-                            Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.PayMoneyForContract".Translate(contract.Name), new TransactionProcess
-                            {
-                                transactionCost = contract.reward,
-                                postTransactionAction = delegate
-                                {
-                                    var things = new List<Thing>();
-                                    while (contract.amount > 0)
-                                    {
-                                        var thing = ThingMaker.MakeThing(contract.item, contract.stuff);
-                                        thing.stackCount = Mathf.Min(contract.item.stackLimit, contract.amount);
-                                        contract.amount -= thing.stackCount;
-                                        things.Add(thing);
-                                    }
-                                    IntVec3 intVec = DropCellFinder.RandomDropSpot(localMap);
-                                    DropPodUtility.DropThingsNear(intVec, localMap, things, 110, canInstaDropDuringInit: false, leaveSlag: true);
-                                    var list = "";
-                                    foreach (var thing in things)
-                                    {
-                                        list += "x" + thing.stackCount + " " + thing.LabelNoCount + "\n";
-                                    }
-                                    Find.LetterStack.ReceiveLetter("VTE.ContractFullfilled".Translate(), "VTE.ContractFullfilledDesc".Translate() + list.TrimEndNewlines(), LetterDefOf.PositiveEvent, things);
-                                },
-                                postCloseAction = delegate
-                                {
-                                    playerSubmittedContracts.Remove(contract);
-                                }
-                            }));
+                            npcSubmittedContracts.Add(GenerateRandomContract());
                         }
+                    }
+                }
+            }
+
+            for (var i = playerSubmittedContracts.Count - 1; i >= 0; i--)
+            {
+                var contract = playerSubmittedContracts[i];
+                if (Find.TickManager.TicksGame > contract.expiresInTicks)
+                {
+                    playerSubmittedContracts.Remove(contract);
+                }
+                else if (twoHoursIntervalThisTick)
+                {
+                    var markup = (contract.reward / contract.BaseMarketValue) * 100f;
+                    var chance = markup / ((float)contract.reward);
+                    if (Rand.Chance(chance))
+                    {
+                        Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.PayMoneyForContract".Translate(contract.Name), new TransactionProcess
+                        {
+                            transactionCost = contract.reward,
+                            postTransactionAction = delegate
+                            {
+                                var things = new List<Thing>();
+                                while (contract.amount > 0)
+                                {
+                                    var thing = ThingMaker.MakeThing(contract.item, contract.stuff);
+                                    thing.stackCount = Mathf.Min(contract.item.stackLimit, contract.amount);
+                                    contract.amount -= thing.stackCount;
+                                    things.Add(thing);
+                                }
+                                IntVec3 intVec = DropCellFinder.RandomDropSpot(localMap);
+                                DropPodUtility.DropThingsNear(intVec, localMap, things, 110, canInstaDropDuringInit: false, leaveSlag: true);
+                                var list = "";
+                                foreach (var thing in things)
+                                {
+                                    list += "x" + thing.stackCount + " " + thing.LabelNoCount + "\n";
+                                }
+                                Find.LetterStack.ReceiveLetter("VTE.ContractFullfilled".Translate(), "VTE.ContractFullfilledDesc".Translate() + list.TrimEndNewlines(), LetterDefOf.PositiveEvent, things);
+                            },
+                            postCloseAction = delegate
+                            {
+                                playerSubmittedContracts.Remove(contract);
+                            },
+                        }));
                     }
                 }
             }
