@@ -276,7 +276,7 @@
 		<defName>VTE_SettlementAlphabeavers</defName>
 		<textRulePack>VTE_SettlementAlphabeavers</textRulePack>
 		<thingDefs>
-			<li>Wood</li>
+			<li>WoodLog</li>
 		</thingDefs>
 		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
 		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
@@ -298,7 +298,7 @@
 		<defName>VTE_SettlementAlphabeaversDealtWith</defName>
 		<textRulePack>VTE_SettlementAlphabeaversDealtWith</textRulePack>
 		<thingDefs>
-			<li>Wood</li>
+			<li>WoodLog</li>
 		</thingDefs>
 		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
 		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 

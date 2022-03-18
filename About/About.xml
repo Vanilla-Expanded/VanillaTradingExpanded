@@ -6,5 +6,6 @@
 	<li>1.3</li>
 	</supportedVersions>
 	<packageId>VanillaExpanded.VanillaTradingExpanded</packageId>
-	<description>PLACEHOLDER</description>
+	<description>Vanilla Trading Expanded is our take on the trading system and RimWorld, meant to add some much needed randomization, planning and strategy to otherwise stale trading. Currently in RimWorld, all values are flat and never change - meaning there are certain things that sell, and certain things that don’t. This mod will change that making market value of things dynamic, and changing based on the supply and demand.
+This mod overhauls the trading system and adds many new features, such as the Bank, Planetary news network, fluctuating prices, squeezes and crashes, loans, contracts, stock market etc. Please note this is not meant to be a realistic representation of the economy - I am not an economist, and I also don't want it to be realistic. It's simplified and almost arcadey, because it's a video game, and we don't need a corrupt market in the game to remind us how bad it is outside of it.</description>
 </ModMetaData>
