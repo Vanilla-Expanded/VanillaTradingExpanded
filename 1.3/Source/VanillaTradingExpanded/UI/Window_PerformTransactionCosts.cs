@@ -10,7 +10,7 @@ namespace VanillaTradingExpanded
     public class Window_PerformTransactionCosts : Window
 	{
 		public TransactionProcess transactionProcess;
-		public override Vector2 InitialSize => new Vector2(450, 430);
+		public override Vector2 InitialSize => new Vector2(500, 430);
 
 		public string title;
         public Window_PerformTransactionCosts(string title, TransactionProcess parent)
@@ -51,13 +51,13 @@ namespace VanillaTradingExpanded
 				{
 					Widgets.DrawLightHighlight(entryRect);
 				}
-				var silverIcon = new Rect(pos.x, pos.y, 24, 24);
+				var bankIcon = new Rect(pos.x, pos.y, 24, 24);
 				GUI.color = bank.parentFaction.Color;
-				GUI.DrawTexture(silverIcon, bank.parentFaction.def.FactionIcon);
+				GUI.DrawTexture(bankIcon, bank.parentFaction.def.FactionIcon);
 				GUI.color = Color.white;
 
-				var silverLabel = new Rect(silverIcon.xMax + 10, pos.y, 130, 24);
-				Widgets.Label(silverLabel, bank.Name);
+				var bankLabel = new Rect(bankIcon.xMax + 10, pos.y, 200, 24);
+				Widgets.Label(bankLabel, bank.Name);
 
 				var bankMoney = bank.DepositAmount;
 				if (this.transactionProcess.amountToTransfer != null && this.transactionProcess.amountToTransfer.TryGetValue(bank, out var amount))
@@ -65,10 +65,10 @@ namespace VanillaTradingExpanded
 					bankMoney += amount;
 				}
 
-				var depositAmountRect = new Rect(silverLabel.xMax, pos.y, 55, 24);
+				var depositAmountRect = new Rect(bankLabel.xMax, pos.y, 65, 24);
 				Widgets.Label(depositAmountRect, bankMoney.ToStringMoney());
 
-				var withdrawFullyRect = new Rect(depositAmountRect.xMax + 10, pos.y, 24, 24);
+				var withdrawFullyRect = new Rect(depositAmountRect.xMax, pos.y, 24, 24);
 				if (bankMoney == 0 && this.transactionProcess.amountToSpend[bank] == 0)
 				{
 					GUI.color = Widgets.InactiveColor;
@@ -111,7 +111,7 @@ namespace VanillaTradingExpanded
 			var transactionCostToPay = new Rect(pos.x, pos.y, 250, 24);
 			Widgets.Label(transactionCostToPay, "VTE.TransactionCostToPay".Translate(transactionProcess.transactionCost));
 			
-			var moneyToBePaid = new Rect(transactionCostToPay.xMax, pos.y, 250, 24);
+			var moneyToBePaid = new Rect(transactionCostToPay.xMax + 40, pos.y, 250, 24);
 			Widgets.Label(moneyToBePaid, "VTE.MoneyToSpend".Translate(allMoneyToSpend));
 
 			pos.y += 30;
@@ -124,7 +124,7 @@ namespace VanillaTradingExpanded
 				this.Close();
 			}
 			GUI.color = Color.white;
-			var closeButtonRect = new Rect(confirmButtonRect.xMax + 25, confirmButtonRect.y, confirmButtonRect.width, confirmButtonRect.height);
+			var closeButtonRect = new Rect(confirmButtonRect.xMax + 85, confirmButtonRect.y, confirmButtonRect.width, confirmButtonRect.height);
 			if (Widgets.ButtonText(closeButtonRect, "Close".Translate()))
 			{
 				transactionProcess.PostCancel();

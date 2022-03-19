@@ -40,6 +40,7 @@ namespace VanillaTradingExpanded
 		{
 			SetDirty();
 			this.forcePause = true;
+			this.closeOnClickedOutside = true;
 		}
 
 		private static float cellHeight = 35f;

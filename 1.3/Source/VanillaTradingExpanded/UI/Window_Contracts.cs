@@ -19,6 +19,7 @@ namespace VanillaTradingExpanded
         {
             this.negotiator = negotiator;
             this.forcePause = true;
+            this.closeOnClickedOutside = true;
             curPlayerContract = new Contract
             {
                 amount = 1

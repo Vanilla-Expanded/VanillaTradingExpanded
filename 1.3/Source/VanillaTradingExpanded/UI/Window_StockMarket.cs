@@ -116,6 +116,7 @@ namespace VanillaTradingExpanded
 		{
 			SetDirty();
 			this.forcePause = true;
+			this.closeOnClickedOutside = true;
 			transactionProcess = new TransactionProcess();
 		}
 

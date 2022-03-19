@@ -14,6 +14,50 @@ namespace VanillaTradingExpanded
     [StaticConstructorOnStartup]
     public static class Utils
     {
+        [DebugAction("General", "Spawn 1x news", allowedGameStates = AllowedGameStates.Playing)]
+        private static void Spawn1xNews()
+        {
+            var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
+            var news = TradingManager.Instance.CreateNews(newsDefs);
+            if (news.def.Worker.VisibleToPlayer(news))
+            {
+                TradingManager.Instance.RegisterNews(news);
+            }
+        }
+        [DebugAction("General", "Spawn 10x news", allowedGameStates = AllowedGameStates.Playing)]
+        private static void Spawn10xNews()
+        {
+            for (var i = 0; i < 10; i++)
+            {
+                var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
+                var news = TradingManager.Instance.CreateNews(newsDefs);
+                if (news.def.Worker.VisibleToPlayer(news))
+                {
+                    TradingManager.Instance.RegisterNews(news);
+                }
+            }
+        }
+
+        [DebugAction("General", "Fluctuate prices of 10 items", allowedGameStates = AllowedGameStates.Playing)]
+        private static void FluctuatePrices10()
+        {
+            var affectedItems = cachedTradeableItems.InRandomOrder().Take(10).ToList();
+            foreach (var item in affectedItems)
+            {
+                TradingManager.Instance.AffectPriceRandomly(item);
+            }
+        }
+
+        [DebugAction("General", "Fluctuate prices of 20 items", allowedGameStates = AllowedGameStates.Playing)]
+        private static void FluctuatePrices20()
+        {
+            var affectedItems = cachedTradeableItems.InRandomOrder().Take(20).ToList();
+            foreach (var item in affectedItems)
+            {
+                TradingManager.Instance.AffectPriceRandomly(item);
+            }
+        }
+
         public static List<ThingDef> cachedItemsForContracts = new List<ThingDef>();
         public static HashSet<ThingDef> tradeableItemsToIgnore = new HashSet<ThingDef>
         {

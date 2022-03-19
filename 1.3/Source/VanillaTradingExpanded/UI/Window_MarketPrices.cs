@@ -65,6 +65,7 @@ namespace VanillaTradingExpanded
 		{
 			SetDirty();
 			this.forcePause = true;
+			this.closeOnClickedOutside = true;
 		}
 
 		private static float maxWidth = 800;
@@ -188,7 +189,7 @@ namespace VanillaTradingExpanded
 					GuiHelper.ThingIcon(thingIconRect, thingDef);
 					Widgets.InfoCardButton(thingIconRect.xMax + infoCardXOffset, rect2.y + infoCardYOffset, thingDef);
 
-					var chartIconRect = new Rect(thingIconRect.xMax + 25 + (infoCardXOffset * 2), rect2.y + 5, rect2.height - 10, rect2.height - 10);
+					var chartIconRect = new Rect(thingIconRect.xMax + 25 + (infoCardXOffset * 2), rect2.y + 7, rect2.height * 0.6f, rect2.height * 0.6f);
 					GUI.DrawTexture(chartIconRect, GuiHelper.ChartIcon);
 					if (Mouse.IsOver(chartIconRect))
                     {

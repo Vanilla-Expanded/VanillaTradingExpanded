@@ -30,6 +30,7 @@ namespace VanillaTradingExpanded
 			faction = bankFaction;
 			bank = faction.GetBank();
 			this.forcePause = true;
+			this.closeOnClickedOutside = true;
 		}
 		public override Vector2 InitialSize => new Vector2(800, Mathf.Min(740, UI.screenHeight));
 		public override void DoWindowContents(Rect inRect)

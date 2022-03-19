@@ -359,7 +359,7 @@ namespace VanillaTradingExpanded
                 }
             }
 
-            bool twoHoursIntervalThisTick = Find.TickManager.TicksGame % GenDate.TicksPerHour * 2 == 0;
+            bool checkIntervalThisTick = Find.TickManager.TicksGame % GenDate.TicksPerHour * 12 == 0;
             for (var i = npcSubmittedContracts.Count - 1; i >= 0; i--)
             {
                 var contract = npcSubmittedContracts[i];
@@ -367,7 +367,7 @@ namespace VanillaTradingExpanded
                 {
                     npcSubmittedContracts.RemoveAt(i);
                 }
-                else if (twoHoursIntervalThisTick)
+                else if (checkIntervalThisTick)
                 {
                     var markup = (contract.reward / contract.BaseMarketValue) * 100f;
                     var chance = markup / ((float)contract.reward);
@@ -389,7 +389,7 @@ namespace VanillaTradingExpanded
                 {
                     playerSubmittedContracts.Remove(contract);
                 }
-                else if (twoHoursIntervalThisTick)
+                else if (checkIntervalThisTick)
                 {
                     var markup = (contract.reward / contract.BaseMarketValue) * 100f;
                     var chance = markup / ((float)contract.reward);
@@ -476,38 +476,44 @@ namespace VanillaTradingExpanded
             var affectedItems = Utils.cachedTradeableItems.InRandomOrder().Take((int)(Utils.cachedTradeableItems.Count * 0.2f)).ToList();
             foreach (var item in affectedItems)
             {
-                var actions = new List<Pair<Action, float>>();
-                actions.Add(new Pair<Action, float>(delegate
-                {
-                    AffectPrice(item, false, Rand.Range(0.01f, 0.05f));
-                }, 0.15f));
-                actions.Add(new Pair<Action, float>(delegate
-                {
-                    AffectPrice(item, false, Rand.Range(0.01f, 0.03f));
-                }, 0.15f));
-                actions.Add(new Pair<Action, float>(delegate
-                {
-                    AffectPrice(item, false, 0.01f);
-                }, 0.20f));
-                actions.Add(new Pair<Action, float>(delegate
-                {
-                    AffectPrice(item, true, 0.01f);
-                }, 0.20f));
-                actions.Add(new Pair<Action, float>(delegate
-                {
-                    AffectPrice(item, true, Rand.Range(0.01f, 0.03f));
-                }, 0.15f));
-                actions.Add(new Pair<Action, float>(delegate
-                {
-                    AffectPrice(item, true, Rand.Range(0.01f, 0.05f));
-                }, 0.15f));
-
-                if (actions.TryRandomElementByWeight(x => x.Second, out var result))
-                {
-                    result.First();
-                }
+                AffectPriceRandomly(item);
             }
         }
+
+        public void AffectPriceRandomly(ThingDef item)
+        {
+            var actions = new List<Pair<Action, float>>();
+            actions.Add(new Pair<Action, float>(delegate
+            {
+                AffectPrice(item, false, Rand.Range(0.01f, 0.05f));
+            }, 0.15f));
+            actions.Add(new Pair<Action, float>(delegate
+            {
+                AffectPrice(item, false, Rand.Range(0.01f, 0.03f));
+            }, 0.15f));
+            actions.Add(new Pair<Action, float>(delegate
+            {
+                AffectPrice(item, false, 0.01f);
+            }, 0.20f));
+            actions.Add(new Pair<Action, float>(delegate
+            {
+                AffectPrice(item, true, 0.01f);
+            }, 0.20f));
+            actions.Add(new Pair<Action, float>(delegate
+            {
+                AffectPrice(item, true, Rand.Range(0.01f, 0.03f));
+            }, 0.15f));
+            actions.Add(new Pair<Action, float>(delegate
+            {
+                AffectPrice(item, true, Rand.Range(0.01f, 0.05f));
+            }, 0.15f));
+
+            if (actions.TryRandomElementByWeight(x => x.Second, out var result))
+            {
+                result.First();
+            }
+        }
+
         private void DoPriceImpactsFromNews()
         {
             for (int num = unProcessedNews.Count - 1; num >= 0; num--)
