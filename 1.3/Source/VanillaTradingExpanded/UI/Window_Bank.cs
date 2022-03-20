@@ -269,7 +269,7 @@ namespace VanillaTradingExpanded
 
 				if (loanIsTaken)
                 {
-					var repayDateLabel = new Rect(loanTitle.x, silverLabel.yMax, 250, 24);
+					var repayDateLabel = new Rect(loanTitle.x, silverLabel.yMax, 280, 24);
 					Widgets.Label(repayDateLabel, "VTE.RepayDateDaysLeft".Translate(GenDate.DateFullStringAt(repayDate, 
 						Find.WorldGrid.LongLatOf(negotiator.Map.Tile)), (loan.repayDate - Find.TickManager.TicksAbs).ToStringTicksToPeriod()));
 
@@ -281,10 +281,10 @@ namespace VanillaTradingExpanded
 				}
 				else
                 {
-					var repayLabel = new Rect(loanTitle.x, silverLabel.yMax, 250, 24);
+					var repayLabel = new Rect(loanTitle.x, silverLabel.yMax, 280, 24);
 					Widgets.Label(repayLabel, "VTE.Repay".Translate() + " " + repayAmount);
 
-					var repayDateLabel = new Rect(repayLabel.x, repayLabel.yMax, 250, 24);
+					var repayDateLabel = new Rect(repayLabel.x, repayLabel.yMax, 280, 24);
 					Widgets.Label(repayDateLabel, "VTE.RepayDate".Translate(GenDate.DateFullStringAt(repayDate, Find.WorldGrid.LongLatOf(negotiator.Map.Tile)),
 						(repayDate - Find.TickManager.TicksAbs).ToStringTicksToDays()));
 

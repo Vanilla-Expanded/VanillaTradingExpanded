@@ -19,10 +19,7 @@ namespace VanillaTradingExpanded
         {
             var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
             var news = TradingManager.Instance.CreateNews(newsDefs);
-            if (news.def.Worker.VisibleToPlayer(news))
-            {
-                TradingManager.Instance.RegisterNews(news);
-            }
+            TradingManager.Instance.RegisterNews(news);
         }
         [DebugAction("General", "Spawn 10x news", allowedGameStates = AllowedGameStates.Playing)]
         private static void Spawn10xNews()
@@ -31,10 +28,7 @@ namespace VanillaTradingExpanded
             {
                 var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
                 var news = TradingManager.Instance.CreateNews(newsDefs);
-                if (news.def.Worker.VisibleToPlayer(news))
-                {
-                    TradingManager.Instance.RegisterNews(news);
-                }
+                TradingManager.Instance.RegisterNews(news);
             }
         }
 

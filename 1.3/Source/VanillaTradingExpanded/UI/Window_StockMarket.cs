@@ -213,7 +213,7 @@ namespace VanillaTradingExpanded
 						Widgets.DrawLightHighlight(rect2);
 					}
 
-					var chartIconRect = new Rect(rect2.x, rect2.y, rect2.height, rect2.height);
+					var chartIconRect = new Rect(rect2.x, rect2.y + 7, rect2.height * 0.6f, rect2.height * 0.6f);
 					GUI.DrawTexture(chartIconRect, GuiHelper.ChartIcon);
 					if (Mouse.IsOver(chartIconRect))
                     {

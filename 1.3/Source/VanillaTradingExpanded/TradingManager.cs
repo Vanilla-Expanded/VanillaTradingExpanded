@@ -192,15 +192,17 @@ namespace VanillaTradingExpanded
             var context = newsDef.Worker.GenerateContext();
             var nameRequest = newsDef.Worker.GetGrammarRequest(context);
             nameRequest.Includes.Add(newsDef.textRulePack);
-            return new News
+            var news = new News
             {
                 def = newsDef,
                 text = GrammarResolver.Resolve("root", nameRequest),
                 newsContext = context,
-                creationTick = Find.TickManager.TicksGame,
+                creationTick = Find.TickManager.TicksAbs,
                 priceImpact = RandomPriceImpact(newsDef.priceImpactRandomInRange),
                 priceImpactStartTick = Find.TickManager.TicksGame + newsDef.priceImpactTicksDelay.RandomInRange,
             };
+            newsDef.Worker.OnCreate(news);
+            return news;
         }
 
         public float RandomPriceImpact(FloatRange floatRange)
@@ -318,11 +320,7 @@ namespace VanillaTradingExpanded
             {
                 var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
                 var news = CreateNews(newsDefs);
-                //Log.Message(news.text + " - " + news.priceImpact);
-                if (news.def.Worker.VisibleToPlayer(news))
-                {
-                    RegisterNews(news);
-                }
+                RegisterNews(news);
             }
 
             // process news and do price impacts based on them
@@ -370,7 +368,7 @@ namespace VanillaTradingExpanded
                 else if (checkIntervalThisTick)
                 {
                     var markup = (contract.reward / contract.BaseMarketValue) * 100f;
-                    var chance = markup / ((float)contract.reward);
+                    var chance = (markup / ((float)contract.reward)) / 2f;
                     if (Rand.Chance(chance))
                     {
                         npcSubmittedContracts.RemoveAt(i); 
@@ -392,7 +390,7 @@ namespace VanillaTradingExpanded
                 else if (checkIntervalThisTick)
                 {
                     var markup = (contract.reward / contract.BaseMarketValue) * 100f;
-                    var chance = markup / ((float)contract.reward);
+                    var chance = (markup / ((float)contract.reward)) / 2f;
                     if (Rand.Chance(chance))
                     {
                         Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.PayMoneyForContract".Translate(contract.Name), new TransactionProcess

@@ -32,10 +32,7 @@ namespace VanillaTradingExpanded
         public abstract GrammarRequest GetGrammarRequest(NewsContext context);
         public abstract void AffectPrices(News news);
 
-        public virtual bool VisibleToPlayer(News news)
-        {
-            return true;
-        }
+        public virtual void OnCreate(News news) { }
 	}
 
     public abstract class NewsWorker_TradeItemsImpact : NewsWorker
@@ -86,13 +83,8 @@ namespace VanillaTradingExpanded
 
     public class NewsWorker_CompanyAction : NewsWorker
     {
-        public override bool VisibleToPlayer(News news)
-        {
-            return news.newsContext.company.playerFollowsNews;
-        }
         public override void AffectPrices(News news)
         {
-
             if (news.priceImpact >= 0)
             {
                 news.newsContext.company.currentValue *= 1f + news.priceImpact;
@@ -114,6 +106,15 @@ namespace VanillaTradingExpanded
             var grammarRequest = default(GrammarRequest);
             grammarRequest.Rules.Add(new Rule_String("COMPANY", context.company.name));
             return grammarRequest;
+        }
+
+        public override void OnCreate(News news)
+        {
+            base.OnCreate(news);
+            if (news.newsContext.company.playerFollowsNews)
+            {
+                Messages.Message(news.text, MessageTypeDefOf.NeutralEvent);
+            }
         }
     }
 }
