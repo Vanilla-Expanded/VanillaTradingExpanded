@@ -52,18 +52,26 @@ namespace VanillaTradingExpanded
             }
         }
 
-        public static List<ThingDef> cachedItemsForContracts = new List<ThingDef>();
+        [DebugAction("General", "Regenerate contracts", allowedGameStates = AllowedGameStates.Playing)]
+        private static void RegenerateContracts()
+        {
+            TradingManager.Instance.npcSubmittedContracts.Clear();
+            TradingManager.Instance.GenerateAllStartingContracts();
+        }
+
+        public static HashSet<ThingDef> craftableOrCollectableItems = new HashSet<ThingDef>();
+        public static HashSet<ThingDef> nonCraftableItems = new HashSet<ThingDef>();
         public static HashSet<ThingDef> tradeableItemsToIgnore = new HashSet<ThingDef>
         {
             ThingDefOf.Silver,
         };
 
-        public static HashSet<ThingDef> craftableItemsSpecific = new HashSet<ThingDef>
+        private static HashSet<ThingDef> craftableItemsSpecific = new HashSet<ThingDef>
         {
             ThingDefOf.Beer
         };
 
-        public static HashSet<ThingDef> collectableThings = new HashSet<ThingDef>();
+        private static HashSet<ThingDef> collectableThings = new HashSet<ThingDef>();
         public static List<ThingDef> cachedTradeableItems = new List<ThingDef>();
         public static List<ThingDef> cachedFoodItems = new List<ThingDef>();
         public static Dictionary<string, List<ThingDef>> itemsByThingSetMakerTags = new Dictionary<string, List<ThingDef>>();
@@ -133,23 +141,27 @@ namespace VanillaTradingExpanded
                     collectableThings.Add(thingDef.race.meatDef);
                 }
                 var marketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-                if (thingDef.tradeability != Tradeability.None && marketValue > 0 && !tradeableItemsToIgnore.Contains(thingDef))
+                if (CanBeSoldOrBought(thingDef, marketValue))
                 {
                     if (marketValue > minTradePrice)
                     {
                         minTradePrice = marketValue;
                     }
-                    //Log.Message($"Adding: {thingDef}, {thingDef.tradeability}, {thingDef.GetStatValueAbstract(StatDefOf.MarketValue)}, {string.Join(", ", thingDef.tradeTags ?? new List<string>())}");
+                    //Log.Message($"Adding: {thingDef}, thingDef.tradeability: {thingDef.tradeability}, marketValue: {marketValue}, {string.Join(", ", thingDef.tradeTags ?? new List<string>())}");
                     cachedTradeableItems.Add(thingDef);
                 }
             }
             foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
             {
-                if (thingDef.category == ThingCategory.Item && thingDef != ThingDefOf.Silver)
+                if (IsSuitableForContract(thingDef))
                 {
-                    if (IsSuitableForContracts(thingDef))
+                    if (IsCraftableOrCollectable(thingDef))
                     {
-                        cachedItemsForContracts.Add(thingDef);
+                        craftableOrCollectableItems.Add(thingDef);
+                    }
+                    else
+                    {
+                        nonCraftableItems.Add(thingDef);
                     }
                 }
             }
@@ -162,7 +174,39 @@ namespace VanillaTradingExpanded
                 }
             }
 
-            bool IsSuitableForContracts(ThingDef thingDef)
+            bool CanBeSoldOrBought(ThingDef thingDef, float marketValue)
+            {
+                bool result = thingDef.tradeability != Tradeability.None && marketValue > 0 && !tradeableItemsToIgnore.Contains(thingDef);
+                if (result)
+                {
+                    if (thingDef.plant != null && !thingDef.Minifiable)
+                    {
+                        //Log.Message("Cannot sell " + thingDef + " - " + thingDef.label);
+                        return false;
+                    }
+                    if (thingDef.building != null && !thingDef.Minifiable)
+                    {
+                        //Log.Message("Cannot sell " + thingDef + " - " + thingDef.label);
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            bool IsSuitableForContract(ThingDef thingDef)
+            {
+                if (thingDef.category == ThingCategory.Item && thingDef != ThingDefOf.Silver)
+                {
+                    if (!DebugThingPlaceHelper.IsDebugSpawnable(thingDef))
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
+            }
+            bool IsCraftableOrCollectable(ThingDef thingDef)
             {
                 foreach (var recipe in DefDatabase<RecipeDef>.AllDefs)
                 {

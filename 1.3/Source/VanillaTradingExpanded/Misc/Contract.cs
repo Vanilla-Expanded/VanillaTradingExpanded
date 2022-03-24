@@ -42,7 +42,7 @@ namespace VanillaTradingExpanded
             {
                 tries++;
                 Reset();
-                item = Utils.cachedItemsForContracts.RandomElement();
+                item = Utils.craftableOrCollectableItems.RandomElement();
                 stuff = GenStuff.RandomStuffFor(item);
                 amount = Mathf.Max(1, (int)(targetMarketValue.RandomInRange / item.GetStatValueAbstract(StatDefOf.MarketValue, stuff)));
                 if (targetMarketValue.Includes(BaseMarketValue))

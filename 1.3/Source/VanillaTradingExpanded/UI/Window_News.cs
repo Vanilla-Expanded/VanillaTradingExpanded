@@ -190,7 +190,7 @@ namespace VanillaTradingExpanded
         {
 			switch (filter)
             {
-				case FilterBy.All: return cachedNews;
+				case FilterBy.All: return cachedNews.OrderByDescending(x => x.creationTick).ToList();
 				case FilterBy.OnlySpecificCategory: return cachedNews.Where(x => x.MatchesCategory(specificCategory)).ToList();
 				case FilterBy.OnlyBullish: return cachedNews.Where(x => x.newsContext.company is null && x.priceImpact > 0).ToList();
 				case FilterBy.OnlyBearish: return cachedNews.Where(x => x.newsContext.company is null && x.priceImpact < 0).ToList();

@@ -70,7 +70,7 @@ namespace VanillaTradingExpanded
 				var withdrawRect = new Rect(withdrawFullyRect.xMax, pos.y, 24, 24);
 				if (Widgets.ButtonText(withdrawRect, "<") && this.transactionProcess.transactionGain - allMoneyToGain > 0)
 				{
-					this.transactionProcess.amountToTransfer[bank]++;
+					this.transactionProcess.amountToTransfer[bank] += 1 * GenUI.CurrentAdjustmentMultiplier();
 				}
 				var textEntry = new Rect(withdrawRect.xMax + 5, pos.y, 60, 24);
 				textEntryBuffer = this.transactionProcess.amountToTransfer[bank].ToString();
@@ -81,7 +81,7 @@ namespace VanillaTradingExpanded
 				var depositRect = new Rect(textEntry.xMax + 5, pos.y, 24, 24);
 				if (Widgets.ButtonText(depositRect, ">") && this.transactionProcess.amountToTransfer[bank] > 0)
 				{
-					this.transactionProcess.amountToTransfer[bank]--;
+					this.transactionProcess.amountToTransfer[bank] -= 1 * GenUI.CurrentAdjustmentMultiplier();
 				}
 				var depositFullyRect = new Rect(depositRect.xMax, pos.y, 24, 24);
 				if (Widgets.ButtonText(depositFullyRect, ">>"))

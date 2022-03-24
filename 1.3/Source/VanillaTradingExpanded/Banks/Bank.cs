@@ -37,9 +37,16 @@ namespace VanillaTradingExpanded
             set
             {
                 this.depositAmount = value;
+                for (int num = loans.Count - 1; num >= 0; num--)
+                {
+                    var loan = loans[num];
+                    if (loan.IsOverdue)
+                    {
+                        this.TryRepayFromBalance(loan);
+                    }
+                }
             }
         }
-        public float Balance => depositAmount;
 
         public BankExtension bankExtension;
         public float Fees => bankExtension.feesByGoodwill.Evaluate(this.parentFaction.GoodwillWith(Faction.OfPlayer));
@@ -85,7 +92,8 @@ namespace VanillaTradingExpanded
         {
             this.loans.Add(new Loan
             {
-                repayAmount = repayAmount,
+                initialRepayAmount = repayAmount,
+                curRepayAmount = repayAmount,
                 repayDate = repayDate,
                 loanOptionId = this.bankExtension.loanOptions.IndexOf(loanOption),
                 mapTile = negotiator.Map.Tile
@@ -108,12 +116,12 @@ namespace VanillaTradingExpanded
 
         public void TryRepayFromBalance(Loan loan)
         {
-            if (this.Balance > 0)
+            if (this.DepositAmount > 0)
             {
-                var toPay = (int)(Mathf.Min(this.Balance, loan.repayAmount));
-                loan.repayAmount -= toPay;
+                var toPay = (int)(Mathf.Min(this.DepositAmount, loan.curRepayAmount));
+                loan.curRepayAmount -= toPay;
                 this.depositAmount -= toPay;
-                if (loan.repayAmount == 0)
+                if (loan.curRepayAmount == 0)
                 {
                     this.loans.Remove(loan);
                 }
@@ -127,6 +135,12 @@ namespace VanillaTradingExpanded
                 var loan = loans[num];
                 if (loan.IsOverdue)
                 {
+                    if (Find.TickManager.TicksGame % GenDate.TicksPerDay == 0)
+                    {
+                        var loanOption = loan.GetLoanOption(this);
+                        var additionalMoneyInterest = (int)(loan.initialRepayAmount * loanOption.overdueInterestEveryDay);
+                        loan.curRepayAmount += additionalMoneyInterest;
+                    }
                     this.TryRepayFromBalance(loan);
                     if (loans.Contains(loan))
                     {
@@ -142,7 +156,7 @@ namespace VanillaTradingExpanded
                             if (!loan.warrantForIndebtednessWarningIssued)
                             {
                                 loan.warrantForIndebtednessWarningIssued = true;
-                                Find.LetterStack.ReceiveLetter("VTE.DebtCollection".Translate(), "VTE.DebtCollectionDesc".Translate(loan.repayAmount, parentFaction.Named("FACTION")), LetterDefOf.ThreatBig);
+                                Find.LetterStack.ReceiveLetter("VTE.DebtCollection".Translate(), "VTE.DebtCollectionDesc".Translate(loan.curRepayAmount, parentFaction.Named("FACTION")), LetterDefOf.ThreatBig);
                             }
                             if (Rand.MTBEventOccurs(15, 60000f, 1f))
                             {

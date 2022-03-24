@@ -21,13 +21,14 @@ namespace VanillaTradingExpanded
         public float? repayAmountPerDeposit;
         public bool transactionFeesIncluded;
         public float loanRepayPeriodDays;
+        public float overdueInterestEveryDay;
         public int GetLoanAmountFrom(Bank bank)
         {
             if (fixedLoanAmount.HasValue)
             {
                 return fixedLoanAmount.Value;
             }
-            return Mathf.CeilToInt(bank.Balance * loanAmountPerDeposit.Value);
+            return Mathf.CeilToInt(bank.DepositAmount * loanAmountPerDeposit.Value);
         }
 
         public int GetRepayAmountFrom(Bank bank)
@@ -48,8 +49,6 @@ namespace VanillaTradingExpanded
         {
             return (int)(Find.TickManager.TicksAbs + (GenDate.TicksPerDay * loanRepayPeriodDays));
         }
-
-
     }
     public class BankExtension : DefModExtension
     {
