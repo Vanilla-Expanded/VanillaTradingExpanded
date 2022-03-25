@@ -4,7 +4,7 @@
   <ThingDef ParentName="BuildingBase">
     <defName>VTE_TradingTerminal</defName>
     <label>trading terminal</label>
-    <description>Allows radio contact with other factions and orbital traders.</description>
+    <description>A terminal that allows contact with the bank, access to stock market, price overview and contracts.</description>
     <thingClass>VanillaTradingExpanded.Building_TradingTerminal</thingClass>
     <graphicData>
       <texPath>Structures/TradingConsole/TradingConsole</texPath>
@@ -36,7 +36,7 @@
       <destroySound>BuildingDestroyed_Metal_Big</destroySound>
     </building>
     <costList>
-      <Steel>120</Steel>
+      <Steel>140</Steel>
       <ComponentIndustrial>4</ComponentIndustrial>
     </costList>
     <defaultPlacingRot>South</defaultPlacingRot>
