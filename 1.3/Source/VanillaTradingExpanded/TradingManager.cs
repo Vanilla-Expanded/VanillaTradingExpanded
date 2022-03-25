@@ -39,8 +39,6 @@ namespace VanillaTradingExpanded
         public List<Contract> playerSubmittedContracts;
         public List<Contract> npcSubmittedContracts;
         public List<Contract> npcContractsToBeCompleted;
-
-        public bool initialized;
         public TradingManager()
         {
             Instance = this;
@@ -55,6 +53,19 @@ namespace VanillaTradingExpanded
         {
             base.FinalizeInit();
             InitVars();
+            Startup();
+        }
+
+        private void Startup()
+        {
+            GenerateAllPriceRecorders();
+            GenerateAllStartingCompanies();
+            GenerateAllStartingBanks();
+            GenerateAllStartingContracts();
+        }
+
+        private void GenerateAllPriceRecorders()
+        {
             foreach (var thingDef in Utils.cachedTradeableItems)
             {
                 if (!priceHistoryRecorders.ContainsKey(thingDef))
@@ -64,16 +75,9 @@ namespace VanillaTradingExpanded
                     priceHistoryRecorders[thingDef] = recorder;
                 }
             }
-
-            var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();
-            var companiesToGenerate = MaxCompanyCount - companies.Count;
-            for (var i = 0; i < companiesToGenerate; i++)
-            {
-                var tradeKind = orbitalTraders.RandomElement();
-                var company = new Company(GetFaction(tradeKind), tradeKind, companies.Count);
-                companies.Add(company);
-            }
-
+        }
+        private void GenerateAllStartingBanks()
+        {
             if (Find.World != null)
             {
                 foreach (var faction in Find.FactionManager.AllFactions)
@@ -92,21 +96,36 @@ namespace VanillaTradingExpanded
                     }
                 }
             }
+        }
 
-            if (!initialized)
+        private void GenerateAllStartingCompanies()
+        {
+            var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();
+            var companiesToGenerate = MaxCompanyCount - companies.Count;
+            for (var i = 0; i < companiesToGenerate; i++)
             {
-                initialized = true;
-                for (var i = 0; i < MaxNPCContractCount; i++)
+                var tradeKind = orbitalTraders.RandomElement();
+                var company = new Company(GetFaction(tradeKind), tradeKind, companies.Count);
+                companies.Add(company);
+            }
+        }
+
+        public void GenerateAllStartingContracts()
+        {
+            for (var i = 0; i < MaxNPCContractCount; i++)
+            {
+                if (npcSubmittedContracts.Count < MaxNPCContractCount)
                 {
                     npcSubmittedContracts.Add(GenerateRandomContract());
                 }
             }
         }
+
         public Contract GenerateRandomContract()
         {
             var baseMap = Find.AnyPlayerHomeMap;
             var wealth = baseMap.wealthWatcher.WealthTotal;
-            var targetMarketValue = new FloatRange(wealth * 0.01f, wealth * 0.05f);
+            var targetMarketValue = new FloatRange(Mathf.Min(2000, wealth * 0.01f), wealth * 0.03f);
             var contract = new Contract
             {
                 creationTick = Find.TickManager.TicksGame,
@@ -114,6 +133,8 @@ namespace VanillaTradingExpanded
             };
             contract.GenerateItem(targetMarketValue);
             contract.GenerateReward();
+            //Log.Message("Target targetMarketValue: " + targetMarketValue + ", current wealth: " + wealth + 
+            //    ", generated contract: " + contract.Name + ", base market value: " + contract.BaseMarketValue + ", rate: " + contract.BaseMarketValue / targetMarketValue.Average);
             return contract;
         }
         public void CompleteContract(Contract contract)
@@ -160,15 +181,19 @@ namespace VanillaTradingExpanded
         {
             if (!Utils.tradeableItemsToIgnore.Contains(soldThing.def))
             {
-                Log.Message(soldThing + " is sold by " + countToSell);
+                Log.Message("before thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " 
+                    + thingsAffectedBySoldPurchasedMarketValue.TryGetValue(soldThing.def, out var test));
+                var totalValue = soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                Log.Message(soldThing + " is sold by " + countToSell + " with " + totalValue + " base market value: " + soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue));
                 if (thingsAffectedBySoldPurchasedMarketValue.ContainsKey(soldThing.def))
                 {
-                    thingsAffectedBySoldPurchasedMarketValue[soldThing.def] += soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    thingsAffectedBySoldPurchasedMarketValue[soldThing.def] += totalValue;
                 }
                 else
                 {
-                    thingsAffectedBySoldPurchasedMarketValue[soldThing.def] = soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
+                    thingsAffectedBySoldPurchasedMarketValue[soldThing.def] = totalValue;
                 }
+                Log.Message("thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " + thingsAffectedBySoldPurchasedMarketValue[soldThing.def]);
             }
         }
         public void RegisterPurchasedThing(Thing soldThing, int countToSell)
@@ -184,6 +209,7 @@ namespace VanillaTradingExpanded
                 {
                     thingsAffectedBySoldPurchasedMarketValue[soldThing.def] = -soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
+                Log.Message("thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " + thingsAffectedBySoldPurchasedMarketValue[soldThing.def]);
             }
         }
 
@@ -307,10 +333,10 @@ namespace VanillaTradingExpanded
             {
                 // process player transactions and do price impacts based on them
                 ProcessPlayerTransactions();
-
+            
                 // handles prices on seasonal items, such as food
                 SeasonalPriceUpdates();
-
+            
                 // simulate world trading, by trading 20% of whole tradeable items
                 SimulateWorldTrading();
             }
@@ -318,7 +344,7 @@ namespace VanillaTradingExpanded
             // create news every 3 days in average
             if (Rand.MTBEventOccurs(3f, 60000f, 1f))
             {
-                var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
+                var newsDefs = DefDatabase<NewsDef>.AllDefs.Where(x => x.CanOccur).RandomElementByWeight(x => x.commonality);
                 var news = CreateNews(newsDefs);
                 RegisterNews(news);
             }
@@ -334,7 +360,6 @@ namespace VanillaTradingExpanded
                 prevDay = day;
                 DoPriceRebalances();
             }
-
             ProcessContracts(localMap);
         }
 
@@ -391,6 +416,10 @@ namespace VanillaTradingExpanded
                 {
                     var markup = (contract.reward / contract.BaseMarketValue) * 100f;
                     var chance = (markup / ((float)contract.reward)) / 2f;
+                    if (Utils.nonCraftableItems.Contains(contract.item))
+                    {
+                        chance /= 2f; // lowering chance for the non-craftable item to be retrieved
+                    }
                     if (Rand.Chance(chance))
                     {
                         Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.PayMoneyForContract".Translate(contract.Name), new TransactionProcess
@@ -406,7 +435,7 @@ namespace VanillaTradingExpanded
                                     contract.amount -= thing.stackCount;
                                     things.Add(thing);
                                 }
-                                IntVec3 intVec = DropCellFinder.RandomDropSpot(localMap);
+                                IntVec3 intVec = DropCellFinder.TradeDropSpot(localMap);
                                 DropPodUtility.DropThingsNear(intVec, localMap, things, 110, canInstaDropDuringInit: false, leaveSlag: true);
                                 var list = "";
                                 foreach (var thing in things)
@@ -534,12 +563,17 @@ namespace VanillaTradingExpanded
         {
             foreach (var priceModifierKvp in thingsAffectedBySoldPurchasedMarketValue)
             {
-                var chance = Math.Abs(priceModifierKvp.Value / 10f) / 100f;
-                Log.Message($"Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
+                var spentMoneyInTransaction = Math.Abs(priceModifierKvp.Value);
+                var chance = (spentMoneyInTransaction / 10f) / 100f;
+                //Log.Message($"Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
                 if (Rand.Chance(chance))
                 {
-                    Log.Message($"Success: Chance for {priceModifierKvp.Key} is {chance}. amount of spent silver is {priceModifierKvp.Value}");
-                    AffectPrice(priceModifierKvp.Key, priceModifierKvp.Value > 0, Rand.Range(0.01f, 0.1f));
+                    var impactModifier = Mathf.Min(10f, Mathf.Max(1f, spentMoneyInTransaction / 1000f)); 
+                    // if amount of silver spent is higher than 1000, start price impact change scalling up to 10x
+                    Log.Message($"Success: Chance for {priceModifierKvp.Key} is {chance}. " +
+                        $"amount of spent silver is {priceModifierKvp.Value}, " +
+                        $"impactModifier: {impactModifier}");
+                    AffectPrice(priceModifierKvp.Key, priceModifierKvp.Value < 0, Rand.Range(0.01f, 0.1f) * impactModifier);
                 }
             }
             thingsAffectedBySoldPurchasedMarketValue.Clear();
@@ -614,8 +648,8 @@ namespace VanillaTradingExpanded
                     }
                 }
             }
-            //Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
-            //Log.ResetMessageCount();
+            Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
+            Log.ResetMessageCount();
         }
 
         public bool TryGetModifiedPriceFor(ThingDef thingDef, out float price)
@@ -643,7 +677,20 @@ namespace VanillaTradingExpanded
             Scribe_Collections.Look(ref npcSubmittedContracts, "npcSubmittedContracts", LookMode.Deep);
             Scribe_Collections.Look(ref npcContractsToBeCompleted, "npcContractsToBeCompleted", LookMode.Deep);
             InitVars();
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                DoCleanup();
+                Startup();
+            }
+        }
+
+        private void DoCleanup()
+        {
             companies.RemoveAll(x => x.traderKind is null);
+            priceHistoryRecorders.RemoveAll(x => x.Key is null);
+            playerSubmittedContracts.RemoveAll(x => x.item is null);
+            npcSubmittedContracts.RemoveAll(x => x.item is null);
+            npcContractsToBeCompleted.RemoveAll(x => x.item is null);
         }
 
         private List<ThingDef> thingDefsKeys1;

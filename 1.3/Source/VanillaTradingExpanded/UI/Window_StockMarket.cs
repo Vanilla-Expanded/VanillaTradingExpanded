@@ -283,7 +283,7 @@ namespace VanillaTradingExpanded
 					var shareBuyRect = new Rect(profitLossChangeRect.xMax + 55, rect2.y + 1, rect2.height - 2, rect2.height - 2);
 					if (Widgets.ButtonText(shareBuyRect, "<"))
 					{
-						amount--;
+						amount -= 1 * GenUI.CurrentAdjustmentMultiplier();
 					}
 
 					GUI.color = Color.white;
@@ -294,7 +294,7 @@ namespace VanillaTradingExpanded
 					var shareSellRect = new Rect(textEntry.xMax + 5, rect2.y + 1, rect2.height - 2, rect2.height - 2);
 					if (Widgets.ButtonText(shareSellRect, ">"))
 					{
-						amount++;
+						amount += 1 * GenUI.CurrentAdjustmentMultiplier();
 					}
 					var followNewsBox = new Rect(shareSellRect.xMax + 40, rect2.y + 2.5f, rect2.height - 5, rect2.height - 5);
 					GUI.DrawTexture(followNewsBox, checkBox);

@@ -19,9 +19,9 @@ namespace VanillaTradingExpanded
         {
             doCloseButton = true;
             doCloseX = true;
-            closeOnClickedOutside = false;
+            closeOnClickedOutside = true;
             absorbInputAroundWindow = false;
-            allItems = Utils.cachedItemsForContracts.ToList();
+            allItems = Utils.craftableOrCollectableItems.Concat(Utils.nonCraftableItems).ToList();
             this.contract = parent;
         }
 

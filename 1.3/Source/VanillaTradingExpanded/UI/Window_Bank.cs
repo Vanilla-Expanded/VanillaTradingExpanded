@@ -53,7 +53,7 @@ namespace VanillaTradingExpanded
 			Widgets.Label(localFundsRect, "VTE.LocalFunds".Translate(AvailableSilver.Sum(x => x.stackCount)));
 
 			var bankBalanceRect = new Rect(factionNameRect.x, localFundsRect.yMax - 5, factionNameRect.width, 24);
-			Widgets.Label(bankBalanceRect, "VTE.BankBalance".Translate(bank.Balance));
+			Widgets.Label(bankBalanceRect, "VTE.BankBalance".Translate(bank.DepositAmount));
 		}
 
 		private void DrawBankFeesInfo(Rect inRect, ref float posY)
@@ -108,7 +108,11 @@ namespace VanillaTradingExpanded
 			var withdrawRect = new Rect(withdrawFullyRect.xMax, withdrawBox.y, 24, 24);
 			if (Widgets.ButtonText(withdrawRect, "<") && bank.DepositAmount > -amountToDepositOrWithdraw)
 			{
-				amountToDepositOrWithdraw--;
+				amountToDepositOrWithdraw = amountToDepositOrWithdraw - (1 * GenUI.CurrentAdjustmentMultiplier());
+				if (amountToDepositOrWithdraw < -bank.DepositAmount)
+                {
+					amountToDepositOrWithdraw = -bank.DepositAmount;
+				}
 			}
 
 			GUI.color = Color.white;
@@ -120,9 +124,11 @@ namespace VanillaTradingExpanded
 			var depositRect = new Rect(textEntry.xMax + 5, withdrawBox.y, 24, 24);
 			if (Widgets.ButtonText(depositRect, ">"))
 			{
-				if (silverThings.Sum(x => x.stackCount) > amountToDepositOrWithdraw)
-                {
-					amountToDepositOrWithdraw++;
+				var maxAmount = silverThings.Sum(x => x.stackCount);
+				amountToDepositOrWithdraw = amountToDepositOrWithdraw + (1 * GenUI.CurrentAdjustmentMultiplier());
+				if (amountToDepositOrWithdraw > maxAmount)
+				{
+					amountToDepositOrWithdraw = maxAmount;
 				}
 			}
 			var depositFullyRect = new Rect(depositRect.xMax, withdrawBox.y, 24, 24);
@@ -233,7 +239,7 @@ namespace VanillaTradingExpanded
 			var loanTitle = new Rect(rect.x + 10, rect.y + 5, 250, 24);
 			Widgets.Label(loanTitle, loanOption.loanNameKey.Translate());
 
-			if (bank.Balance > 0 || loanOption.fixedLoanAmount.HasValue)
+			if (bank.DepositAmount > 0 || loanOption.fixedLoanAmount.HasValue)
 			{
 				bool loanIsTaken = bank.LoanIsTaken(loanOption, out var loan);
 				if (loanIsTaken)
@@ -246,8 +252,8 @@ namespace VanillaTradingExpanded
 				}
 
 				var loanAmount = loanOption.GetLoanAmountFrom(bank);
-				var repayAmount = loanIsTaken ? loan.repayAmount : loanOption.GetRepayAmountFrom(bank);
-				var repayDate = loanOption.GetRepayDateTicks();
+				var repayAmount = loanIsTaken ? loan.curRepayAmount : loanOption.GetRepayAmountFrom(bank);
+				var repayDate = loanIsTaken ? loan.repayDate :  loanOption.GetRepayDateTicks();
 
 				var posY = loanTitle.yMax;
 				var posX = rect.x + 90;
@@ -262,17 +268,24 @@ namespace VanillaTradingExpanded
 
 				Text.Anchor = TextAnchor.MiddleLeft;
 				Text.Font = GameFont.Medium;
-				var silverLabel = new Rect(silverIcon.xMax + 5, silverIcon.y, 60, 24);
+				var silverLabel = new Rect(silverIcon.xMax + 5, silverIcon.y, 80, 24);
 				Widgets.Label(silverLabel, (loanIsTaken ? repayAmount : loanAmount).ToString());
 				Text.Anchor = TextAnchor.UpperLeft;
 				Text.Font = GameFont.Small;
 
+				var dateString = GenDate.DateFullStringAt(repayDate, Find.WorldGrid.LongLatOf(negotiator.Map.Tile));
 				if (loanIsTaken)
                 {
 					var repayDateLabel = new Rect(loanTitle.x, silverLabel.yMax, 280, 24);
-					Widgets.Label(repayDateLabel, "VTE.RepayDateDaysLeft".Translate(GenDate.DateFullStringAt(repayDate, 
-						Find.WorldGrid.LongLatOf(negotiator.Map.Tile)), (loan.repayDate - Find.TickManager.TicksAbs).ToStringTicksToPeriod()));
-
+					if (loan.repayDate > Find.TickManager.TicksAbs)
+                    {
+						Widgets.Label(repayDateLabel, "VTE.RepayDateDaysLeft".Translate(dateString,
+							(loan.repayDate - Find.TickManager.TicksAbs).ToStringTicksToPeriod()));
+					}
+					else
+					{
+						Widgets.Label(repayDateLabel, "VTE.RepayDateOverdue".Translate(dateString));
+					}
 					var repayFromBalance = new Rect(rect.x + 50, repayDateLabel.yMax + 5, rect.width - 100, 30);
 					if (Widgets.ButtonText(repayFromBalance, "VTE.RepayFromBalance".Translate()))
 					{
@@ -285,7 +298,8 @@ namespace VanillaTradingExpanded
 					Widgets.Label(repayLabel, "VTE.Repay".Translate() + " " + repayAmount);
 
 					var repayDateLabel = new Rect(repayLabel.x, repayLabel.yMax, 280, 24);
-					Widgets.Label(repayDateLabel, "VTE.RepayDate".Translate(GenDate.DateFullStringAt(repayDate, Find.WorldGrid.LongLatOf(negotiator.Map.Tile)),
+
+					Widgets.Label(repayDateLabel, "VTE.RepayDate".Translate(dateString,
 						(repayDate - Find.TickManager.TicksAbs).ToStringTicksToDays()));
 
 					var takeLoan = new Rect(rect.x + 50, repayDateLabel.yMax + 5, rect.width - 100, 30);

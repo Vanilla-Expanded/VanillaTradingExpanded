@@ -89,7 +89,9 @@ namespace VanillaTradingExpanded
                 var infoCardRect = new Rect(thingIconRect.xMax, pos.y, 24, 24);
                 Widgets.InfoCardButton(infoCardRect, contract.item);
                 var nameRect = new Rect(infoCardRect.xMax, pos.y, 270, 24);
+                Text.WordWrap = false;
                 Widgets.Label(nameRect, contract.Name);
+                Text.WordWrap = true;
 
                 Text.Anchor = TextAnchor.MiddleCenter;
                 var rewardRect = new Rect(nameRect.xMax + 40, pos.y, 60, 24);
@@ -172,7 +174,9 @@ namespace VanillaTradingExpanded
                 var infoCardRect = new Rect(thingIconRect.xMax, pos.y, 24, 24);
                 Widgets.InfoCardButton(infoCardRect, contract.item);
                 var nameRect = new Rect(infoCardRect.xMax, pos.y, 270, 24);
+                Text.WordWrap = false;
                 Widgets.Label(nameRect, contract.Name);
+                Text.WordWrap = true;
 
                 Text.Anchor = TextAnchor.MiddleCenter;
                 var rewardRect = new Rect(nameRect.xMax + 40, pos.y, 60, 24);
@@ -202,7 +206,7 @@ namespace VanillaTradingExpanded
             var amountDecreaseRect = new Rect(pos.x, pos.y, 24, 24);
             if (Widgets.ButtonText(amountDecreaseRect, "<") && curPlayerContract.amount > 0)
             {
-                curPlayerContract.amount--;
+                curPlayerContract.amount = Mathf.Max(0, curPlayerContract.amount - (1 * GenUI.CurrentAdjustmentMultiplier()));
             }
 
             GUI.color = Color.white;
@@ -213,7 +217,7 @@ namespace VanillaTradingExpanded
             var amountIncreaseRect = new Rect(textEntry.xMax + 5, pos.y, 24, 24);
             if (Widgets.ButtonText(amountIncreaseRect, ">"))
             {
-                curPlayerContract.amount++;
+                curPlayerContract.amount += 1 * GenUI.CurrentAdjustmentMultiplier();
             }
 
             bool itemIsSetAndMadeFromStuff = curPlayerContract.item != null && curPlayerContract.item.MadeFromStuff;

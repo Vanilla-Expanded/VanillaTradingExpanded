@@ -966,7 +966,7 @@
 	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
 		<defName>VTE_ShipCrashed</defName>
 		<textRulePack>VTE_ShipCrashed</textRulePack>
-		<priceImpactRandomInRange>-0.02~0.15</priceImpactRandomInRange>
+		<priceImpactRandomInRange>-0.02~-0.15</priceImpactRandomInRange>
 		<priceImpactTicksDelay>1200~6600</priceImpactTicksDelay> 
 		<commonality>1.1</commonality>
 	</VanillaTradingExpanded.NewsDef>

@@ -34,6 +34,7 @@ namespace VanillaTradingExpanded
                 return workerInt;
             }
         }
+        public bool CanOccur => Worker.CanOccur();
 
         public float commonality;
     }
