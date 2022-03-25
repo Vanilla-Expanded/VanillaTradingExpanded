@@ -33,6 +33,7 @@ namespace VanillaTradingExpanded
         public abstract void AffectPrices(News news);
 
         public virtual void OnCreate(News news) { }
+        public abstract bool CanOccur();
 	}
 
     public abstract class NewsWorker_TradeItemsImpact : NewsWorker
@@ -53,31 +54,61 @@ namespace VanillaTradingExpanded
         {
             return new NewsContext
             {
-                faction = Find.FactionManager.AllFactions.Where(x => !x.defeated && !x.Hidden && x.def.humanlikeFaction && !x.IsPlayer).RandomElement()
+                faction = GetFaction()
             };
         }
+        private static Faction GetFaction()
+        {
+            if (Find.FactionManager.AllFactions.Where(x => !x.defeated && !x.Hidden && x.def.humanlikeFaction && !x.IsPlayer).TryRandomElement(out var faction))
+            {
+                return faction;
+            }
+            if (Find.FactionManager.AllFactions.Where(x => x.def.humanlikeFaction && !x.IsPlayer).TryRandomElement(out var faction2))
+            {
+                return faction2;
+            }
+            return null;
+        }
+
         public override GrammarRequest GetGrammarRequest(NewsContext context)
         {
             var grammarRequest = default(GrammarRequest);
             grammarRequest.Rules.AddRange(GrammarUtility.RulesForFaction("FACTION", context.faction, grammarRequest.Constants));
             return grammarRequest;
         }
-    }
 
+        public override bool CanOccur()
+        {
+            return GetFaction() != null;
+        }
+    }
     public class NewsWorker_SettlementAction : NewsWorker_TradeItemsImpact
     {
         public override NewsContext GenerateContext()
         {
             return new NewsContext
             {
-                settlement = Find.World.worldObjects.Settlements.Where(x => !x.Faction.defeated && !x.Faction.Hidden && x.Faction.def.humanlikeFaction && !x.Faction.IsPlayer).RandomElement()
+                settlement = GetSettlement()
             };
+        }
+        public Settlement GetSettlement()
+        {
+            if (Find.World.worldObjects.Settlements.Where(x => !x.Faction.defeated && !x.Faction.Hidden && x.Faction.def.humanlikeFaction && !x.Faction.IsPlayer).TryRandomElement(out var settlement))
+            {
+                return settlement;
+            }
+            return Find.World.worldObjects.Settlements.RandomElement();
         }
         public override GrammarRequest GetGrammarRequest(NewsContext context)
         {
             var grammarRequest = default(GrammarRequest);
             grammarRequest.Rules.AddRange(GrammarUtility.RulesForWorldObject("SETTLEMENT", context.settlement));
             return grammarRequest;
+        }
+
+        public override bool CanOccur()
+        {
+            return GetSettlement() != null;
         }
     }
 
@@ -94,6 +125,12 @@ namespace VanillaTradingExpanded
                 news.newsContext.company.currentValue /= 1f + Mathf.Abs(news.priceImpact);
             }
         }
+
+        public override bool CanOccur()
+        {
+            return TradingManager.Instance.companies.Any();
+        }
+
         public override NewsContext GenerateContext()
         {
             return new NewsContext

@@ -39,8 +39,6 @@ namespace VanillaTradingExpanded
         public List<Contract> playerSubmittedContracts;
         public List<Contract> npcSubmittedContracts;
         public List<Contract> npcContractsToBeCompleted;
-
-        public bool initialized;
         public TradingManager()
         {
             Instance = this;
@@ -55,6 +53,19 @@ namespace VanillaTradingExpanded
         {
             base.FinalizeInit();
             InitVars();
+            Startup();
+        }
+
+        private void Startup()
+        {
+            GenerateAllPriceRecorders();
+            GenerateAllStartingCompanies();
+            GenerateAllStartingBanks();
+            GenerateAllStartingContracts();
+        }
+
+        private void GenerateAllPriceRecorders()
+        {
             foreach (var thingDef in Utils.cachedTradeableItems)
             {
                 if (!priceHistoryRecorders.ContainsKey(thingDef))
@@ -64,16 +75,9 @@ namespace VanillaTradingExpanded
                     priceHistoryRecorders[thingDef] = recorder;
                 }
             }
-
-            var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();
-            var companiesToGenerate = MaxCompanyCount - companies.Count;
-            for (var i = 0; i < companiesToGenerate; i++)
-            {
-                var tradeKind = orbitalTraders.RandomElement();
-                var company = new Company(GetFaction(tradeKind), tradeKind, companies.Count);
-                companies.Add(company);
-            }
-
+        }
+        private void GenerateAllStartingBanks()
+        {
             if (Find.World != null)
             {
                 foreach (var faction in Find.FactionManager.AllFactions)
@@ -92,10 +96,17 @@ namespace VanillaTradingExpanded
                     }
                 }
             }
-            if (!initialized)
+        }
+
+        private void GenerateAllStartingCompanies()
+        {
+            var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();
+            var companiesToGenerate = MaxCompanyCount - companies.Count;
+            for (var i = 0; i < companiesToGenerate; i++)
             {
-                initialized = true;
-                GenerateAllStartingContracts();
+                var tradeKind = orbitalTraders.RandomElement();
+                var company = new Company(GetFaction(tradeKind), tradeKind, companies.Count);
+                companies.Add(company);
             }
         }
 
@@ -333,7 +344,7 @@ namespace VanillaTradingExpanded
             // create news every 3 days in average
             if (Rand.MTBEventOccurs(3f, 60000f, 1f))
             {
-                var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
+                var newsDefs = DefDatabase<NewsDef>.AllDefs.Where(x => x.CanOccur).RandomElementByWeight(x => x.commonality);
                 var news = CreateNews(newsDefs);
                 RegisterNews(news);
             }
@@ -349,7 +360,6 @@ namespace VanillaTradingExpanded
                 prevDay = day;
                 DoPriceRebalances();
             }
-
             ProcessContracts(localMap);
         }
 
@@ -666,9 +676,21 @@ namespace VanillaTradingExpanded
             Scribe_Collections.Look(ref playerSubmittedContracts, "playerSubmittedContracts", LookMode.Deep);
             Scribe_Collections.Look(ref npcSubmittedContracts, "npcSubmittedContracts", LookMode.Deep);
             Scribe_Collections.Look(ref npcContractsToBeCompleted, "npcContractsToBeCompleted", LookMode.Deep);
-            Scribe_Values.Look(ref initialized, "initialized");
             InitVars();
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                DoCleanup();
+                Startup();
+            }
+        }
+
+        private void DoCleanup()
+        {
             companies.RemoveAll(x => x.traderKind is null);
+            priceHistoryRecorders.RemoveAll(x => x.Key is null);
+            playerSubmittedContracts.RemoveAll(x => x.item is null);
+            npcSubmittedContracts.RemoveAll(x => x.item is null);
+            npcContractsToBeCompleted.RemoveAll(x => x.item is null);
         }
 
         private List<ThingDef> thingDefsKeys1;

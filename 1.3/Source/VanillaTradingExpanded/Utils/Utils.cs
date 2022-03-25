@@ -17,7 +17,7 @@ namespace VanillaTradingExpanded
         [DebugAction("General", "Spawn 1x news", allowedGameStates = AllowedGameStates.Playing)]
         private static void Spawn1xNews()
         {
-            var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
+            var newsDefs = DefDatabase<NewsDef>.AllDefs.Where(x => x.CanOccur).RandomElementByWeight(x => x.commonality);
             var news = TradingManager.Instance.CreateNews(newsDefs);
             TradingManager.Instance.RegisterNews(news);
         }
@@ -26,7 +26,7 @@ namespace VanillaTradingExpanded
         {
             for (var i = 0; i < 10; i++)
             {
-                var newsDefs = DefDatabase<NewsDef>.AllDefs.RandomElementByWeight(x => x.commonality);
+                var newsDefs = DefDatabase<NewsDef>.AllDefs.Where(x => x.CanOccur).RandomElementByWeight(x => x.commonality);
                 var news = TradingManager.Instance.CreateNews(newsDefs);
                 TradingManager.Instance.RegisterNews(news);
             }
@@ -57,6 +57,15 @@ namespace VanillaTradingExpanded
         {
             TradingManager.Instance.npcSubmittedContracts.Clear();
             TradingManager.Instance.GenerateAllStartingContracts();
+        }
+
+        [DebugAction("General", "Spawn 100000 silver", allowedGameStates = AllowedGameStates.Playing)]
+        private static void Spawn100000Silver()
+        {
+            var silver = ThingMaker.MakeThing(ThingDefOf.Silver);
+            silver.stackCount = 100000;
+            IntVec3 intVec = DropCellFinder.TradeDropSpot(Find.CurrentMap);
+            DropPodUtility.DropThingsNear(intVec, Find.CurrentMap, new List<Thing> { silver }, 110, canInstaDropDuringInit: false, leaveSlag: true, forbid: false);
         }
 
         public static HashSet<ThingDef> craftableOrCollectableItems = new HashSet<ThingDef>();
