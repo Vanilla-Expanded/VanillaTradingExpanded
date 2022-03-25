@@ -149,15 +149,23 @@ namespace VanillaTradingExpanded
                     collectableThings.Add(thingDef.race.leatherDef);
                     collectableThings.Add(thingDef.race.meatDef);
                 }
-                var marketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-                if (CanBeSoldOrBought(thingDef, marketValue))
+
+                try
                 {
-                    if (marketValue > minTradePrice)
+                    var marketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+                    if (CanBeSoldOrBought(thingDef, marketValue))
                     {
-                        minTradePrice = marketValue;
+                        if (marketValue > minTradePrice)
+                        {
+                            minTradePrice = marketValue;
+                        }
+                        //Log.Message($"Adding: {thingDef}, thingDef.tradeability: {thingDef.tradeability}, marketValue: {marketValue}, {string.Join(", ", thingDef.tradeTags ?? new List<string>())}");
+                        cachedTradeableItems.Add(thingDef);
                     }
-                    //Log.Message($"Adding: {thingDef}, thingDef.tradeability: {thingDef.tradeability}, marketValue: {marketValue}, {string.Join(", ", thingDef.tradeTags ?? new List<string>())}");
-                    cachedTradeableItems.Add(thingDef);
+                }
+                catch (NullReferenceException exception)
+                {
+
                 }
             }
             foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
