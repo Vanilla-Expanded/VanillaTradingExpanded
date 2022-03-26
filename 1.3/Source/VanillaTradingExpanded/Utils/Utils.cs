@@ -70,6 +70,7 @@ namespace VanillaTradingExpanded
 
         public static HashSet<ThingDef> craftableOrCollectableItems = new HashSet<ThingDef>();
         public static HashSet<ThingDef> nonCraftableItems = new HashSet<ThingDef>();
+        public static HashSet<ThingDef> animals = new HashSet<ThingDef>();
         public static HashSet<ThingDef> tradeableItemsToIgnore = new HashSet<ThingDef>
         {
             ThingDefOf.Silver,
@@ -88,6 +89,7 @@ namespace VanillaTradingExpanded
         public static float minTradePrice;
         static Utils()
         {
+            InitMarkupValues();
             minTradePrice = float.MaxValue;
             foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
             {
@@ -148,6 +150,10 @@ namespace VanillaTradingExpanded
                 {
                     collectableThings.Add(thingDef.race.leatherDef);
                     collectableThings.Add(thingDef.race.meatDef);
+                    if (thingDef.race.Animal && !thingDef.race.Dryad)
+                    {
+                        animals.Add(thingDef);
+                    }
                 }
 
                 try
@@ -245,7 +251,25 @@ namespace VanillaTradingExpanded
                 return false;
             }
         }
-
+        public static SimpleCurve markupCurve;
+        public static float[] markupRange;
+        public static void InitMarkupValues()
+        {
+            var maxMarkupValue = VanillaTradingExpandedMod.settings.maxMarkupOnNPCContract;
+            markupRange = new float[1000];
+            for (var i = 0; i < 1000; i++)
+            {
+                markupRange[i] = Rand.Range(1f, (float)maxMarkupValue);
+            }
+            markupCurve = new SimpleCurve();
+            float value = 1;
+            for (var i = 1; i < maxMarkupValue + 1; i++)
+            {
+                var curvePoint = new CurvePoint(i, value);
+                markupCurve.Add(curvePoint);
+                value *= 0.7f;
+            }
+        }
         public static string ToStringMoney(this int f, string format = null)
         {
             if (format == null)

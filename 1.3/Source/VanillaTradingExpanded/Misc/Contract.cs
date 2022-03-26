@@ -15,7 +15,6 @@ namespace VanillaTradingExpanded
         public ThingDef item;
         public ThingDef stuff;
         public int amount;
-        public int creationTick;
         public int expiresInTicks;
         public int arrivesInTicks;
         public Map mapToTakeItems;
@@ -64,34 +63,11 @@ namespace VanillaTradingExpanded
                 amount = (int)((Math.Round(amount / 5f)) * 5f);
             }
         }
-
-        private static float[] range;
         public void GenerateReward()
         {
-            if (range is null)
-            {
-                range = new float[1000];
-                for (var i = 0; i < 1000; i++)
-                {
-                    range[i] = Rand.Range(1f, 10f);
-                }
-            }
-            this.reward = (int)(this.BaseMarketValue * range.RandomElementByWeight(x => markupCurve.Evaluate(x)));
+            this.reward = (int)(this.BaseMarketValue * Utils.markupRange.RandomElementByWeight(x => Utils.markupCurve.Evaluate(x)));
         }
 
-        public SimpleCurve markupCurve = new SimpleCurve
-        {
-            {1f, 1f },
-            {2f, 0.9f },
-            {3f, 0.5f },
-            {4f, 0.3f },
-            {5f,  0.15f },
-            {6f,  0.07f },
-            {7f, 0.004f },
-            {8f,  0.001f },
-            {9f, 0.0001f },
-            {10f,  0.0001f },
-        };
         public void Reset()
         {
             item = null;
@@ -114,6 +90,34 @@ namespace VanillaTradingExpanded
             }
             return things;
         }
+
+        public Thing MakeItem()
+        {
+            if (this.item.race != null)
+            {
+                var pawnKindDef = DefDatabase<PawnKindDef>.AllDefs.FirstOrDefault(x => x.race == this.item);
+                var pawn = PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayer);
+                return pawn;
+            }
+            else
+            {
+                var thing = ThingMaker.MakeThing(this.item, this.stuff);
+                thing.stackCount = Mathf.Min(this.item.stackLimit, this.amount);
+                return thing;
+            }
+        }
+
+        public float ContractFulfilmentChance()
+        {
+            var markup = (this.reward / this.BaseMarketValue) * 100f;
+            var chance = (markup / this.BaseMarketValue) / 2f;
+            if (Utils.nonCraftableItems.Contains(this.item))
+            {
+                chance /= 2f; // lowering chance for the non-craftable item to be retrieved
+            }
+            //Log.Message("Chance of completion: " + chance + " - " + this.Name + ", markup: " + markup + ", contract.reward: " + this.reward);
+            return chance;
+        }
         public void ExposeData()
         {
             Scribe_Values.Look(ref reward, "reward");
@@ -121,7 +125,6 @@ namespace VanillaTradingExpanded
             Scribe_Defs.Look(ref item, "item");
             Scribe_Defs.Look(ref stuff, "stuff");
             Scribe_Values.Look(ref amount, "amount");
-            Scribe_Values.Look(ref creationTick, "creationTick");
             Scribe_Values.Look(ref expiresInTicks, "expiredInTicks");
             Scribe_Values.Look(ref arrivesInTicks, "arrivesInTicks");
             Scribe_References.Look(ref mapToTakeItems, "mapToTakeItems");

@@ -15,14 +15,12 @@ namespace VanillaTradingExpanded
 {
     public class TradingManager : GameComponent
     {
-        public const int MaxNPCContractCount = 30;
-        public const int MaxCompanyCount = 30;
         public static TradingManager Instance;
         // goods
-        private Dictionary<ThingDef, float> priceModifiers;
+        public Dictionary<ThingDef, float> priceModifiers;
         public Dictionary<ThingDef, float> thingsAffectedBySoldPurchasedMarketValue;
 
-        private Dictionary<ThingDef, PriceHistoryAutoRecorderThing> priceHistoryRecorders;
+        public Dictionary<ThingDef, PriceHistoryAutoRecorderThing> priceHistoryRecorders;
         // banks
         public Dictionary<Faction, Bank> banksByFaction;
         public List<Bank> Banks => banksByFaction.Values.ToList();
@@ -64,7 +62,7 @@ namespace VanillaTradingExpanded
             GenerateAllStartingContracts();
         }
 
-        private void GenerateAllPriceRecorders()
+        public void GenerateAllPriceRecorders()
         {
             foreach (var thingDef in Utils.cachedTradeableItems)
             {
@@ -101,7 +99,7 @@ namespace VanillaTradingExpanded
         private void GenerateAllStartingCompanies()
         {
             var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();
-            var companiesToGenerate = MaxCompanyCount - companies.Count;
+            var companiesToGenerate = VanillaTradingExpandedMod.settings.maxCompanyCount - companies.Count;
             for (var i = 0; i < companiesToGenerate; i++)
             {
                 var tradeKind = orbitalTraders.RandomElement();
@@ -112,9 +110,9 @@ namespace VanillaTradingExpanded
 
         public void GenerateAllStartingContracts()
         {
-            for (var i = 0; i < MaxNPCContractCount; i++)
+            for (var i = 0; i < VanillaTradingExpandedMod.settings.maxNPCContractCount; i++)
             {
-                if (npcSubmittedContracts.Count < MaxNPCContractCount)
+                if (npcSubmittedContracts.Count < VanillaTradingExpandedMod.settings.maxNPCContractCount)
                 {
                     npcSubmittedContracts.Add(GenerateRandomContract());
                 }
@@ -128,7 +126,6 @@ namespace VanillaTradingExpanded
             var targetMarketValue = new FloatRange(Mathf.Min(2000, wealth * 0.01f), wealth * 0.03f);
             var contract = new Contract
             {
-                creationTick = Find.TickManager.TicksGame,
                 expiresInTicks = Find.TickManager.TicksGame + (GenDate.TicksPerDay * Rand.Range(15, 60))
             };
             contract.GenerateItem(targetMarketValue);
@@ -181,10 +178,10 @@ namespace VanillaTradingExpanded
         {
             if (!Utils.tradeableItemsToIgnore.Contains(soldThing.def))
             {
-                Log.Message("before thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " 
-                    + thingsAffectedBySoldPurchasedMarketValue.TryGetValue(soldThing.def, out var test));
+                //Log.Message("before thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " 
+                    //+ thingsAffectedBySoldPurchasedMarketValue.TryGetValue(soldThing.def, out var test));
                 var totalValue = soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
-                Log.Message(soldThing + " is sold by " + countToSell + " with " + totalValue + " base market value: " + soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue));
+                //Log.Message(soldThing + " is sold by " + countToSell + " with " + totalValue + " base market value: " + soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue));
                 if (thingsAffectedBySoldPurchasedMarketValue.ContainsKey(soldThing.def))
                 {
                     thingsAffectedBySoldPurchasedMarketValue[soldThing.def] += totalValue;
@@ -193,14 +190,14 @@ namespace VanillaTradingExpanded
                 {
                     thingsAffectedBySoldPurchasedMarketValue[soldThing.def] = totalValue;
                 }
-                Log.Message("thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " + thingsAffectedBySoldPurchasedMarketValue[soldThing.def]);
+                //Log.Message("thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " + thingsAffectedBySoldPurchasedMarketValue[soldThing.def]);
             }
         }
         public void RegisterPurchasedThing(Thing soldThing, int countToSell)
         {
             if (!Utils.tradeableItemsToIgnore.Contains(soldThing.def))
             {
-                Log.Message(soldThing + " is purchased by " + countToSell);
+                //Log.Message(soldThing + " is purchased by " + countToSell);
                 if (thingsAffectedBySoldPurchasedMarketValue.ContainsKey(soldThing.def))
                 {
                     thingsAffectedBySoldPurchasedMarketValue[soldThing.def] -= soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
@@ -209,7 +206,7 @@ namespace VanillaTradingExpanded
                 {
                     thingsAffectedBySoldPurchasedMarketValue[soldThing.def] = -soldThing.def.GetStatValueAbstract(StatDefOf.MarketValue) * countToSell;
                 }
-                Log.Message("thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " + thingsAffectedBySoldPurchasedMarketValue[soldThing.def]);
+                //Log.Message("thingsAffectedBySoldPurchasedMarketValue: " + soldThing.def + " - " + thingsAffectedBySoldPurchasedMarketValue[soldThing.def]);
             }
         }
 
@@ -224,7 +221,7 @@ namespace VanillaTradingExpanded
                 text = GrammarResolver.Resolve("root", nameRequest),
                 newsContext = context,
                 creationTick = Find.TickManager.TicksAbs,
-                priceImpact = RandomPriceImpact(newsDef.priceImpactRandomInRange),
+                priceImpact = RandomPriceImpact(newsDef.priceImpactRandomInRange) * VanillaTradingExpandedMod.settings.newsPriceImpactMultiplier,
                 priceImpactStartTick = Find.TickManager.TicksGame + newsDef.priceImpactTicksDelay.RandomInRange,
             };
             newsDef.Worker.OnCreate(news);
@@ -341,8 +338,8 @@ namespace VanillaTradingExpanded
                 SimulateWorldTrading();
             }
 
-            // create news every 3 days in average
-            if (Rand.MTBEventOccurs(3f, 60000f, 1f))
+            // create news every 3 days in average (default)
+            if (Rand.MTBEventOccurs(VanillaTradingExpandedMod.settings.newsSpawnRate, 60000f, 1f))
             {
                 var newsDefs = DefDatabase<NewsDef>.AllDefs.Where(x => x.CanOccur).RandomElementByWeight(x => x.commonality);
                 var news = CreateNews(newsDefs);
@@ -382,7 +379,7 @@ namespace VanillaTradingExpanded
                 }
             }
 
-            bool checkIntervalThisTick = Find.TickManager.TicksGame % GenDate.TicksPerHour * 12 == 0;
+            bool checkIntervalThisTick = Find.TickManager.TicksGame % 30000 == 0;
             for (var i = npcSubmittedContracts.Count - 1; i >= 0; i--)
             {
                 var contract = npcSubmittedContracts[i];
@@ -392,12 +389,10 @@ namespace VanillaTradingExpanded
                 }
                 else if (checkIntervalThisTick)
                 {
-                    var markup = (contract.reward / contract.BaseMarketValue) * 100f;
-                    var chance = (markup / ((float)contract.reward)) / 2f;
-                    if (Rand.Chance(chance))
+                    if (Rand.Chance(contract.ContractFulfilmentChance() * VanillaTradingExpandedMod.settings.npcContractFulfilmentMultiplier))
                     {
                         npcSubmittedContracts.RemoveAt(i); 
-                        if (npcSubmittedContracts.Count < MaxNPCContractCount)
+                        if (npcSubmittedContracts.Count < VanillaTradingExpandedMod.settings.maxNPCContractCount)
                         {
                             npcSubmittedContracts.Add(GenerateRandomContract());
                         }
@@ -414,13 +409,7 @@ namespace VanillaTradingExpanded
                 }
                 else if (checkIntervalThisTick)
                 {
-                    var markup = (contract.reward / contract.BaseMarketValue) * 100f;
-                    var chance = (markup / ((float)contract.reward)) / 2f;
-                    if (Utils.nonCraftableItems.Contains(contract.item))
-                    {
-                        chance /= 2f; // lowering chance for the non-craftable item to be retrieved
-                    }
-                    if (Rand.Chance(chance))
+                    if (Rand.Chance(contract.ContractFulfilmentChance() * VanillaTradingExpandedMod.settings.playerContractFulfilmentMultiplier))
                     {
                         Find.WindowStack.Add(new Window_PerformTransactionCosts("VTE.PayMoneyForContract".Translate(contract.Name), new TransactionProcess
                         {
@@ -430,8 +419,7 @@ namespace VanillaTradingExpanded
                                 var things = new List<Thing>();
                                 while (contract.amount > 0)
                                 {
-                                    var thing = ThingMaker.MakeThing(contract.item, contract.stuff);
-                                    thing.stackCount = Mathf.Min(contract.item.stackLimit, contract.amount);
+                                    var thing = contract.MakeItem();
                                     contract.amount -= thing.stackCount;
                                     things.Add(thing);
                                 }
@@ -500,7 +488,8 @@ namespace VanillaTradingExpanded
         }
         private void SimulateWorldTrading()
         {
-            var affectedItems = Utils.cachedTradeableItems.InRandomOrder().Take((int)(Utils.cachedTradeableItems.Count * 0.2f)).ToList();
+            var affectedItems = Utils.cachedTradeableItems.InRandomOrder()
+                .Take((int)(Utils.cachedTradeableItems.Count * VanillaTradingExpandedMod.settings.amountOfItemsToFluctuate)).ToList();
             foreach (var item in affectedItems)
             {
                 AffectPriceRandomly(item);
@@ -570,10 +559,11 @@ namespace VanillaTradingExpanded
                 {
                     var impactModifier = Mathf.Min(10f, Mathf.Max(1f, spentMoneyInTransaction / 1000f)); 
                     // if amount of silver spent is higher than 1000, start price impact change scalling up to 10x
-                    Log.Message($"Success: Chance for {priceModifierKvp.Key} is {chance}. " +
-                        $"amount of spent silver is {priceModifierKvp.Value}, " +
-                        $"impactModifier: {impactModifier}");
-                    AffectPrice(priceModifierKvp.Key, priceModifierKvp.Value < 0, Rand.Range(0.01f, 0.1f) * impactModifier);
+                    //Log.Message($"Success: Chance for {priceModifierKvp.Key} is {chance}. " +
+                    //    $"amount of spent silver is {priceModifierKvp.Value}, " +
+                    //    $"impactModifier: {impactModifier}");
+                    AffectPrice(priceModifierKvp.Key, priceModifierKvp.Value < 0, Rand.Range(0.01f, 0.1f) 
+                        * impactModifier * VanillaTradingExpandedMod.settings.playerTransactionImpactMultiplier);
                 }
             }
             thingsAffectedBySoldPurchasedMarketValue.Clear();
@@ -648,8 +638,8 @@ namespace VanillaTradingExpanded
                     }
                 }
             }
-            Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
-            Log.ResetMessageCount();
+            //Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
+            //Log.ResetMessageCount();
         }
 
         public bool TryGetModifiedPriceFor(ThingDef thingDef, out float price)

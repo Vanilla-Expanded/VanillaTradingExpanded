@@ -306,7 +306,7 @@ namespace VanillaTradingExpanded
         public override void PostCleanup()
         {
             base.PostCleanup();
-			if (TradingManager.Instance.npcSubmittedContracts.Count < TradingManager.MaxNPCContractCount)
+			if (TradingManager.Instance.npcSubmittedContracts.Count < VanillaTradingExpandedMod.settings.maxNPCContractCount)
             {
 				TradingManager.Instance.npcSubmittedContracts.Add(TradingManager.Instance.GenerateRandomContract());
 			}

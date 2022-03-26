@@ -101,7 +101,7 @@ namespace VanillaTradingExpanded
                 Widgets.Label(markupRect, (contract.reward / contract.BaseMarketValue).ToStringPercent());
 
                 var timeUntilEndRect = new Rect(markupRect.xMax + 125, pos.y, 60, 24);
-                Widgets.Label(timeUntilEndRect, (contract.expiresInTicks - contract.creationTick).ToStringTicksToPeriod());
+                Widgets.Label(timeUntilEndRect, (contract.expiresInTicks - Find.TickManager.TicksGame).ToStringTicksToPeriod());
 
                 var contractsButton = new Rect(timeUntilEndRect.xMax + 40, pos.y + 1, 150, 22);
                 var playerHasEnoughItem = PlayerHasEnoughItemFor(contract, out var things);
@@ -186,7 +186,7 @@ namespace VanillaTradingExpanded
                 Widgets.Label(markupRect, (contract.rewardAsFloat / contract.BaseMarketValue).ToStringPercent());
 
                 var timeUntilEndRect = new Rect(markupRect.xMax + 125, pos.y, 60, 24);
-                Widgets.Label(timeUntilEndRect, (contract.expiresInTicks - contract.creationTick).ToStringTicksToPeriod());
+                Widgets.Label(timeUntilEndRect, (contract.expiresInTicks - Find.TickManager.TicksGame).ToStringTicksToPeriod());
 
                 var contractsButton = new Rect(timeUntilEndRect.xMax + 40, pos.y + 1, 150, 22);
                 if (Widgets.ButtonText(contractsButton, "VTE.CancelContract".Translate()))
@@ -261,7 +261,6 @@ namespace VanillaTradingExpanded
             {
                 curPlayerContract.reward = (int)rewardForContract;
                 curPlayerContract.rewardAsFloat = rewardForContract;
-                curPlayerContract.creationTick = Find.TickManager.TicksGame;
                 curPlayerContract.expiresInTicks = Find.TickManager.TicksGame + (int)(GenDate.TicksPerDay * fixedDurationInDays);
                 TradingManager.Instance.playerSubmittedContracts.Add(curPlayerContract);
                 curPlayerContract = new Contract

@@ -112,4 +112,14 @@ Negative numbers sell.</VTE.SharesTransactionHeader>
 	<VTE.ContractFullfilledDesc>A contract has been fulfilled by an interested party. The funds required have been transferred to them.
 Cargo pods are arriving containing:
 </VTE.ContractFullfilledDesc>
+	<VTE.NewsSpawnOption>How often news will appear:</VTE.NewsSpawnOption>
+	<VTE.PlayerTransactionImpactMultiplierOption>Player transaction impact multiplier on price fluctuation:</VTE.PlayerTransactionImpactMultiplierOption>
+	<VTE.PlayerContractFulfilmentChanceMultiplier>Player contract fulfilment chance multiplier:</VTE.PlayerContractFulfilmentChanceMultiplier>
+	<VTE.NPCContractFulfilmentChanceMultiplier>NPC contract fulfilment chance multiplier:</VTE.NPCContractFulfilmentChanceMultiplier>
+	<VTE.MaxNPCContractCount>Max available NPC contract count:</VTE.MaxNPCContractCount>
+	<VTE.MaxCompanyCount>Max trade company count:</VTE.MaxCompanyCount>
+	<VTE.MaximumMarkupOnNPCContract>Maximum mark-up on NPC contract:</VTE.MaximumMarkupOnNPCContract>
+	<VTE.NewsPriceImpactMultiplier>Multiplier of how much news affect the market:</VTE.NewsPriceImpactMultiplier>
+	<VTE.AmountOfRandomItemsToFluctuate>Amount of random item price fluctuations:</VTE.AmountOfRandomItemsToFluctuate>
+	<VTE.ResetPriceChanges>Reset price fluctuations</VTE.ResetPriceChanges>
 </LanguageData>

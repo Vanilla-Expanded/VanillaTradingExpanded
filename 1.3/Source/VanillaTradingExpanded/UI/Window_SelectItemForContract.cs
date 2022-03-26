@@ -21,7 +21,7 @@ namespace VanillaTradingExpanded
             doCloseX = true;
             closeOnClickedOutside = true;
             absorbInputAroundWindow = false;
-            allItems = Utils.craftableOrCollectableItems.Concat(Utils.nonCraftableItems).ToList();
+            allItems = Utils.craftableOrCollectableItems.Concat(Utils.nonCraftableItems).Concat(Utils.animals).ToList();
             this.contract = parent;
         }
 
