@@ -75,6 +75,19 @@ namespace VanillaTradingExpanded
                     TradingManager.Instance.GenerateAllPriceRecorders();
                 }
             }
+
+            if (listingStandard.ButtonText("Reset".Translate()))
+            {
+                settings.newsSpawnRate = 3f;
+                settings.playerTransactionImpactMultiplier = 1f;
+                settings.npcContractFulfilmentMultiplier = 1f;
+                settings.playerContractFulfilmentMultiplier = 1f;
+                settings.maxNPCContractCount = 30;
+                settings.maxCompanyCount = 30;
+                settings.maxMarkupOnNPCContract = 10;
+                settings.newsPriceImpactMultiplier = 1f;
+                settings.amountOfItemsToFluctuate = 0.2f;
+            }
             listingStandard.End();
         }
         public override string SettingsCategory()
