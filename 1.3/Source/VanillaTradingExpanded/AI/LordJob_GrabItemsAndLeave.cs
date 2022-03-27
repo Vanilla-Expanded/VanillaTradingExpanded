@@ -44,7 +44,7 @@ namespace VanillaTradingExpanded
 
 		public override void LordToilTick()
 		{
-			UpdateTransferrables();
+			TryUpdateTransferrables();
 			base.LordToilTick();
 			if (Find.TickManager.TicksGame % 120 != 0)
 			{
@@ -69,56 +69,61 @@ namespace VanillaTradingExpanded
 					break;
 				}
 			}
+
 			if (!flag)
 			{
 				return;
 			}
+
 			foreach (Pawn ownedPawn in lord.ownedPawns)
 			{
 				ownedPawn.inventory.ClearHaulingCaravanCache();
 			}
+
 			lord.ReceiveMemo("AllItemsGathered");
 		}
 
-		public void UpdateTransferrables()
+		public void TryUpdateTransferrables()
         {
 			var lordJob = this.lord.LordJob as LordJob_GrabItemsAndLeave;
 			if (lordJob != null)
             {
-				lordJob.transferables.Clear();
-				var count = 0;
-				var transferable = new TransferableOneWay();
-				foreach (var pawn in lord.ownedPawns)
-				{
-					if (pawn.GetTraderCaravanRole() == TraderCaravanRole.Carrier)
+				var transferable = lordJob.transferables.First();
+				if (transferable != null && transferable.things.Where(x => !x.Destroyed).Sum(x => x.stackCount) < lordJob.contract.amount)
+                {
+					Log.Message("Refreshing transferable");
+					lordJob.transferables.Clear();
+					var count = 0;
+					transferable = new TransferableOneWay();
+					foreach (var pawn in lord.ownedPawns)
 					{
 						foreach (var thing in pawn.inventory.innerContainer)
 						{
 							if (thing.def == lordJob.contract.item && thing.Stuff == lordJob.contract.stuff)
-{
+							{
 								var curCount = Mathf.Min(thing.stackCount, lordJob.contract.amount - count);
 								if (curCount > 0)
-                                {
+								{
 									transferable.things.Add(thing);
 									count += curCount;
 								}
 							}
 						}
 					}
-				}
 
-				List<Thing> wares = lordJob.contract.FoundItemsInMap(this.lord.Map);
-				foreach (var thing in wares)
-				{
-					var curCount = Mathf.Min(thing.stackCount, lordJob.contract.amount - count);
-					if (curCount > 0)
-                    {
-						count += curCount;
-						transferable.things.Add(thing);
+					List<Thing> wares = lordJob.contract.FoundItemsInMap(this.lord.Map);
+					foreach (var thing in wares)
+					{
+						var curCount = Mathf.Min(thing.stackCount, lordJob.contract.amount - count);
+						if (curCount > 0)
+						{
+							count += curCount;
+							transferable.things.Add(thing);
+						}
 					}
+					transferable.CountToTransfer = count;
+					lordJob.transferables.Add(transferable);
 				}
-				transferable.CountToTransfer = count;
-				lordJob.transferables.Add(transferable);
 			}
 		}
 	}
@@ -276,20 +281,17 @@ namespace VanillaTradingExpanded
 			var collectedAmount = 0;
 			foreach (var pawn in lord.ownedPawns)
             {
-				if (pawn.GetTraderCaravanRole() == TraderCaravanRole.Carrier)
-                {
-					foreach (var item in pawn.inventory.innerContainer)
-                    {
-						if (item.def == contract.item && item.Stuff == contract.stuff)
-                        {
-							collectedAmount += item.stackCount;
-						}
-                    }
-                }
+				foreach (var item in pawn.inventory.innerContainer)
+				{
+					if (item.def == contract.item && item.Stuff == contract.stuff)
+					{
+						collectedAmount += item.stackCount;
+					}
+				}
 				pawn.DeSpawn();
 				Find.WorldPawns.PassToWorld(pawn);
             }
-
+			//Log.Message("Final Collected amount: " + collectedAmount);
 			if (collectedAmount >= contract.amount)
             {
 				Find.WindowStack.Add(new Window_PerformTransactionGains("VTE.BankDepositsToPutContractReward".Translate(), new TransactionProcess

@@ -22,6 +22,80 @@ namespace VanillaTradingExpanded
 		{
 			harmony = new Harmony("OskarPotocki.VanillaTradingExpanded");
 			harmony.PatchAll();
+			//foreach (var type in typeof(ThinkNode_JobGiver).AllSubclassesNonAbstract())
+            //{
+			//	try
+            //    {
+			//		var method = AccessTools.Method(type, "TryGiveJob");
+			//		harmony.Patch(method, postfix: new HarmonyMethod(AccessTools.Method(typeof(HarmonyPatches), nameof(Postfix))));
+            //    }
+			//	catch (Exception ex)
+            //    {
+			//
+            //    }
+            //}
+		}
+
+		private static void Postfix(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
+		{
+			if (pawn.RaceProps.Humanlike && pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob
+				&& lordJob.lord.ownedPawns.Where(x => x.RaceProps.Humanlike).ToList()[1] == pawn)
+			{
+				Log.Message(pawn + " gets " + __result + " from " + __instance);
+			}
+		}
+	}
+
+	//[HarmonyPatch(typeof(Pawn_JobTracker), "StartJob")]
+	//public class StartJobPatch
+	//{
+	//    private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
+	//    {
+	//		if (___pawn.RaceProps.Humanlike && ___pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob
+	//			&& lordJob.lord.ownedPawns.Where(x => x.RaceProps.Humanlike).ToList()[1] == ___pawn)
+	//		{
+	//            Log.Message(___pawn + " is starting " + newJob);
+	//        }
+	//    }
+	//}
+	//
+	//
+	//[HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
+	//public class EndCurrentJobPatch
+	//{
+	//    private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
+	//    {
+	//		if (___pawn.RaceProps.Humanlike && ___pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob 
+	//			&& lordJob.lord.ownedPawns.Where(x => x.RaceProps.Humanlike).ToList()[1] == ___pawn)
+	//		{
+	//			Log.Message(___pawn + " is ending " + ___pawn.CurJob);
+	//        }
+	//    }
+	//}
+	//
+	//[HarmonyPatch(typeof(GatherItemsForCaravanUtility), "FindThingToHaul")]
+	//public class FindThingToHaulPatch
+	//{
+	//	private static void Postfix(Pawn p, Lord lord, ref Thing __result)
+	//	{
+	//		if (__result is null && p.RaceProps.Humanlike && p.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob
+	//			&& lordJob.lord.ownedPawns.Where(x => x.RaceProps.Humanlike).ToList()[1] == p)
+	//		{
+	//			p.jobs.debugLog = true;
+	//		}
+	//	}
+	//}
+
+	[HarmonyPatch(typeof(CaravanFormingUtility), "IsFormingCaravanOrDownedPawnToBeTakenByCaravan")]
+	public class IsFormingCaravanOrDownedPawnToBeTakenByCaravanPatch
+	{
+		private static bool Prefix(Pawn p)
+		{
+			if (p.GetLord()?.LordJob is LordJob_GrabItemsAndLeave)
+			{
+				return false;
+			}
+			return true;
 		}
 	}
 
