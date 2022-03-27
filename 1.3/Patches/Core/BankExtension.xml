@@ -28,7 +28,7 @@
 									<fixedRepayAmount>15000</fixedRepayAmount>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
 									<loanRepayPeriodDays>15</loanRepayPeriodDays>
-									<overdueInterestEveryDay>0.05</overdueInterestEveryDay>
+									<overdueInterestEveryDay>0.01</overdueInterestEveryDay>
 								</li>
 								<li>
 									<loanNameKey>VTE.ShortTermLoan</loanNameKey>
@@ -36,7 +36,7 @@
 									<repayAmountPerDeposit>0.5</repayAmountPerDeposit>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
 									<loanRepayPeriodDays>60</loanRepayPeriodDays>
-									<overdueInterestEveryDay>0.05</overdueInterestEveryDay>
+									<overdueInterestEveryDay>0.01</overdueInterestEveryDay>
 								</li>
 								<li>
 									<loanNameKey>VTE.LongTermLoan</loanNameKey>
@@ -44,7 +44,7 @@
 									<repayAmountPerDeposit>1</repayAmountPerDeposit>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
 									<loanRepayPeriodDays>120</loanRepayPeriodDays>
-									<overdueInterestEveryDay>0.05</overdueInterestEveryDay>
+									<overdueInterestEveryDay>0.01</overdueInterestEveryDay>
 								</li>
 								<li>
 									<loanNameKey>VTE.MortgageLoan</loanNameKey>
@@ -52,7 +52,7 @@
 									<repayAmountPerDeposit>2.5</repayAmountPerDeposit>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
 									<loanRepayPeriodDays>300</loanRepayPeriodDays>
-									<overdueInterestEveryDay>0.05</overdueInterestEveryDay>
+									<overdueInterestEveryDay>0.01</overdueInterestEveryDay>
 								</li>
 							</loanOptions>
 						</li>
