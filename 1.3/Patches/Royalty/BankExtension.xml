@@ -24,32 +24,32 @@
 							<loanOptions>
 								<li>
 									<loanNameKey>VTE.QuickCashLoan</loanNameKey>
-									<fixedLoanAmount>10000</fixedLoanAmount>
-									<fixedRepayAmount>15000</fixedRepayAmount>
+									<fixedLoanAmount>5000</fixedLoanAmount>
+									<fixedRepayAmount>7500</fixedRepayAmount>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
-									<loanRepayPeriodDays>15</loanRepayPeriodDays>
+									<loanRepayPeriodDays>10</loanRepayPeriodDays>
 									<overdueInterestEveryDay>0.05</overdueInterestEveryDay>
 								</li>
 								<li>
 									<loanNameKey>VTE.ShortTermLoan</loanNameKey>
-									<loanAmountPerDeposit>0.5</loanAmountPerDeposit>
-									<repayAmountPerDeposit>0.5</repayAmountPerDeposit>
+									<loanAmountPerDeposit>1</loanAmountPerDeposit>
+									<repayAmountPerDeposit>1</repayAmountPerDeposit>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
 									<loanRepayPeriodDays>60</loanRepayPeriodDays>
 									<overdueInterestEveryDay>0.05</overdueInterestEveryDay>
 								</li>
 								<li>
 									<loanNameKey>VTE.LongTermLoan</loanNameKey>
-									<loanAmountPerDeposit>1</loanAmountPerDeposit>
-									<repayAmountPerDeposit>1</repayAmountPerDeposit>
+									<loanAmountPerDeposit>2</loanAmountPerDeposit>
+									<repayAmountPerDeposit>2</repayAmountPerDeposit>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
 									<loanRepayPeriodDays>120</loanRepayPeriodDays>
 									<overdueInterestEveryDay>0.05</overdueInterestEveryDay>
 								</li>
 								<li>
 									<loanNameKey>VTE.MortgageLoan</loanNameKey>
-									<loanAmountPerDeposit>2</loanAmountPerDeposit>
-									<repayAmountPerDeposit>2.5</repayAmountPerDeposit>
+									<loanAmountPerDeposit>3</loanAmountPerDeposit>
+									<repayAmountPerDeposit>3.5</repayAmountPerDeposit>
 									<transactionFeesIncluded>true</transactionFeesIncluded>
 									<loanRepayPeriodDays>300</loanRepayPeriodDays>
 									<overdueInterestEveryDay>0.05</overdueInterestEveryDay>
