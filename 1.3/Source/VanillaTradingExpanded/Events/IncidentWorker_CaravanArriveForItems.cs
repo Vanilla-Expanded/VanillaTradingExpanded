@@ -54,7 +54,8 @@ namespace VanillaTradingExpanded
 				}
 			}
 			SendLetter(parms, pawns, traderKind);
-			var result = CellFinder.RandomClosewalkCellNear(wares[0].Position, pawns[0].MapHeld, 5, delegate (IntVec3 c)
+			var initialPos = wares.Any() ? wares[0].Position : RCellFinder.TryFindRandomSpotJustOutsideColony(pawns[0], out var res) ? res : map.Center;
+			var result = CellFinder.RandomClosewalkCellNear(initialPos, pawns[0].MapHeld, 5, delegate (IntVec3 c)
 			{
 				for (int k = 0; k < pawns.Count; k++)
 				{

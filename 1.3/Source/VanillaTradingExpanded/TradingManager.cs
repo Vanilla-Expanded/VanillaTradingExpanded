@@ -95,7 +95,6 @@ namespace VanillaTradingExpanded
                 }
             }
         }
-
         private void GenerateAllStartingCompanies()
         {
             var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();
@@ -281,7 +280,7 @@ namespace VanillaTradingExpanded
                                 if (Rand.Bool)
                                 {
                                     recorder.squeezeOccured = true;
-                                    AffectPrice(kvp.Key, true, Rand.Range(0.01f, 1f), true);
+                                    AffectPrice(kvp.Key, true, Rand.Range(0.01f, 1f));
                                     itemsToBeCrashedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
                                 }
                             }
@@ -290,7 +289,7 @@ namespace VanillaTradingExpanded
                                 if (Rand.Bool)
                                 {
                                     recorder.crashOccured = true;
-                                    AffectPrice(kvp.Key, false, Rand.Range(0.01f, 1f), true);
+                                    AffectPrice(kvp.Key, false, Rand.Range(0.01f, 1f));
                                     itemsToBeSqueezedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
                                 }
                             }
@@ -305,7 +304,7 @@ namespace VanillaTradingExpanded
                 {
                     if (!priceHistoryRecorders[key].crashOccured)
                     {
-                        AffectPrice(key, false, Rand.Range(0.01f, 1f), true);
+                        AffectPrice(key, false, Rand.Range(0.01f, 1f));
                         priceHistoryRecorders[key].crashOccured = true;
                     }
                     itemsToBeCrashedInTicks.Remove(key);
@@ -318,7 +317,7 @@ namespace VanillaTradingExpanded
                 {
                     if (!priceHistoryRecorders[key].squeezeOccured)
                     {
-                        AffectPrice(key, true, Rand.Range(0.01f, 1f), true);
+                        AffectPrice(key, true, Rand.Range(0.01f, 1f));
                         priceHistoryRecorders[key].squeezeOccured = true;
                     }
                     itemsToBeSqueezedInTicks.Remove(key);
@@ -351,13 +350,16 @@ namespace VanillaTradingExpanded
 
             // price rebalance every year at day 1
             var localMap = Find.AnyPlayerHomeMap;
-            var day = GenDate.DayOfYear(Find.TickManager.TicksAbs, Find.WorldGrid.LongLatOf(localMap.Tile).x);
-            if (prevDay != day && day == 1)
+            if (localMap != null && Find.WorldGrid != null)
             {
-                prevDay = day;
-                DoPriceRebalances();
+                var day = GenDate.DayOfYear(Find.TickManager.TicksAbs, Find.WorldGrid.LongLatOf(localMap.Tile).x);
+                if (prevDay != day && day == 1)
+                {
+                    prevDay = day;
+                    DoPriceRebalances();
+                }
+                ProcessContracts(localMap);
             }
-            ProcessContracts(localMap);
         }
 
         private void ProcessContracts(Map localMap)
@@ -594,9 +596,9 @@ namespace VanillaTradingExpanded
                 AffectPrice(thingDef, priceIncrease, priceImpactChangeGetter());
             }
         }
-
-        public void AffectPrice(ThingDef thingDef, bool priceIncrease, float priceImpactChange, bool issueMessage = false)
+        public void AffectPrice(ThingDef thingDef, bool priceIncrease, float priceImpactChange)
         {
+            priceImpactChange = Mathf.Clamp(priceImpactChange, 0, 10); // this way we make sure that prices won't go up and down at least not with 1000%;
             var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
             if (priceModifiers.ContainsKey(thingDef))
             {
@@ -623,20 +625,6 @@ namespace VanillaTradingExpanded
             if (priceModifiers[thingDef] < 0.0000001f)
             {
                 priceModifiers[thingDef] = 0.0000001f; // we set minimal price to avoid situations with endless minimal prices
-            }
-            if (issueMessage)
-            {
-                if (Find.Maps.Where(x => x.IsPlayerHome).Any(x => x.listerThings.ThingsOfDef(VTE_DefOf.VTE_TradingTerminal).Any(x => x.TryGetComp<CompPowerTrader>().PowerOn)))
-                {
-                    if (priceIncrease)
-                    {
-                        Messages.Message("VTE.SqueezeMessage".Translate(thingDef.label), MessageTypeDefOf.NeutralEvent);
-                    }
-                    else
-                    {
-                        Messages.Message("VTE.CrashMessage".Translate(thingDef.label), MessageTypeDefOf.NeutralEvent);
-                    }
-                }
             }
             //Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
             //Log.ResetMessageCount();

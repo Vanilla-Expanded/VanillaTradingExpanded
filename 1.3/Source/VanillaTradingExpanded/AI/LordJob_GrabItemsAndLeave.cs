@@ -9,7 +9,6 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
-using Verse.Noise;
 
 namespace VanillaTradingExpanded
 {
@@ -44,7 +43,7 @@ namespace VanillaTradingExpanded
 
 		public override void LordToilTick()
 		{
-			TryUpdateTransferrables();
+			TryUpdateTransferrables(out bool allCollected, out bool enoughItemsExists);
 			base.LordToilTick();
 			if (Find.TickManager.TicksGame % 120 != 0)
 			{
@@ -70,7 +69,8 @@ namespace VanillaTradingExpanded
 				}
 			}
 
-			if (!flag)
+			//Log.Message("enoughItemsExists: " + enoughItemsExists);
+			if (!flag && !allCollected && enoughItemsExists)
 			{
 				return;
 			}
@@ -80,18 +80,56 @@ namespace VanillaTradingExpanded
 				ownedPawn.inventory.ClearHaulingCaravanCache();
 			}
 
+			var lordJob = this.lord.LordJob as LordJob_GrabItemsAndLeave;
+			var collectedAmount = 0;
+			bool exceededAmount = false;
+			foreach (var pawn in lord.ownedPawns)
+			{
+				var inventoryThings = pawn.inventory.innerContainer.ToList();
+				for (var i = inventoryThings.Count - 1; i >= 0; i--)
+				{
+					var thing = inventoryThings[i];
+					if (thing.def == lordJob.contract.item && thing.Stuff == lordJob.contract.stuff)
+					{
+						collectedAmount += thing.stackCount;
+						if (exceededAmount)
+                        {
+							//Log.Message("1 Exceed amount, dropping: " + thing);
+							pawn.inventory.innerContainer.TryDrop(thing, ThingPlaceMode.Near, out _);
+						}
+						else if (!exceededAmount && collectedAmount > lordJob.contract.amount)
+                        {
+							var toDropCount = collectedAmount - lordJob.contract.amount;
+							var newThing = thing.SplitOff(toDropCount);
+							if (newThing.ParentHolder == pawn.inventory)
+							{
+								//Log.Message("2 Exceed amount, dropping: " + newThing);
+								pawn.inventory.innerContainer.TryDrop(newThing, ThingPlaceMode.Near, out _);
+							}
+							else
+							{
+								//Log.Message("3 Exceed amount, dropping: " + newThing);
+								GenPlace.TryPlaceThing(newThing, pawn.Position, pawn.Map, ThingPlaceMode.Near);
+                            }
+							exceededAmount = true;
+						}
+					}
+				}
+			}
+			//Log.Message("allCollected: " + allCollected);
 			lord.ReceiveMemo("AllItemsGathered");
 		}
 
-		public void TryUpdateTransferrables()
+		public void TryUpdateTransferrables(out bool allCollected, out bool enoughItemsExists)
         {
+			allCollected = false;
+			enoughItemsExists = true;
 			var lordJob = this.lord.LordJob as LordJob_GrabItemsAndLeave;
 			if (lordJob != null)
             {
 				var transferable = lordJob.transferables.First();
 				if (transferable != null && transferable.things.Where(x => !x.Destroyed).Sum(x => x.stackCount) < lordJob.contract.amount)
                 {
-					Log.Message("Refreshing transferable");
 					lordJob.transferables.Clear();
 					var count = 0;
 					transferable = new TransferableOneWay();
@@ -123,6 +161,26 @@ namespace VanillaTradingExpanded
 					}
 					transferable.CountToTransfer = count;
 					lordJob.transferables.Add(transferable);
+				}
+
+				var collectedAmount = 0;
+				foreach (var pawn in lord.ownedPawns)
+				{
+					foreach (var thing in pawn.inventory.innerContainer)
+					{
+						if (thing.def == lordJob.contract.item && thing.Stuff == lordJob.contract.stuff)
+						{
+							collectedAmount += thing.stackCount;
+						}
+					}
+				}
+				if (collectedAmount >= lordJob.contract.amount)
+                {
+					allCollected = true;
+				}
+				if (collectedAmount + lordJob.contract.FoundItemsInMap(this.lord.Map).Sum(x => x.stackCount) >= lordJob.contract.amount)
+                {
+					enoughItemsExists = true;
 				}
 			}
 		}

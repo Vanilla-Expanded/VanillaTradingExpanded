@@ -31,7 +31,6 @@ namespace VanillaTradingExpanded
         public abstract NewsContext GenerateContext();
         public abstract GrammarRequest GetGrammarRequest(NewsContext context);
         public abstract void AffectPrices(News news);
-
         public virtual void OnCreate(News news) { }
         public abstract bool CanOccur();
 	}
@@ -76,7 +75,6 @@ namespace VanillaTradingExpanded
             grammarRequest.Rules.AddRange(GrammarUtility.RulesForFaction("FACTION", context.faction, grammarRequest.Constants));
             return grammarRequest;
         }
-
         public override bool CanOccur()
         {
             return GetFaction() != null;
@@ -150,7 +148,7 @@ namespace VanillaTradingExpanded
             base.OnCreate(news);
             if (news.newsContext.company.playerFollowsNews)
             {
-                Messages.Message(news.text, MessageTypeDefOf.NeutralEvent);
+                Messages.Message(news.text, MessageTypeDefOf.SilentInput);
             }
         }
     }
