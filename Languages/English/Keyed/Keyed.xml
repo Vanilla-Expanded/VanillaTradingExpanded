@@ -103,7 +103,7 @@ Negative numbers sell.</VTE.SharesTransactionHeader>
 	<VTE.YourContractsExplanation>You can submit your own contracts. Specify the amount of the item, the mark-up and the duration. Longer contracts with higher mark-up have a higher chance of being completed. Not having enough money in the bank accounts to cover the contract reward will automatically cancel the contract.</VTE.YourContractsExplanation>
 	<VTE.ContractCompletedMessage>The caravan will arrive to pick up the contracted items in 3 days. Make sure you have enough items when they arrive. The payment will clear once the caravan leaves your area.</VTE.ContractCompletedMessage>
 	<VTE.LetterTraderCaravanArrival>A caravan from {0} is approaching. They are collecting contracted items.</VTE.LetterTraderCaravanArrival>
-	<VTE.CaravanDidNotCollectAllItems>The caravan didn’t find the promised goods and leaves the area. Only {0} of {1} were collected. You will not receive any payment.</VTE.CaravanDidNotCollectAllItems>
+	<VTE.CaravanDidNotCollectAllItems>The caravan didn’t find the promised goods and leaves the area. You will not receive any payment.</VTE.CaravanDidNotCollectAllItems>
 	<VTE.BankDepositsToPutContractReward>Select bank deposits to put reward for completed contract</VTE.BankDepositsToPutContractReward>
 	<VTE.Select>Select</VTE.Select>
 	<VTE.SelectStuff>Select stuff</VTE.SelectStuff>

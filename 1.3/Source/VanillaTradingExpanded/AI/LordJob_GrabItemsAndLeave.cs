@@ -350,12 +350,14 @@ namespace VanillaTradingExpanded
 				Find.WorldPawns.PassToWorld(pawn);
             }
 			//Log.Message("Final Collected amount: " + collectedAmount);
-			if (collectedAmount >= contract.amount)
+			if (collectedAmount > 0)
             {
+				var rewardRate = collectedAmount / (float)contract.amount;
+				//Log.Message("Reward rate: " + rewardRate + ", transaction: " + ((int)(contract.reward * rewardRate)) + " - " + contract.reward);
 				Find.WindowStack.Add(new Window_PerformTransactionGains("VTE.BankDepositsToPutContractReward".Translate(), new TransactionProcess
 				{
-					transactionGain = contract.reward
-				}));
+					transactionGain = (int)(contract.reward * rewardRate)
+				}, disableCloseButton: true));
 			}
 			else
             {

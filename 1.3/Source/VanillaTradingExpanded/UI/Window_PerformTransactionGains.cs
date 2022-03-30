@@ -14,7 +14,9 @@ namespace VanillaTradingExpanded
         public override Vector2 InitialSize => new Vector2(500, 430);
 
 		public string title;
-        public Window_PerformTransactionGains(string title, TransactionProcess parent)
+
+		public bool disableCloseButton = false;
+        public Window_PerformTransactionGains(string title, TransactionProcess parent, bool disableCloseButton = false)
         {
 			this.title = title;
 			this.transactionProcess = parent;
@@ -24,6 +26,7 @@ namespace VanillaTradingExpanded
             {
 				this.transactionProcess.amountToTransfer[bank] = 0;
 			}
+			this.disableCloseButton = disableCloseButton;
 		}
 
 		public string textEntryBuffer;
@@ -122,7 +125,7 @@ namespace VanillaTradingExpanded
 			}
 			GUI.color = Color.white;
 			var closeButtonRect = new Rect(confirmButtonRect.xMax + 85, confirmButtonRect.y, confirmButtonRect.width, confirmButtonRect.height);
-			if (Widgets.ButtonText(closeButtonRect, "Close".Translate()))
+			if (disableCloseButton is false && Widgets.ButtonText(closeButtonRect, "Close".Translate()))
 			{
 				transactionProcess.PostCancel();
 				this.Close();
