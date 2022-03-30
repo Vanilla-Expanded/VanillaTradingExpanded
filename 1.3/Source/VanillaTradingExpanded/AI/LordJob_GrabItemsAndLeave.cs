@@ -353,10 +353,13 @@ namespace VanillaTradingExpanded
 			if (collectedAmount > 0)
             {
 				var rewardRate = collectedAmount / (float)contract.amount;
-				//Log.Message("Reward rate: " + rewardRate + ", transaction: " + ((int)(contract.reward * rewardRate)) + " - " + contract.reward);
-				Find.WindowStack.Add(new Window_PerformTransactionGains("VTE.BankDepositsToPutContractReward".Translate(), new TransactionProcess
+				var rewardAmount = (int)(contract.reward * rewardRate);
+				//Log.Message("Reward rate: " + rewardRate + ", transaction: " + rewardAmount + " - " + contract.reward);
+				var message = rewardRate < 1f ? "VTE.BankDepositsToPutContractRewardPartially".Translate(rewardRate.ToStringPercent(),
+					rewardAmount) : "VTE.BankDepositsToPutContractReward".Translate();
+				Find.WindowStack.Add(new Window_PerformTransactionGains(message, new TransactionProcess
 				{
-					transactionGain = (int)(contract.reward * rewardRate)
+					transactionGain = rewardAmount
 				}, disableCloseButton: true));
 			}
 			else
