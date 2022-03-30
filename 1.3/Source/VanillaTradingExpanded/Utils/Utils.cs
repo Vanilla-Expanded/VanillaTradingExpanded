@@ -178,7 +178,7 @@ namespace VanillaTradingExpanded
             {
                 if (IsSuitableForContract(thingDef))
                 {
-                    if (IsCraftableOrCollectable(thingDef))
+                    if (IsCraftableOrCollectable(thingDef) && CanBeUsedInNPCContracts(thingDef))
                     {
                         craftableOrCollectableItems.Add(thingDef);
                     }
@@ -197,6 +197,18 @@ namespace VanillaTradingExpanded
                 }
             }
 
+            bool CanBeUsedInNPCContracts(ThingDef thingDef)
+            {
+                if (IsChunk(thingDef))
+                {
+                    return false;
+                }
+                if (thingDef == ThingDefOf.Dye) // players somehow get lots of dye contracts, so I'm excluding it
+                {
+                    return false;
+                }
+                return true;
+            }
             bool CanBeSoldOrBought(ThingDef thingDef, float marketValue)
             {
                 bool result = thingDef.tradeability != Tradeability.None && marketValue > 0 && !tradeableItemsToIgnore.Contains(thingDef);
@@ -226,6 +238,20 @@ namespace VanillaTradingExpanded
                         return false;
                     }
                     return true;
+                }
+                return false;
+            }
+            bool IsChunk(ThingDef thingDef)
+            {
+                if (thingDef.thingCategories != null)
+                {
+                    foreach (var category in thingDef.thingCategories)
+                    {
+                        if (category == ThingCategoryDefOf.Chunks || category == ThingCategoryDefOf.StoneChunks)
+                        {
+                            return true;
+                        }
+                    }
                 }
                 return false;
             }
