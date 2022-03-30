@@ -79,7 +79,7 @@ namespace VanillaTradingExpanded
 				}
 				transferable.CountToTransfer = count;
 				transferables.Add(transferable);
-				LordJob_GrabItemsAndLeave lordJob = new LordJob_GrabItemsAndLeave(parms.faction, result, contract, transferables);
+				LordJob_GrabItemsAndLeave lordJob = new LordJob_GrabItemsAndLeave(pawns, map, parms.faction, result, contract, transferables);
 				LordMaker.MakeNewLord(parms.faction, lordJob, map, pawns);
 				return true;
 			}

@@ -36,14 +36,13 @@ namespace VanillaTradingExpanded
             //}
 		}
 
-		private static void Postfix(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
-		{
-			if (pawn.RaceProps.Humanlike && pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob
-				&& lordJob.lord.ownedPawns.Where(x => x.RaceProps.Humanlike).ToList()[1] == pawn)
-			{
-				Log.Message(pawn + " gets " + __result + " from " + __instance);
-			}
-		}
+		//private static void Postfix(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
+		//{
+		//	if (pawn.RaceProps.Humanlike && pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob)
+		//	{
+		//		Log.Message(pawn + " gets " + __result + " from " + __instance);
+		//	}
+		//}
 	}
 
 	//[HarmonyPatch(typeof(Pawn_JobTracker), "StartJob")]
@@ -51,8 +50,7 @@ namespace VanillaTradingExpanded
 	//{
 	//    private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
 	//    {
-	//		if (___pawn.RaceProps.Humanlike && ___pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob
-	//			&& lordJob.lord.ownedPawns.Where(x => x.RaceProps.Humanlike).ToList()[1] == ___pawn)
+	//		if (___pawn.RaceProps.Humanlike && ___pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob)
 	//		{
 	//            Log.Message(___pawn + " is starting " + newJob);
 	//        }
@@ -65,21 +63,29 @@ namespace VanillaTradingExpanded
 	//{
 	//    private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
 	//    {
-	//		if (___pawn.RaceProps.Humanlike && ___pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob 
-	//			&& lordJob.lord.ownedPawns.Where(x => x.RaceProps.Humanlike).ToList()[1] == ___pawn)
+	//		if (___pawn.RaceProps.Humanlike && ___pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob)
 	//		{
 	//			Log.Message(___pawn + " is ending " + ___pawn.CurJob);
 	//        }
 	//    }
 	//}
 	//
+
+	//[HarmonyPatch(typeof(Lord), "ReceiveMemo")]
+	//public class ReceiveMemoPatch
+	//{
+	//	private static void Postfix(string memo)
+	//	{
+	//		Log.Message("Received memo: " + memo);
+	//	}
+	//}
+
 	//[HarmonyPatch(typeof(GatherItemsForCaravanUtility), "FindThingToHaul")]
 	//public class FindThingToHaulPatch
 	//{
 	//	private static void Postfix(Pawn p, Lord lord, ref Thing __result)
 	//	{
-	//		if (__result is null && p.RaceProps.Humanlike && p.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob
-	//			&& lordJob.lord.ownedPawns.Where(x => x.RaceProps.Humanlike).ToList()[1] == p)
+	//		if (__result is null && p.RaceProps.Humanlike && p.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob)
 	//		{
 	//			p.jobs.debugLog = true;
 	//		}

@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using HarmonyLib;
+using RimWorld;
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
+using Verse.Noise;
 
 namespace VanillaTradingExpanded
 {
@@ -43,7 +45,8 @@ namespace VanillaTradingExpanded
 
 		public override void LordToilTick()
 		{
-			TryUpdateTransferrables(out bool allCollected, out bool enoughItemsExists);
+			var lordJob = this.lord.LordJob as LordJob_GrabItemsAndLeave;
+			lordJob.TryUpdateTransferrables(out bool allCollected, out bool enoughItemsExists);
 			base.LordToilTick();
 			if (Find.TickManager.TicksGame % 120 != 0)
 			{
@@ -69,6 +72,7 @@ namespace VanillaTradingExpanded
 				}
 			}
 
+			//Log.Message("allCollected: " + allCollected);
 			//Log.Message("enoughItemsExists: " + enoughItemsExists);
 			if (!flag && !allCollected && enoughItemsExists)
 			{
@@ -80,7 +84,6 @@ namespace VanillaTradingExpanded
 				ownedPawn.inventory.ClearHaulingCaravanCache();
 			}
 
-			var lordJob = this.lord.LordJob as LordJob_GrabItemsAndLeave;
 			var collectedAmount = 0;
 			bool exceededAmount = false;
 			foreach (var pawn in lord.ownedPawns)
@@ -116,73 +119,7 @@ namespace VanillaTradingExpanded
 					}
 				}
 			}
-			//Log.Message("allCollected: " + allCollected);
 			lord.ReceiveMemo("AllItemsGathered");
-		}
-
-		public void TryUpdateTransferrables(out bool allCollected, out bool enoughItemsExists)
-        {
-			allCollected = false;
-			enoughItemsExists = true;
-			var lordJob = this.lord.LordJob as LordJob_GrabItemsAndLeave;
-			if (lordJob != null)
-            {
-				var transferable = lordJob.transferables.First();
-				if (transferable != null && transferable.things.Where(x => !x.Destroyed).Sum(x => x.stackCount) < lordJob.contract.amount)
-                {
-					lordJob.transferables.Clear();
-					var count = 0;
-					transferable = new TransferableOneWay();
-					foreach (var pawn in lord.ownedPawns)
-					{
-						foreach (var thing in pawn.inventory.innerContainer)
-						{
-							if (thing.def == lordJob.contract.item && thing.Stuff == lordJob.contract.stuff)
-							{
-								var curCount = Mathf.Min(thing.stackCount, lordJob.contract.amount - count);
-								if (curCount > 0)
-								{
-									transferable.things.Add(thing);
-									count += curCount;
-								}
-							}
-						}
-					}
-
-					List<Thing> wares = lordJob.contract.FoundItemsInMap(this.lord.Map);
-					foreach (var thing in wares)
-					{
-						var curCount = Mathf.Min(thing.stackCount, lordJob.contract.amount - count);
-						if (curCount > 0)
-						{
-							count += curCount;
-							transferable.things.Add(thing);
-						}
-					}
-					transferable.CountToTransfer = count;
-					lordJob.transferables.Add(transferable);
-				}
-
-				var collectedAmount = 0;
-				foreach (var pawn in lord.ownedPawns)
-				{
-					foreach (var thing in pawn.inventory.innerContainer)
-					{
-						if (thing.def == lordJob.contract.item && thing.Stuff == lordJob.contract.stuff)
-						{
-							collectedAmount += thing.stackCount;
-						}
-					}
-				}
-				if (collectedAmount >= lordJob.contract.amount)
-                {
-					allCollected = true;
-				}
-				if (collectedAmount + lordJob.contract.FoundItemsInMap(this.lord.Map).Sum(x => x.stackCount) >= lordJob.contract.amount)
-                {
-					enoughItemsExists = true;
-				}
-			}
 		}
 	}
 	internal class LordToil_DefendTraderCaravan : LordToil_DefendPoint
@@ -235,20 +172,198 @@ namespace VanillaTradingExpanded
 		public override bool NeverInRestraints => true;
 		public override bool AddFleeToil => false;
 		public override bool ManagesRopableAnimals => true;
-
 		public Faction faction;
-
 		public Contract contract;
 		public LordJob_GrabItemsAndLeave()
 		{
 		}
-		public LordJob_GrabItemsAndLeave(Faction faction, IntVec3 meetingSpot, Contract contract, List<TransferableOneWay> transferables)
+		public LordJob_GrabItemsAndLeave(List<Pawn> pawns, Map map, Faction faction, IntVec3 meetingSpot, Contract contract, List<TransferableOneWay> transferables)
 		{
 			this.meetingPoint = meetingSpot;
 			this.faction = faction;
 			this.transferables = transferables;
 			this.contract = contract;
 			this.downedPawns = new List<Pawn>();
+			if (!TryFindExitSpot(map, pawns, reachableForEveryColonist: true, out exitSpot))
+			{
+				//Log.Message("Didn't find exit spot 1");
+				if (!TryFindExitSpot(map, pawns, reachableForEveryColonist: false, out exitSpot))
+                {
+					//Log.Message("Didn't find exit spot 2");
+                }
+			}
+			//Log.Message("exitSpot: " + exitSpot);
+		}
+
+		private bool TryFindExitSpot(Map map, List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
+		{
+			Predicate<IntVec3> validator = (IntVec3 x) => !x.Fogged(map) && x.Standable(map);
+			if (reachableForEveryColonist)
+			{
+				return CellFinder.TryFindRandomEdgeCellWith(delegate (IntVec3 x)
+				{
+					if (!validator(x))
+					{
+						return false;
+					}
+					for (int j = 0; j < pawns.Count; j++)
+					{
+						if (!pawns[j].Downed && !pawns[j].CanReach(x, PathEndMode.Touch, Danger.Deadly))
+						{
+							return false;
+						}
+					}
+					return true;
+				}, map, CellFinder.EdgeRoadChance_Always, out spot);
+			}
+			IntVec3 intVec = IntVec3.Invalid;
+			int num = -1;
+			IEnumerable<Rot4> RotationsToUse()
+			{
+				yield return new Rot4(0);
+				yield return new Rot4(1);
+				yield return new Rot4(2);
+				yield return new Rot4(3);
+			}
+			foreach (var rot4 in RotationsToUse().InRandomOrder())
+            {
+				foreach (IntVec3 item in CellRect.WholeMap(map).GetEdgeCells(rot4).InRandomOrder())
+				{
+					if (!validator(item))
+					{
+						continue;
+					}
+					int num2 = 0;
+					for (int i = 0; i < pawns.Count; i++)
+					{
+						if (!pawns[i].Downed && pawns[i].CanReach(item, PathEndMode.Touch, Danger.Deadly))
+						{
+							num2++;
+						}
+					}
+					if (num2 > num)
+					{
+						num = num2;
+						intVec = item;
+					}
+				}
+				if (intVec.IsValid)
+				{
+					spot = intVec;
+					return true;
+				}
+			}
+
+			spot = intVec;
+			return intVec.IsValid;
+		}
+
+
+		public override void LordJobTick()
+        {
+            base.LordJobTick();
+			if (!exitSpot.IsValid || !AllPawnsCanReachSpot(lord.ownedPawns, exitSpot, Map))
+            {
+				if (!TryFindExitSpot(Map, lord.ownedPawns, reachableForEveryColonist: true, out exitSpot))
+				{
+					//Log.Message("Didn't find exit spot 1");
+					if (!TryFindExitSpot(Map, lord.ownedPawns, reachableForEveryColonist: false, out exitSpot))
+					{
+						//Log.Message("Didn't find exit spot 2");
+					}
+				}
+				//Log.Message("exitSpot: " + exitSpot);
+				if (exitSpot.IsValid)
+                {
+					Traverse.Create(this.leave).Field("exitSpot").SetValue(exitSpot);
+					if (this.lord.CurLordToil == this.leave)
+                    {
+						this.leave.UpdateAllDuties();
+                    }
+				}
+			}
+			//Log.Message(this.lord.curLordToil + " - " + this.lord.curLordToil.GetType() + " - " + this.contract.Name);
+        }
+
+		private bool AllPawnsCanReachSpot(List<Pawn> pawns, IntVec3 spot, Map map)
+		{
+			Predicate<IntVec3> validator = (IntVec3 x) => !x.Fogged(map) && x.Standable(map);
+			if (!validator(spot))
+			{
+				return false;
+			}
+			for (int j = 0; j < pawns.Count; j++)
+			{
+				if (!pawns[j].Downed && !pawns[j].CanReach(spot, PathEndMode.Touch, Danger.Deadly))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		public void TryUpdateTransferrables(out bool allCollected, out bool enoughItemsExists)
+		{
+			allCollected = false;
+			enoughItemsExists = true;
+			var transferable = this.transferables.First();
+			if (transferable != null && transferable.things.Where(x => !x.Destroyed).Sum(x => x.stackCount) < this.contract.amount)
+			{
+				var count = 0;
+				var newTransferable = new TransferableOneWay();
+				foreach (var pawn in lord.ownedPawns)
+				{
+					foreach (var thing in pawn.inventory.innerContainer)
+					{
+						if (thing.def == this.contract.item && thing.Stuff == this.contract.stuff)
+						{
+							var curCount = Mathf.Min(thing.stackCount, this.contract.amount - count);
+							if (curCount > 0)
+							{
+								newTransferable.things.Add(thing);
+								count += curCount;
+							}
+						}
+					}
+				}
+
+				List<Thing> wares = this.contract.FoundItemsInMap(this.lord.Map);
+				foreach (var thing in wares)
+				{
+					var curCount = Mathf.Min(thing.stackCount, this.contract.amount - count);
+					if (curCount > 0)
+					{
+						count += curCount;
+						newTransferable.things.Add(thing);
+					}
+				}
+				newTransferable.CountToTransfer = count;
+				if (newTransferable.things.Any())
+				{
+					//Log.Message("Refreshing transferables");
+					this.transferables.Clear();
+					this.transferables.Add(newTransferable);
+                }
+			}
+
+			var collectedAmount = 0;
+			foreach (var pawn in lord.ownedPawns)
+			{
+				foreach (var thing in pawn.inventory.innerContainer)
+				{
+					if (thing.def == this.contract.item && thing.Stuff == this.contract.stuff)
+					{
+						collectedAmount += thing.stackCount;
+					}
+				}
+			}
+			if (collectedAmount >= this.contract.amount)
+			{
+				allCollected = true;
+			}
+			if (collectedAmount + this.contract.FoundItemsInMap(this.lord.Map).Sum(x => x.stackCount) >= this.contract.amount)
+			{
+				enoughItemsExists = true;
+			}
 		}
 		public override StateGraph CreateGraph()
 		{
