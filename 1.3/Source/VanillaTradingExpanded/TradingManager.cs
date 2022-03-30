@@ -80,21 +80,79 @@ namespace VanillaTradingExpanded
             {
                 foreach (var faction in Find.FactionManager.AllFactions)
                 {
-                    var bankExtension = faction.def.GetModExtension<BankExtension>();
-                    if (bankExtension != null)
+                    if (!banksByFaction.TryGetValue(faction, out var bank))
                     {
-                        if (!banksByFaction.ContainsKey(faction))
+                        var bankExtension = faction.def.GetModExtension<BankExtension>();
+                        if (bankExtension != null)
                         {
-                            banksByFaction[faction] = new Bank(faction);
+                            bank = CreateNewBank(faction, bankExtension);
                         }
                     }
-                    else if (banksByFaction.ContainsKey(faction))
+                    else
                     {
-                        banksByFaction.Remove(faction);
+                        var bankExtension = faction.def.GetModExtension<BankExtension>();
+                        if (bankExtension != null)
+                        {
+                            bank.bankExtension = bankExtension;
+                        }
+                        else
+                        {
+                            bank.bankExtension = GetNewBankExtensionFor(faction);
+                        }
+                    }
+                }
+                if (!banksByFaction.Any(x => Find.FactionManager.AllFactions.Contains(x.Key)))
+                {
+                    var factions = Find.FactionManager.GetFactions(allowNonHumanlike: false).Where(x => !x.IsPlayer && !x.HostileTo(Faction.OfPlayer));
+                    if (factions.Any() && factions.TryRandomElement(out var faction))
+                    {
+                        var bank = CreateNewBank(faction, GetNewBankExtensionFor(faction));
+                        //Log.Message("Adding new bank: " + bank.Name);
+                    }
+                    else
+                    {
+                        factions = Find.FactionManager.GetFactions(allowNonHumanlike: false).Where(x => !x.IsPlayer);
+                        if (factions.Any() && factions.TryRandomElement(out faction))
+                        {
+                            var bank = CreateNewBank(faction, GetNewBankExtensionFor(faction));
+                            //Log.Message("Adding new bank: " + bank.Name);
+                        }
                     }
                 }
             }
         }
+        public Bank CreateNewBank(Faction faction, BankExtension bankExtension)
+        {
+            Bank bank = new Bank(faction);
+            banksByFaction[faction] = bank;
+            bank.bankExtension = bankExtension;
+            return bank;
+        }
+        public BankExtension GetNewBankExtensionFor(Faction faction)
+        {
+            var baseExtension = FactionDefOf.OutlanderCivil.GetModExtension<BankExtension>();
+            var newExtension = GetBankExtensionCopy(baseExtension);
+            newExtension.bankNameKey = null;
+            return newExtension;
+        }
+        public BankExtension GetBankExtensionCopy(BankExtension bankExtension)
+        {
+            var propsType = bankExtension.GetType();
+            var newExtension = Activator.CreateInstance(propsType) as BankExtension;
+            foreach (var fieldInfo in propsType.GetFields())
+            {
+                try
+                {
+                    var newField = propsType.GetField(fieldInfo.Name);
+                    newField.SetValue(newExtension, fieldInfo.GetValue(bankExtension));
+                }
+                catch
+                {
+                }
+            }
+            return newExtension;
+        }
+
         private void GenerateAllStartingCompanies()
         {
             var orbitalTraders = DefDatabase<TraderKindDef>.AllDefs.Where(x => x.orbital).ToList();

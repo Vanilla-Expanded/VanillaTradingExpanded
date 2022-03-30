@@ -68,6 +68,21 @@ namespace VanillaTradingExpanded
             DropPodUtility.DropThingsNear(intVec, Find.CurrentMap, new List<Thing> { silver }, 110, canInstaDropDuringInit: false, leaveSlag: true, forbid: false);
         }
 
+        [DebugAction("General", "Add bank", allowedGameStates = AllowedGameStates.Playing)]
+        private static void AddBank()
+        {
+            List<DebugMenuOption> list = new List<DebugMenuOption>();
+            foreach (var faction in Find.FactionManager.AllFactions.Where(x => x.def.humanlikeFaction && !x.IsPlayer 
+                && !TradingManager.Instance.banksByFaction.ContainsKey(x)))
+            {
+                list.Add(new DebugMenuOption(faction.name, DebugMenuOptionMode.Action, delegate
+                {
+                    TradingManager.Instance.CreateNewBank(faction, TradingManager.Instance.GetNewBankExtensionFor(faction));
+                }));
+            }
+            Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));
+        }
+
         public static HashSet<ThingDef> craftableOrCollectableItems = new HashSet<ThingDef>();
         public static HashSet<ThingDef> nonCraftableItems = new HashSet<ThingDef>();
         public static HashSet<ThingDef> animals = new HashSet<ThingDef>();

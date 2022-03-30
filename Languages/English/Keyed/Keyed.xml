@@ -14,6 +14,7 @@
 	<VTE.ViewNews>View news</VTE.ViewNews>
 	<VTE.Contact>Contact {0}</VTE.Contact>
 	<VTE.EmpireBankName>Imperial Bank</VTE.EmpireBankName>
+	<VTE.BaseBankName>Bank of {FACTION_name}</VTE.BaseBankName>
 	<VTE.OutlanderCivilBankName>Bank of {FACTION_name}</VTE.OutlanderCivilBankName>
 	
 	<VTE.LocalFunds>Local funds: {0}</VTE.LocalFunds>

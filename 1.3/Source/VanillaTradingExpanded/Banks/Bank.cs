@@ -26,7 +26,6 @@ namespace VanillaTradingExpanded
         public Bank(Faction faction)
         {
             this.parentFaction = faction;
-            this.bankExtension = faction.def.GetModExtension<BankExtension>();
         }
         public int DepositAmount
         {
@@ -50,8 +49,17 @@ namespace VanillaTradingExpanded
 
         public BankExtension bankExtension;
         public float Fees => bankExtension.feesByGoodwill.Evaluate(this.parentFaction.GoodwillWith(Faction.OfPlayer));
-
-        public string Name => bankExtension.bankNameKey.Translate(this.parentFaction.Named("FACTION"));
+        public string Name
+        {
+            get
+            {
+                if (this.bankExtension.bankNameKey != null)
+                {
+                    return bankExtension.bankNameKey.Translate(this.parentFaction.Named("FACTION"));
+                }
+                return "VTE.BaseBankName".Translate(this.parentFaction.Named("FACTION"));
+            }
+        }
         public void DepositSilver(List<Thing> silvers, int amountToDeposit)
         {
             while (amountToDeposit > 0)
@@ -189,7 +197,6 @@ namespace VanillaTradingExpanded
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 loans ??= new List<Loan>();
-                bankExtension = parentFaction.def.GetModExtension<BankExtension>();
             }
         }
 
