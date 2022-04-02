@@ -238,9 +238,18 @@ namespace VanillaTradingExpanded
         {
 			var loanTitle = new Rect(rect.x + 10, rect.y + 5, 250, 24);
 			Widgets.Label(loanTitle, loanOption.loanNameKey.Translate());
-
 			bool loanIsTaken = bank.LoanIsTaken(loanOption, out var loan);
-			if (bank.DepositAmount > 0 || loanOption.fixedLoanAmount.HasValue || loanIsTaken)
+			var lastTimeLoanWasRepaid = bank.LastTimeLoanWasTaken(loanOption);
+			var loanOptionRepayTicks = loanOption.GetRepayDateTicks();
+			if (!loanIsTaken && lastTimeLoanWasRepaid > -1 && lastTimeLoanWasRepaid + loanOptionRepayTicks > Find.TickManager.TicksAbs)
+            {
+				Widgets.DrawHighlight(rect);
+				Text.Anchor = TextAnchor.MiddleCenter;
+				Text.Font = GameFont.Medium;
+				var dateString = GenDate.DateFullStringAt(lastTimeLoanWasRepaid + loanOptionRepayTicks, Find.WorldGrid.LongLatOf(negotiator.Map.Tile));
+				Widgets.Label(rect.ContractedBy(20), "VTE.YouCanTakeThisLoanOn".Translate(dateString));
+			}
+			else if (bank.DepositAmount > 0 || loanOption.fixedLoanAmount.HasValue || loanIsTaken)
 			{
 				if (loanIsTaken)
                 {

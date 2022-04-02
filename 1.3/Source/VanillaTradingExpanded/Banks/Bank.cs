@@ -18,7 +18,7 @@ namespace VanillaTradingExpanded
         public Faction parentFaction;
         private int depositAmount;
         public List<Loan> loans = new List<Loan>();
-
+        public Dictionary<int, int> loanLastTimeTaken = new Dictionary<int, int>();
         public Bank()
         {
 
@@ -107,6 +107,9 @@ namespace VanillaTradingExpanded
                 mapTile = negotiator.Map.Tile
             });
 
+            var index = this.bankExtension.loanOptions.IndexOf(loanOption);
+            loanLastTimeTaken[index] = Find.TickManager.TicksAbs;
+
             List<Thing> thingsToLaunch = new List<Thing>();
             while (loanAmount > 0)
             {
@@ -189,14 +192,26 @@ namespace VanillaTradingExpanded
             loan = loans.FirstOrDefault(x => x.loanOptionId == this.bankExtension.loanOptions.IndexOf(loanOption));
             return loan != null;
         }
+
+        public int LastTimeLoanWasTaken(LoanOption loanOption)
+        {
+            var index = this.bankExtension.loanOptions.IndexOf(loanOption);
+            if (loanLastTimeTaken.TryGetValue(index, out var lastTimeRepaid))
+            {
+                return lastTimeRepaid;
+            }
+            return -1;
+        }
         public void ExposeData()
         {
             Scribe_References.Look(ref parentFaction, "parentFaction");
             Scribe_Values.Look(ref depositAmount, "depositAmount");
             Scribe_Collections.Look(ref loans, "loans", LookMode.Deep);
+            Scribe_Collections.Look(ref loanLastTimeTaken, "loanLastTimeTaken", LookMode.Value, LookMode.Value);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 loans ??= new List<Loan>();
+                loanLastTimeTaken ??= new Dictionary<int, int>();
             }
         }
 

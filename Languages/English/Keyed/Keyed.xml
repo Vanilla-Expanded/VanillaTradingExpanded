@@ -124,4 +124,5 @@ Cargo pods are arriving containing:
 	<VTE.NewsPriceImpactMultiplier>Multiplier of how much news affect the market:</VTE.NewsPriceImpactMultiplier>
 	<VTE.AmountOfRandomItemsToFluctuate>Amount of random item price fluctuations:</VTE.AmountOfRandomItemsToFluctuate>
 	<VTE.ResetPriceChanges>Reset price fluctuations</VTE.ResetPriceChanges>
+	<VTE.YouCanTakeThisLoanOn>You can only take this loan again on {0}.</VTE.YouCanTakeThisLoanOn>
 </LanguageData>
