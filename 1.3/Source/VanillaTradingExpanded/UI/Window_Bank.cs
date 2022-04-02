@@ -239,9 +239,9 @@ namespace VanillaTradingExpanded
 			var loanTitle = new Rect(rect.x + 10, rect.y + 5, 250, 24);
 			Widgets.Label(loanTitle, loanOption.loanNameKey.Translate());
 
-			if (bank.DepositAmount > 0 || loanOption.fixedLoanAmount.HasValue)
+			bool loanIsTaken = bank.LoanIsTaken(loanOption, out var loan);
+			if (bank.DepositAmount > 0 || loanOption.fixedLoanAmount.HasValue || loanIsTaken)
 			{
-				bool loanIsTaken = bank.LoanIsTaken(loanOption, out var loan);
 				if (loanIsTaken)
                 {
 					GUI.DrawTexture(rect, SolidColorMaterials.NewSolidColorTexture(new ColorInt(22, 22, 22).ToColor));
@@ -308,7 +308,6 @@ namespace VanillaTradingExpanded
 						bank.TakeLoan(negotiator, loanAmount, repayAmount, repayDate, loanOption);
 					}
 				}
-
 			}
 			else
 			{
