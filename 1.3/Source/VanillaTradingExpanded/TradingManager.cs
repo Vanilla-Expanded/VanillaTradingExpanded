@@ -180,7 +180,7 @@ namespace VanillaTradingExpanded
         {
             var baseMap = Find.AnyPlayerHomeMap;
             var wealth = baseMap.wealthWatcher.WealthTotal;
-            var targetMarketValue = new FloatRange(Mathf.Min(2000, wealth * 0.01f), wealth * 0.03f);
+            var targetMarketValue = new FloatRange(Mathf.Min(2000, wealth * 0.01f), Mathf.Min(100000, wealth * 0.03f));
             var contract = new Contract
             {
                 expiresInTicks = Find.TickManager.TicksGame + (GenDate.TicksPerDay * Rand.Range(15, 60))
