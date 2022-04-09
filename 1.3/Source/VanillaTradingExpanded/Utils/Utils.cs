@@ -248,7 +248,7 @@ namespace VanillaTradingExpanded
             {
                 if (thingDef.category == ThingCategory.Item && thingDef != ThingDefOf.Silver)
                 {
-                    if (!DebugThingPlaceHelper.IsDebugSpawnable(thingDef))
+                    if (!DebugThingPlaceHelper.IsDebugSpawnable(thingDef) || thingDef.BaseMarketValue <= 0)
                     {
                         return false;
                     }

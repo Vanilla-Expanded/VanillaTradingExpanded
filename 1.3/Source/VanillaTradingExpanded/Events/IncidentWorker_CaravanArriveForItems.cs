@@ -126,7 +126,7 @@ namespace VanillaTradingExpanded
 			parms2.tile = parms.tile;
 			parms2.makingFaction = parms.faction;
 			GenerateCarriers(parms, groupMaker, pawn, wares, outPawns);
-			parms.points = outPawns.Count * 100;
+			parms.points = outPawns.Count * 50f;
 			GenerateGuards(parms, groupMaker, pawn, wares, outPawns);
 		}
 		private Pawn GenerateTrader(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, TraderKindDef traderKind)
@@ -142,8 +142,19 @@ namespace VanillaTradingExpanded
 		private void GenerateCarriers(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, Pawn trader, List<Thing> wares, List<Pawn> outPawns)
 		{
 			List<Thing> list = wares.Where((Thing x) => !(x is Pawn)).ToList();
+			int numOfItemsToGrab = 0;
+			int curStackCount = 0;
+			foreach (var thing in list)
+            {
+				curStackCount += thing.stackCount;
+				if (curStackCount >= thing.def.stackLimit)
+                {
+					numOfItemsToGrab++;
+					curStackCount = 0;
+				}
+			}
 			int i = 0;
-			int num = Mathf.CeilToInt((float)list.Count / 8f);
+			int num = Mathf.CeilToInt(numOfItemsToGrab / 8f);
 			PawnKindDef kind = groupMaker.carriers.Where((PawnGenOption x) => parms.tile == -1 || Find.WorldGrid[parms.tile].biome.IsPackAnimalAllowed(x.kind.race)).RandomElementByWeight((PawnGenOption x) => x.selectionWeight).kind;
 			List<Pawn> list2 = new List<Pawn>();
 			for (int j = 0; j < num; j++)
