@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,8 @@ namespace VanillaTradingExpanded
         public VanillaTradingExpandedMod(ModContentPack content) : base(content)
         {
             settings = GetSettings<Settings>();
+            var harmony = new Harmony("OskarPotocki.VanillaTradingExpanded");
+            harmony.PatchAll();
         }
 
         public override void WriteSettings()

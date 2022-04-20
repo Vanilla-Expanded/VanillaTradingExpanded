@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -138,7 +139,6 @@ namespace VanillaTradingExpanded
                 }
             }
         }
-
         public void Tick()
         {
             for (int num = loans.Count - 1; num >= 0; num--)
@@ -172,7 +172,9 @@ namespace VanillaTradingExpanded
                             if (Rand.MTBEventOccurs(15, 60000f, 1f))
                             {
                                 IncidentWorker_Collectors.bankerFaction = this.parentFaction;
+                                World_PlayerWealthForStoryteller_Patch.loanToAdd = loan.curRepayAmount;
                                 var parms = StorytellerUtility.DefaultParmsNow(IncidentCategoryDefOf.ThreatBig, Find.World);
+                                World_PlayerWealthForStoryteller_Patch.loanToAdd = 0;
                                 parms.points *= 2;
                                 parms.target = Find.AnyPlayerHomeMap;
                                 parms.faction = Find.FactionManager.AllFactions.FirstOrDefault(x => x.def.defName == "Pirate")
@@ -186,7 +188,15 @@ namespace VanillaTradingExpanded
             }
         }
 
-        public bool RaidWarrantsActive => loans.Any(x => Mathf.Abs(x.DaysUntil) >= IndebtednessPeriodDaysUntilWarrant);
+        [HarmonyPatch(typeof(World), "PlayerWealthForStoryteller", MethodType.Getter)]
+        public static class World_PlayerWealthForStoryteller_Patch
+        {
+            public static float loanToAdd;
+            public static void Postfix(ref float __result)
+            {
+                __result += loanToAdd;
+            }
+        }
         public bool LoanIsTaken(LoanOption loanOption, out Loan loan)
         {
             loan = loans.FirstOrDefault(x => x.loanOptionId == this.bankExtension.loanOptions.IndexOf(loanOption));

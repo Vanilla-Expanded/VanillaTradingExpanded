@@ -14,84 +14,6 @@ using Verse.AI.Group;
 
 namespace VanillaTradingExpanded
 {
-	[StaticConstructorOnStartup]
-	internal static class HarmonyPatches
-	{
-		public static Harmony harmony;
-		static HarmonyPatches()
-		{
-			harmony = new Harmony("OskarPotocki.VanillaTradingExpanded");
-			harmony.PatchAll();
-			//foreach (var type in typeof(ThinkNode_JobGiver).AllSubclassesNonAbstract())
-            //{
-			//	try
-            //    {
-			//		var method = AccessTools.Method(type, "TryGiveJob");
-			//		harmony.Patch(method, postfix: new HarmonyMethod(AccessTools.Method(typeof(HarmonyPatches), nameof(Postfix))));
-            //    }
-			//	catch (Exception ex)
-            //    {
-			//
-            //    }
-            //}
-		}
-
-		//private static void Postfix(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
-		//{
-		//	if (pawn.RaceProps.Humanlike && pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob)
-		//	{
-		//		Log.Message(pawn + " gets " + __result + " from " + __instance);
-		//	}
-		//}
-	}
-
-	//[HarmonyPatch(typeof(Pawn_JobTracker), "StartJob")]
-	//public class StartJobPatch
-	//{
-	//    private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
-	//    {
-	//		if (___pawn.RaceProps.Humanlike && ___pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob)
-	//		{
-	//            Log.Message(___pawn + " is starting " + newJob);
-	//        }
-	//    }
-	//}
-	//
-	//
-	//[HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
-	//public class EndCurrentJobPatch
-	//{
-	//    private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
-	//    {
-	//		if (___pawn.RaceProps.Humanlike && ___pawn.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob)
-	//		{
-	//			Log.Message(___pawn + " is ending " + ___pawn.CurJob);
-	//        }
-	//    }
-	//}
-	//
-
-	//[HarmonyPatch(typeof(Lord), "ReceiveMemo")]
-	//public class ReceiveMemoPatch
-	//{
-	//	private static void Postfix(string memo)
-	//	{
-	//		Log.Message("Received memo: " + memo);
-	//	}
-	//}
-
-	//[HarmonyPatch(typeof(GatherItemsForCaravanUtility), "FindThingToHaul")]
-	//public class FindThingToHaulPatch
-	//{
-	//	private static void Postfix(Pawn p, Lord lord, ref Thing __result)
-	//	{
-	//		if (__result is null && p.RaceProps.Humanlike && p.GetLord()?.LordJob is LordJob_GrabItemsAndLeave lordJob)
-	//		{
-	//			p.jobs.debugLog = true;
-	//		}
-	//	}
-	//}
-
 	[HarmonyPatch(typeof(CaravanFormingUtility), "IsFormingCaravanOrDownedPawnToBeTakenByCaravan")]
 	public class IsFormingCaravanOrDownedPawnToBeTakenByCaravanPatch
 	{
@@ -235,6 +157,26 @@ namespace VanillaTradingExpanded
 			GUI.EndGroup();
 			GUI.color = Color.white;
 			Text.WordWrap = true;
+		}
+	}
+
+	[HarmonyPatch]
+	public static class ResetMarketValue_Patch
+	{
+		[HarmonyTargetMethods]
+		public static IEnumerable<MethodBase> TargetMethods()
+		{
+			yield return AccessTools.Method(typeof(GenStep_PreciousLump), "Generate");
+			yield return AccessTools.Method(typeof(GenStep_ScatterLumpsMineable), "ChooseThingDef");
+		}
+		private static void Prefix()
+		{
+			StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
+		}
+
+        private static void Postfix()
+        {
+			StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
 		}
 	}
 }

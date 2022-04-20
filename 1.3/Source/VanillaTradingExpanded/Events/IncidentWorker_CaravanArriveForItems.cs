@@ -11,15 +11,25 @@ namespace VanillaTradingExpanded
 {
     public class IncidentWorker_CaravanArriveForItems : IncidentWorker_NeutralGroup
 	{
-		public static Contract contract;
 		public override bool FactionCanBeGroupSource(Faction f, Map map, bool desperate = false)
 		{
 			var faction = Find.FactionManager.GetFactions(allowNonHumanlike: false).Where(x => !x.HostileTo(Faction.OfPlayer)).RandomElement();
 			return faction == f;
 		}
-
-		public override bool TryExecuteWorker(IncidentParms parms)
+        public override bool CanFireNowSub(IncidentParms parms)
+        {
+            return false;
+        }
+        public override bool TryExecuteWorker(IncidentParms parms)
+        {
+			return false; // some mods might patch it, so we use TrySpawnCaravanForContract instead to run all its logic
+		}
+        public bool TrySpawnCaravanForContract(IncidentParms parms, Contract contract)
 		{
+			if (contract is null)
+            {
+				return false;
+            }
 			Map map = (Map)parms.target;
 			if (!TryResolveParms(parms))
 			{

@@ -10,6 +10,7 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Grammar;
+using static VanillaTradingExpanded.Bank;
 
 namespace VanillaTradingExpanded
 {
@@ -430,12 +431,9 @@ namespace VanillaTradingExpanded
                 {
                     var map = contract.mapToTakeItems ?? localMap;
                     var parms = StorytellerUtility.DefaultParmsNow(VTE_DefOf.VTE_CaravanArriveForItems.category, map);
-                    IncidentWorker_CaravanArriveForItems.contract = contract;
-                    if (VTE_DefOf.VTE_CaravanArriveForItems.Worker.TryExecute(parms))
-                    {
-                        npcContractsToBeCompleted.RemoveAt(i);
-                    }
-                    IncidentWorker_CaravanArriveForItems.contract = null;
+                    var incidentWorker_CaravanArriveForItems = VTE_DefOf.VTE_CaravanArriveForItems.Worker as IncidentWorker_CaravanArriveForItems;
+                    incidentWorker_CaravanArriveForItems.TrySpawnCaravanForContract(parms, contract);
+                    npcContractsToBeCompleted.RemoveAt(i);
                 }
             }
 
@@ -458,6 +456,11 @@ namespace VanillaTradingExpanded
                         }
                     }
                 }
+            }
+
+            if (checkIntervalThisTick && npcSubmittedContracts.Count + npcContractsToBeCompleted.Count < VanillaTradingExpandedMod.settings.maxNPCContractCount)
+            {
+                npcSubmittedContracts.Add(GenerateRandomContract());
             }
 
             for (var i = playerSubmittedContracts.Count - 1; i >= 0; i--)
@@ -607,6 +610,23 @@ namespace VanillaTradingExpanded
                     }
                 }
             }
+
+            if (Find.TickManager.TicksGame % GenDate.TicksPerDay == 0) // fluctuates the stock prices every day for a random company
+            {
+                var randomCompanies = this.companies.InRandomOrder().Take(this.companies.Count / 2);
+                foreach (var company in randomCompanies)
+                {
+                    var priceImpact = Rand.Range(-0.01f, 0.01f);
+                    if (priceImpact >= 0)
+                    {
+                        company.currentValue *= 1f + priceImpact;
+                    }
+                    else
+                    {
+                        company.currentValue /= 1f + Mathf.Abs(priceImpact);
+                    }
+                }
+            }
         }
         private void ProcessPlayerTransactions()
         {
@@ -722,6 +742,10 @@ namespace VanillaTradingExpanded
 
         private void DoCleanup()
         {
+            priceModifiers.RemoveAll(kvp => kvp.Key is null);
+            thingsAffectedBySoldPurchasedMarketValue.RemoveAll(kvp => kvp.Key is null);
+            itemsToBeCrashedInTicks.RemoveAll(kvp => kvp.Key is null);
+            itemsToBeSqueezedInTicks.RemoveAll(kvp => kvp.Key is null);
             companies.RemoveAll(x => x.traderKind is null);
             priceHistoryRecorders.RemoveAll(x => x.Key is null);
             playerSubmittedContracts.RemoveAll(x => x.item is null);

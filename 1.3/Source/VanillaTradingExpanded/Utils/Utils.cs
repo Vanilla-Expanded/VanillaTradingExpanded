@@ -3,6 +3,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -11,7 +12,26 @@ using Verse.AI;
 
 namespace VanillaTradingExpanded
 {
-    [StaticConstructorOnStartup]
+    [HarmonyPatch]
+    public static class Initializer
+    {
+        public static MethodBase targetMethod;
+        
+        [HarmonyTargetMethod]
+        public static MethodBase TargetMethod()
+        {
+            if (ModsConfig.ActiveModsInLoadOrder.Any(x => x.Name == "BetterLoading"))
+            {
+                return AccessTools.Method("BetterLoading.BetterLoadingMain:CreateTimingReport");
+            }
+            return AccessTools.Method(typeof(StaticConstructorOnStartupUtility), "CallAll");
+        }
+        public static void Postfix()
+        {
+            Utils.Initialize();
+        }
+    }
+
     public static class Utils
     {
         [DebugAction("General", "Spawn 1x news", allowedGameStates = AllowedGameStates.Playing)]
@@ -72,7 +92,7 @@ namespace VanillaTradingExpanded
         private static void AddBank()
         {
             List<DebugMenuOption> list = new List<DebugMenuOption>();
-            foreach (var faction in Find.FactionManager.AllFactions.Where(x => x.def.humanlikeFaction && !x.IsPlayer 
+            foreach (var faction in Find.FactionManager.AllFactions.Where(x => x.def.humanlikeFaction && !x.IsPlayer
                 && !TradingManager.Instance.banksByFaction.ContainsKey(x)))
             {
                 list.Add(new DebugMenuOption(faction.name, DebugMenuOptionMode.Action, delegate
@@ -102,7 +122,7 @@ namespace VanillaTradingExpanded
         public static Dictionary<string, List<ThingDef>> itemsByThingSetMakerTags = new Dictionary<string, List<ThingDef>>();
         public static Dictionary<string, List<ThingDef>> itemsByTradeTags = new Dictionary<string, List<ThingDef>>();
         public static float minTradePrice;
-        static Utils()
+        public static void Initialize()
         {
             InitMarkupValues();
             minTradePrice = float.MaxValue;
@@ -248,7 +268,22 @@ namespace VanillaTradingExpanded
             {
                 if (thingDef.category == ThingCategory.Item && thingDef != ThingDefOf.Silver)
                 {
-                    if (!DebugThingPlaceHelper.IsDebugSpawnable(thingDef) || thingDef.BaseMarketValue <= 0)
+                    try
+                    {
+                        if (!DebugThingPlaceHelper.IsDebugSpawnable(thingDef))
+                        {
+                            return false;
+                        }
+                    }
+                    catch (NullReferenceException exception)
+                    {
+                        return false; // if the thingdef is erroring like that, it's probably a weird thing, not suitable for contracts
+                    }
+                    if (thingDef.BaseMarketValue <= 0)
+                    {
+                        return false;
+                    }
+                    if (thingDef.tradeTags != null && thingDef.tradeTags.Contains("NonContractable")) // we skip any thing with the NonContractable tag
                     {
                         return false;
                     }
