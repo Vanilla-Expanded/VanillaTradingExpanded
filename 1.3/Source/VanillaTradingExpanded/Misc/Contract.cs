@@ -76,7 +76,8 @@ namespace VanillaTradingExpanded
         }
         public List<Thing> FoundItemsInMap(Map map)
         {
-            var candidates = (this.stuff != null ? map.listerThings.ThingsOfDef(this.item).Where(x => x.Stuff == this.stuff) : map.listerThings.ThingsOfDef(this.item)).Where(x => x.IsInAnyStorage()).ToList();
+            var candidates = (this.stuff != null ? map.listerThings.ThingsOfDef(this.item).Where(x => x.Stuff == this.stuff) :
+                map.listerThings.ThingsOfDef(this.item)).Where(x => x.IsInAnyStorage() || map.areaManager.Home[x.Position]).ToList();
             var things = new List<Thing>();
             var num = 0;
             foreach (var thing in candidates)

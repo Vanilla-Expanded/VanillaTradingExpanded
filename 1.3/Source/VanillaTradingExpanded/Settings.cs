@@ -57,7 +57,7 @@ namespace VanillaTradingExpanded
             listingStandard.SliderLabeled("VTE.NewsSpawnOption".Translate(), ref settings.newsSpawnRate,
                 "PeriodDays".Translate(settings.newsSpawnRate), 0.01f, 100f); 
             listingStandard.SliderLabeled("VTE.PlayerTransactionImpactMultiplierOption".Translate(), ref settings.playerTransactionImpactMultiplier,
-                settings.playerTransactionImpactMultiplier.ToStringPercent(), 0.01f, 10f);
+                settings.playerTransactionImpactMultiplier.ToStringPercent(), 0f, 10f);
             listingStandard.SliderLabeled("VTE.PlayerContractFulfilmentChanceMultiplier".Translate(), 
                 ref settings.playerContractFulfilmentMultiplier, settings.playerContractFulfilmentMultiplier.ToStringPercent(), 0.01f, 10f);
             listingStandard.SliderLabeled("VTE.NewsPriceImpactMultiplier".Translate(), ref settings.newsPriceImpactMultiplier,
