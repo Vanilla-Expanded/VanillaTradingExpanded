@@ -414,9 +414,9 @@ namespace VanillaTradingExpanded
                 var day = GenDate.DayOfYear(Find.TickManager.TicksAbs, Find.WorldGrid.LongLatOf(localMap.Tile).x);
                 if (prevDay != day && day == 1)
                 {
-                    prevDay = day;
                     DoPriceRebalances();
                 }
+                prevDay = day;
                 ProcessContracts(localMap);
             }
         }
