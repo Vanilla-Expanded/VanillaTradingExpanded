@@ -355,6 +355,11 @@ namespace VanillaTradingExpanded
                         }
                     }
                 }
+
+                foreach (var company in companies)
+                {
+                    company.recorder.RecordCurrentPrice();
+                }
             }
 
             foreach (var key in itemsToBeCrashedInTicks.Keys.ToList())
@@ -394,6 +399,9 @@ namespace VanillaTradingExpanded
             
                 // simulate world trading, by trading 20% of whole tradeable items
                 SimulateWorldTrading();
+
+                // do price rebalances
+                DoPriceRebalances();
             }
 
             // create news every 3 days in average (default)
@@ -411,12 +419,6 @@ namespace VanillaTradingExpanded
             var localMap = Find.AnyPlayerHomeMap;
             if (localMap != null && Find.WorldGrid != null)
             {
-                var day = GenDate.DayOfYear(Find.TickManager.TicksAbs, Find.WorldGrid.LongLatOf(localMap.Tile).x);
-                if (prevDay != day && day == 1)
-                {
-                    DoPriceRebalances();
-                }
-                prevDay = day;
                 ProcessContracts(localMap);
             }
         }
@@ -654,8 +656,9 @@ namespace VanillaTradingExpanded
             foreach (var key in priceModifiers.Keys.ToList())
             {
                 var diff = priceModifiers[key] - key.GetStatValueAbstract(StatDefOf.MarketValue);
-                var change = Rand.Range(0.01f, 0.1f);
-                AffectPrice(key, diff > 0, change);
+                var priceDifferencePct = Mathf.Abs(priceModifiers[key] / key.GetStatValueAbstract(StatDefOf.MarketValue));
+                var change = Rand.Range(0.0005f, 0.005f) * priceDifferencePct;
+                AffectPrice(key, diff < 0, change);
             }
             StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
 
@@ -678,6 +681,7 @@ namespace VanillaTradingExpanded
         {
             priceImpactChange = Mathf.Clamp(priceImpactChange, 0, 10); // this way we make sure that prices won't go up and down at least not with 1000%;
             var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+            //var oldPrice = priceModifiers.ContainsKey(thingDef) ? priceModifiers[thingDef] : baseMarketValue;
             if (priceModifiers.ContainsKey(thingDef))
             {
                 if (priceIncrease)
@@ -704,7 +708,7 @@ namespace VanillaTradingExpanded
             {
                 priceModifiers[thingDef] = 0.0000001f; // we set minimal price to avoid situations with endless minimal prices
             }
-            //Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef]);
+            //Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef] + " - old price: " + oldPrice);
             //Log.ResetMessageCount();
         }
 
