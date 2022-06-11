@@ -35,6 +35,14 @@ namespace VanillaTradingExpanded
 			{
 				return false;
 			}
+			if (!FactionCanBeGroupSource(parms.faction, map))
+            {
+				return false;
+            }
+			if (NeutralGroupIncidentUtility.AnyBlockingHostileLord(map, parms.faction))
+            {
+				return false;
+            }
 			if (parms.faction.HostileTo(Faction.OfPlayer))
 			{
 				return false;
@@ -90,7 +98,8 @@ namespace VanillaTradingExpanded
 				transferable.CountToTransfer = count;
 				transferables.Add(transferable);
 				LordJob_GrabItemsAndLeave lordJob = new LordJob_GrabItemsAndLeave(pawns, map, parms.faction, result, contract, transferables);
-				LordMaker.MakeNewLord(parms.faction, lordJob, map, pawns);
+				var lord = LordMaker.MakeNewLord(parms.faction, lordJob, map, pawns);
+				TradingManager.Instance.currentCaravanLordsWithContracts[lord] = contract;
 				return true;
 			}
 			return false;

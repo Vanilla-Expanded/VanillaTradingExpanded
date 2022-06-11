@@ -28,8 +28,12 @@ namespace VanillaTradingExpanded
 			}
 			this.disableCloseButton = disableCloseButton;
 		}
+		public override void OnCancelKeyPressed()
+        {
 
-		public string textEntryBuffer;
+        }
+
+        public string textEntryBuffer;
 		private Vector2 scrollPosition;
 		private float allMoneyToGain;
 		public override void DoWindowContents(Rect inRect)

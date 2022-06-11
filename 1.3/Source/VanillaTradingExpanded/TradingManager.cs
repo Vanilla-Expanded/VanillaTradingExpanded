@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,7 @@ namespace VanillaTradingExpanded
         public List<Contract> playerSubmittedContracts;
         public List<Contract> npcSubmittedContracts;
         public List<Contract> npcContractsToBeCompleted;
+        public Dictionary<Lord, Contract> currentCaravanLordsWithContracts;
         public TradingManager()
         {
             Instance = this;
@@ -170,7 +172,7 @@ namespace VanillaTradingExpanded
         {
             for (var i = 0; i < VanillaTradingExpandedMod.settings.maxNPCContractCount; i++)
             {
-                if (npcSubmittedContracts.Count < VanillaTradingExpandedMod.settings.maxNPCContractCount)
+                if (npcSubmittedContracts.Count + currentCaravanLordsWithContracts.Count < VanillaTradingExpandedMod.settings.maxNPCContractCount)
                 {
                     npcSubmittedContracts.Add(GenerateRandomContract());
                 }
@@ -179,14 +181,11 @@ namespace VanillaTradingExpanded
 
         public Contract GenerateRandomContract()
         {
-            var baseMap = Find.AnyPlayerHomeMap;
-            var wealth = baseMap.wealthWatcher.WealthTotal;
-            var targetMarketValue = new FloatRange(Mathf.Min(2000, wealth * 0.01f), Mathf.Min(100000, wealth * 0.03f));
             var contract = new Contract
             {
                 expiresInTicks = Find.TickManager.TicksGame + (GenDate.TicksPerDay * Rand.Range(15, 60))
             };
-            contract.GenerateItem(targetMarketValue);
+            contract.GenerateItem();
             contract.GenerateReward();
             //Log.Message("Target targetMarketValue: " + targetMarketValue + ", current wealth: " + wealth + 
             //    ", generated contract: " + contract.Name + ", base market value: " + contract.BaseMarketValue + ", rate: " + contract.BaseMarketValue / targetMarketValue.Average);
@@ -194,10 +193,21 @@ namespace VanillaTradingExpanded
         }
         public void CompleteContract(Contract contract)
         {
-            npcSubmittedContracts.Remove(contract);
-            npcContractsToBeCompleted.Add(contract);
-            contract.arrivesInTicks = Find.TickManager.TicksGame + (GenDate.TicksPerDay * 3);
-            Find.WindowStack.Add(new Dialog_MessageBox("VTE.ContractCompletedMessage".Translate()));
+            if (VanillaTradingExpandedMod.settings.caravanLessContractItemPickup)
+            {
+                npcSubmittedContracts.Remove(contract);
+                var message = "VTE.BankDepositsToPutContractReward".Translate();
+                Find.WindowStack.Add(new Window_PerformTransactionGains(message, new TransactionProcess
+                {
+                    transactionGain = contract.reward
+                }, disableCloseButton: true));
+            }
+            else
+            {
+                npcContractsToBeCompleted.Add(contract);
+                contract.arrivesInTicks = Find.TickManager.TicksGame + (GenDate.TicksPerDay * 3);
+                Find.WindowStack.Add(new Dialog_MessageBox("VTE.ContractCompletedMessage".Translate()));
+            }
         }
         private Faction GetFaction(TraderKindDef trader)
         {
@@ -226,6 +236,7 @@ namespace VanillaTradingExpanded
             playerSubmittedContracts ??= new List<Contract>();
             npcSubmittedContracts ??= new List<Contract>();
             npcContractsToBeCompleted ??= new List<Contract>();
+            currentCaravanLordsWithContracts ??= new Dictionary<Lord, Contract>();
         }
 
         public PriceHistoryAutoRecorder GetRecorder(ThingDef thingDef)
@@ -415,14 +426,15 @@ namespace VanillaTradingExpanded
             // process news and do price impacts based on them
             DoPriceImpactsFromNews();
 
-            // price rebalance every year at day 1
-            var localMap = Find.AnyPlayerHomeMap;
-            if (localMap != null && Find.WorldGrid != null)
+            if (Find.TickManager.TicksGame % 60 == 0)
             {
-                ProcessContracts(localMap);
+                var localMap = Find.AnyPlayerHomeMap;
+                if (localMap != null && Find.WorldGrid != null)
+                {
+                    ProcessContracts(localMap);
+                }
             }
         }
-
         private void ProcessContracts(Map localMap)
         {
             // iterate over completed npc contracts and make sure to spawn caravans to pick up things
@@ -434,8 +446,28 @@ namespace VanillaTradingExpanded
                     var map = contract.mapToTakeItems ?? localMap;
                     var parms = StorytellerUtility.DefaultParmsNow(VTE_DefOf.VTE_CaravanArriveForItems.category, map);
                     var incidentWorker_CaravanArriveForItems = VTE_DefOf.VTE_CaravanArriveForItems.Worker as IncidentWorker_CaravanArriveForItems;
-                    incidentWorker_CaravanArriveForItems.TrySpawnCaravanForContract(parms, contract);
-                    npcContractsToBeCompleted.RemoveAt(i);
+                    if (incidentWorker_CaravanArriveForItems.TrySpawnCaravanForContract(parms, contract))
+                    {
+                        npcContractsToBeCompleted.RemoveAt(i);
+                    }
+                }
+            }
+
+            // iterate over existing NPC caravans arrived for contracted items and make sure that they will return back
+            // if they left the map due to dangerous conditions
+            foreach (var key in currentCaravanLordsWithContracts.Keys.ToList())
+            {
+                var lord = key;
+                var contract = currentCaravanLordsWithContracts[key];
+                if (!lord.ownedPawns.Any())
+                {
+                    if (lord.numPawnsEverGained > lord.numPawnsLostViolently)
+                    {
+                        contract.arrivesInTicks = Find.TickManager.TicksGame + (GenDate.TicksPerDay * 3);
+                        npcContractsToBeCompleted.Add(contract);
+                        Find.WindowStack.Add(new Dialog_MessageBox("VTE.CaravanContractWillReturnMessage".Translate()));
+                    }
+                    currentCaravanLordsWithContracts.Remove(key);
                 }
             }
 
@@ -736,6 +768,8 @@ namespace VanillaTradingExpanded
             Scribe_Collections.Look(ref playerSubmittedContracts, "playerSubmittedContracts", LookMode.Deep);
             Scribe_Collections.Look(ref npcSubmittedContracts, "npcSubmittedContracts", LookMode.Deep);
             Scribe_Collections.Look(ref npcContractsToBeCompleted, "npcContractsToBeCompleted", LookMode.Deep);
+            Scribe_Collections.Look(ref currentCaravanLordsWithContracts, "currentCaravanLordsWithContracts", LookMode.Reference, 
+                LookMode.Deep, ref lordKeys, ref contractValues);
             InitVars();
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
@@ -768,5 +802,8 @@ namespace VanillaTradingExpanded
         private List<int> intValues1;
         private List<ThingDef> thingDefsKeys4;
         private List<int> intValues2;
+
+        private List<Lord> lordKeys;
+        private List<Contract> contractValues;
     }
 }

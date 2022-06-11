@@ -34,8 +34,13 @@ namespace VanillaTradingExpanded
             }
         }
         public float BaseMarketValue => item.GetStatValueAbstract(StatDefOf.MarketValue, stuff) * amount;
-        public void GenerateItem(FloatRange targetMarketValue)
+        public void GenerateItem()
         {
+            var baseMap = Find.AnyPlayerHomeMap;
+            var wealth = baseMap.wealthWatcher.WealthTotal;
+            var targetMarketValue = new FloatRange(Mathf.Min(2000, wealth * 0.01f),
+                Mathf.Min(VanillaTradingExpandedMod.settings.maximumMarketValueOfItemsInContracts,
+                wealth * VanillaTradingExpandedMod.settings.maximumMarketValueOfItemsPerPlayerWealth));
             int tries = 0;
             while (tries < 100)
             {

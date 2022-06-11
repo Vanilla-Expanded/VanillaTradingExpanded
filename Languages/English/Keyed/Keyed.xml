@@ -103,6 +103,9 @@ Negative numbers sell.</VTE.SharesTransactionHeader>
 	<VTE.SelectItem>Select item</VTE.SelectItem>
 	<VTE.YourContractsExplanation>You can submit your own contracts. Specify the amount of the item, the mark-up and the duration. Longer contracts with higher mark-up have a higher chance of being completed. Not having enough money in the bank accounts to cover the contract reward will automatically cancel the contract.</VTE.YourContractsExplanation>
 	<VTE.ContractCompletedMessage>The caravan will arrive to pick up the contracted items in 3 days. Make sure you have enough items when they arrive. The payment will clear once the caravan leaves your area.</VTE.ContractCompletedMessage>
+	<VTE.CaravanContractWillReturnMessage>Due to the fact that your location has become dangerous, the caravan that arrived for the contracted items left the map. They will return for the items when it is safe.
+	
+Make sure you have enough items when they arrive. The payment will clear once the caravan leaves your area.</VTE.CaravanContractWillReturnMessage>
 	<VTE.LetterTraderCaravanArrival>A caravan from {0} is approaching. They are collecting contracted items.</VTE.LetterTraderCaravanArrival>
 	<VTE.CaravanDidNotCollectAllItems>The caravan didn’t find the promised goods and leaves the area. You will not receive any payment.</VTE.CaravanDidNotCollectAllItems>
 	<VTE.BankDepositsToPutContractReward>Select bank deposits to put reward for completed contract</VTE.BankDepositsToPutContractReward>
@@ -118,11 +121,14 @@ Cargo pods are arriving containing:
 	<VTE.PlayerTransactionImpactMultiplierOption>Player transaction impact multiplier on price fluctuation:</VTE.PlayerTransactionImpactMultiplierOption>
 	<VTE.PlayerContractFulfilmentChanceMultiplier>Player contract fulfilment chance multiplier:</VTE.PlayerContractFulfilmentChanceMultiplier>
 	<VTE.NPCContractFulfilmentChanceMultiplier>NPC contract fulfilment chance multiplier:</VTE.NPCContractFulfilmentChanceMultiplier>
-	<VTE.MaxNPCContractCount>Max available NPC contract count:</VTE.MaxNPCContractCount>
-	<VTE.MaxCompanyCount>Max trade company count:</VTE.MaxCompanyCount>
+	<VTE.MaxNPCContractCount>Maximum available NPC contract count:</VTE.MaxNPCContractCount>
+	<VTE.MaxCompanyCount>Maximum trade company count:</VTE.MaxCompanyCount>
 	<VTE.MaximumMarkupOnNPCContract>Maximum mark-up on NPC contract:</VTE.MaximumMarkupOnNPCContract>
 	<VTE.NewsPriceImpactMultiplier>Multiplier of how much news affect the market:</VTE.NewsPriceImpactMultiplier>
 	<VTE.AmountOfRandomItemsToFluctuate>Amount of random item price fluctuations:</VTE.AmountOfRandomItemsToFluctuate>
 	<VTE.ResetPriceChanges>Reset price fluctuations</VTE.ResetPriceChanges>
 	<VTE.YouCanTakeThisLoanOn>You can only take this loan again on {0}.</VTE.YouCanTakeThisLoanOn>
+	<VTE.CaravanLessContractItemPickup>Caravan-less contract item pickup</VTE.CaravanLessContractItemPickup>
+	<VTE.MaximumMarketValueOfItemsInContracts>Maximum value of NPC contracts in silver:</VTE.MaximumMarketValueOfItemsInContracts>
+	<VTE.MaximumMarketValueOfItemsPerPlayerWealth>Maximum value of NPC contracts in percentage of wealth:</VTE.MaximumMarketValueOfItemsPerPlayerWealth>
 </LanguageData>

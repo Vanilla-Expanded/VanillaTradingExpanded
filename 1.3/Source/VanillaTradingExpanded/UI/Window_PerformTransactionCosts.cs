@@ -28,6 +28,11 @@ namespace VanillaTradingExpanded
 		public string textEntryBuffer;
 		private Vector2 scrollPosition;
 		private float allMoneyToSpend;
+
+		public override void OnCancelKeyPressed()
+		{
+
+		}
 		public override void DoWindowContents(Rect inRect)
 		{
 			Text.Font = GameFont.Small;

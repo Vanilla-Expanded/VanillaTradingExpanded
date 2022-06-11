@@ -481,6 +481,11 @@ namespace VanillaTradingExpanded
             {
 				Find.WindowStack.Add(new Dialog_MessageBox("VTE.CaravanDidNotCollectAllItems".Translate(collectedAmount, contract.BaseName)));
             }
+
+			if (TradingManager.Instance.currentCaravanLordsWithContracts.ContainsKey(lord))
+            {
+				TradingManager.Instance.currentCaravanLordsWithContracts.Remove(lord);
+			}
         }
 
         public override void PostCleanup()
