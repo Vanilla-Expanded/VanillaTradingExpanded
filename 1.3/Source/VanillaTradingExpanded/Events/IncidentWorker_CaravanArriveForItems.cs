@@ -108,7 +108,13 @@ namespace VanillaTradingExpanded
 		{
 			Map map = (Map)parms.target;
 			var groupParms = IncidentParmsUtility.GetDefaultPawnGroupMakerParms(PawnGroupKindDef, parms, ensureCanGenerateAtLeastOnePawn: true);
-			var groupMaker = parms.faction.def.pawnGroupMakers.First(x => x.kindDef == PawnGroupKindDefOf.Trader);
+			var groupMaker = parms.faction.def.pawnGroupMakers.FirstOrDefault(x => x.kindDef == PawnGroupKindDefOf.Trader);
+			if (groupMaker == null)
+            {
+				var faction = Find.FactionManager.AllFactions.Where(x => x.def.humanlikeFaction
+					&& x.def.pawnGroupMakers.Exists(x => x.kindDef == PawnGroupKindDefOf.Trader)).FirstOrDefault();
+				groupMaker = faction.def.pawnGroupMakers.FirstOrDefault(x => x.kindDef == PawnGroupKindDefOf.Trader);
+			}
 			List<Pawn> list = new List<Pawn>();
 			GeneratePawns(map, parms, wares, groupParms, groupMaker, list);
 			foreach (Pawn item in list)

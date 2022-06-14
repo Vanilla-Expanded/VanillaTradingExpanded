@@ -193,9 +193,29 @@ namespace VanillaTradingExpanded
         }
         public void CompleteContract(Contract contract)
         {
+            npcSubmittedContracts.Remove(contract);
             if (VanillaTradingExpandedMod.settings.caravanLessContractItemPickup)
             {
-                npcSubmittedContracts.Remove(contract);
+                var localMap = Find.AnyPlayerHomeMap;
+                var items = contract.FoundItemsInMap(contract.mapToTakeItems ?? localMap);
+                var count = 0;
+                foreach (var thing in items)
+                {
+                    var curCount = Mathf.Min(thing.stackCount, contract.amount - count);
+                    if (curCount > 0)
+                    {
+                        count += curCount;
+                        if (curCount == thing.stackCount)
+                        {
+                            thing.Destroy();
+                        }
+                        else
+                        {
+                            var newThing = thing.SplitOff(curCount);
+                            newThing.Destroy();
+                        }
+                    }
+                }
                 var message = "VTE.BankDepositsToPutContractReward".Translate();
                 Find.WindowStack.Add(new Window_PerformTransactionGains(message, new TransactionProcess
                 {
@@ -336,31 +356,33 @@ namespace VanillaTradingExpanded
                 foreach (var kvp in priceHistoryRecorders)
                 {
                     var recorder = kvp.Value;
-                    recorder.RecordCurrentPrice();
-
-                    // here we check prices for last 30 days and see how they changed. if price fell down by 25%, there is 50% chance of squeezing. and vice versa 
-                    if (!itemsToBeCrashedInTicks.ContainsKey(kvp.Key) && !itemsToBeSqueezedInTicks.ContainsKey(kvp.Key) && (!recorder.squeezeOccured || !recorder.crashOccured))
+                    if (recorder != null)
                     {
-                        var priceIn30Days = recorder.GetPriceInPreviousDays(30, false);
-                        if (priceIn30Days != -1f)
+                        recorder.RecordCurrentPrice();
+                        // here we check prices for last 30 days and see how they changed. if price fell down by 25%, there is 50% chance of squeezing. and vice versa 
+                        if (!itemsToBeCrashedInTicks.ContainsKey(kvp.Key) && !itemsToBeSqueezedInTicks.ContainsKey(kvp.Key) && (!recorder.squeezeOccured || !recorder.crashOccured))
                         {
-                            var pct = recorder.records.Last() / priceIn30Days;
-                            if (!recorder.squeezeOccured && pct >= 1.25f)
+                            var priceIn30Days = recorder.GetPriceInPreviousDays(30, false);
+                            if (priceIn30Days != -1f)
                             {
-                                if (Rand.Bool)
+                                var pct = recorder.records.Last() / priceIn30Days;
+                                if (!recorder.squeezeOccured && pct >= 1.25f)
                                 {
-                                    recorder.squeezeOccured = true;
-                                    AffectPrice(kvp.Key, true, Rand.Range(0.01f, 1f));
-                                    itemsToBeCrashedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
+                                    if (Rand.Bool)
+                                    {
+                                        recorder.squeezeOccured = true;
+                                        AffectPrice(kvp.Key, true, Rand.Range(0.01f, 1f));
+                                        itemsToBeCrashedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
+                                    }
                                 }
-                            }
-                            else if (!recorder.crashOccured && pct <= 0.75f)
-                            {
-                                if (Rand.Bool)
+                                else if (!recorder.crashOccured && pct <= 0.75f)
                                 {
-                                    recorder.crashOccured = true;
-                                    AffectPrice(kvp.Key, false, Rand.Range(0.01f, 1f));
-                                    itemsToBeSqueezedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
+                                    if (Rand.Bool)
+                                    {
+                                        recorder.crashOccured = true;
+                                        AffectPrice(kvp.Key, false, Rand.Range(0.01f, 1f));
+                                        itemsToBeSqueezedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
+                                    }
                                 }
                             }
                         }
