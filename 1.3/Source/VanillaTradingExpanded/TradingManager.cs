@@ -333,12 +333,14 @@ namespace VanillaTradingExpanded
         {
             InitVars();
             base.StartedNewGame();
+            Startup();
         }
 
         public override void LoadedGame()
         {
             InitVars();
             base.LoadedGame();
+            Startup();
         }
 
         public override void GameComponentTick()
@@ -796,7 +798,6 @@ namespace VanillaTradingExpanded
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 DoCleanup();
-                Startup();
             }
         }
 
