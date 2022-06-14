@@ -13,9 +13,8 @@ namespace VanillaTradingExpanded
 	{
 		public override bool FactionCanBeGroupSource(Faction f, Map map, bool desperate = false)
 		{
-			var faction = Find.FactionManager.GetFactions(allowNonHumanlike: false).Where(x => !x.HostileTo(Faction.OfPlayer) 
-				&& x.def.pawnGroupMakers.Exists(x => x.kindDef == PawnGroupKindDefOf.Trader)).RandomElement();
-			return faction == f;
+			return Find.FactionManager.GetFactions(allowNonHumanlike: false).Where(x => !x.HostileTo(Faction.OfPlayer)
+				&& x.def.pawnGroupMakers.Exists(x => x.kindDef == PawnGroupKindDefOf.Trader)).Contains(f);
 		}
         public override bool CanFireNowSub(IncidentParms parms)
         {
