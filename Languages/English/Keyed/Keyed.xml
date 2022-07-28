@@ -131,4 +131,7 @@ Cargo pods are arriving containing:
 	<VTE.CaravanLessContractItemPickup>Caravan-less contract item pickup</VTE.CaravanLessContractItemPickup>
 	<VTE.MaximumMarketValueOfItemsInContracts>Maximum value of NPC contracts in silver:</VTE.MaximumMarketValueOfItemsInContracts>
 	<VTE.MaximumMarketValueOfItemsPerPlayerWealth>Maximum value of NPC contracts in percentage of wealth:</VTE.MaximumMarketValueOfItemsPerPlayerWealth>
+	<VTE.MaximumPriceFluctuations>Price fluctuation limitations</VTE.MaximumPriceFluctuations>
+	<VTE.MinimumOfMarketValue>Negative change: {0}</VTE.MinimumOfMarketValue>
+	<VTE.MaximumOfMarketValue>Positive change: {0}</VTE.MaximumOfMarketValue>
 </LanguageData>

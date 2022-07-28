@@ -12,7 +12,6 @@ using Verse.AI;
 
 namespace VanillaTradingExpanded
 {
-    [HarmonyPatch]
     public static class Initializer
     {
         public static MethodBase targetMethod;
@@ -124,6 +123,11 @@ namespace VanillaTradingExpanded
         public static float minTradePrice;
         public static void Initialize()
         {
+            var banknote = DefDatabase<ThingDef>.GetNamedSilentFail("BankNote");
+            if (banknote != null)
+            {
+                tradeableItemsToIgnore.Add(banknote);
+            }
             InitMarkupValues();
             minTradePrice = float.MaxValue;
             foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
@@ -209,6 +213,7 @@ namespace VanillaTradingExpanded
 
                 }
             }
+
             foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
             {
                 if (IsSuitableForContract(thingDef))

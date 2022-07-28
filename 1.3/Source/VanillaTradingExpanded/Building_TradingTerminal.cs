@@ -125,12 +125,15 @@ namespace VanillaTradingExpanded
 		{
 			foreach (var kvp in TradingManager.Instance.banksByFaction)
             {
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("VTE.Contact".Translate(kvp.Value.Name), delegate
-				{
-					Job job = JobMaker.MakeJob(VTE_DefOf.VTE_ContactBank, this);
-					currentVisitableFactionBank = kvp.Key;
-					negotiator.jobs.TryTakeOrderedJob(job);
-				}, MenuOptionPriority.Default), negotiator, this);
+				if (kvp.Value.parentFaction != null && kvp.Value.bankExtension != null)
+                {
+					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("VTE.Contact".Translate(kvp.Value.Name), delegate
+					{
+						Job job = JobMaker.MakeJob(VTE_DefOf.VTE_ContactBank, this);
+						currentVisitableFactionBank = kvp.Key;
+						negotiator.jobs.TryTakeOrderedJob(job);
+					}, MenuOptionPriority.Default), negotiator, this);
+				}
 			}
 		}
 

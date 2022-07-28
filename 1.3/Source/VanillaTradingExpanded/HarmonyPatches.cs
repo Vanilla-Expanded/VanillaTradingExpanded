@@ -14,6 +14,16 @@ using Verse.AI.Group;
 
 namespace VanillaTradingExpanded
 {
+    [StaticConstructorOnStartup]
+	public static class Startup
+    {
+		static Startup()
+        {
+			var harmony = new Harmony("OskarPotocki.VanillaTradingExpanded");
+			harmony.PatchAll();
+		}
+    }
+
 	[HarmonyPatch(typeof(CaravanFormingUtility), "IsFormingCaravanOrDownedPawnToBeTakenByCaravan")]
 	public class IsFormingCaravanOrDownedPawnToBeTakenByCaravanPatch
 	{
@@ -44,12 +54,13 @@ namespace VanillaTradingExpanded
 	public class StatWorker_GetBaseValueFor_Patch
 	{
 		public static bool outputOnlyVanilla;
-		private static bool Prefix(StatWorker __instance, StatDef ___stat, StatRequest request, ref float __result)
+		private static bool Prefix(StatDef ___stat, StatRequest request, ref float __result)
 		{
 			if (___stat == StatDefOf.MarketValue && !outputOnlyVanilla && request.BuildableDef is ThingDef thingDef)
 			{
-				if (TradingManager.Instance?.TryGetModifiedPriceFor(thingDef, out __result) ?? false)
+				if (TradingManager.Instance?.TryGetModifiedPriceFor(thingDef, out var tmpResult) ?? false)
                 {
+					__result = tmpResult;
 					return false;
 				}
 			}

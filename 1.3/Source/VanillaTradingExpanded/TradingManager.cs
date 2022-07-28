@@ -75,6 +75,10 @@ namespace VanillaTradingExpanded
                     recorder.RecordCurrentPrice();
                     priceHistoryRecorders[thingDef] = recorder;
                 }
+                if (priceModifiers.ContainsKey(thingDef))
+                {
+                    TryClampPriceModifierIfNeeded(thingDef);
+                }
             }
         }
         private void GenerateAllStartingBanks()
@@ -735,46 +739,76 @@ namespace VanillaTradingExpanded
         }
         public void AffectPrice(ThingDef thingDef, bool priceIncrease, float priceImpactChange)
         {
-            priceImpactChange = Mathf.Clamp(priceImpactChange, 0, 10); // this way we make sure that prices won't go up and down at least not with 1000%;
-            var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-            //var oldPrice = priceModifiers.ContainsKey(thingDef) ? priceModifiers[thingDef] : baseMarketValue;
-            if (priceModifiers.ContainsKey(thingDef))
+            if (Utils.tradeableItemsToIgnore.Contains(thingDef) is false)
             {
-                if (priceIncrease)
+                priceImpactChange = Mathf.Clamp(priceImpactChange, 0, 1); // this way we make sure that prices won't go up and down at least not with 1000%;
+                var baseMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+                //var oldPrice = priceModifiers.ContainsKey(thingDef) ? priceModifiers[thingDef] : baseMarketValue;
+                if (priceModifiers.ContainsKey(thingDef))
                 {
-                    priceModifiers[thingDef] *= 1f + priceImpactChange;
+                    if (priceIncrease)
+                    {
+                        priceModifiers[thingDef] *= 1f + priceImpactChange;
+                    }
+                    else
+                    {
+                        priceModifiers[thingDef] /= 1f + priceImpactChange;
+                    }
                 }
                 else
                 {
-                    priceModifiers[thingDef] /= 1f + priceImpactChange;
+                    if (priceIncrease)
+                    {
+                        priceModifiers[thingDef] = baseMarketValue * (1f + priceImpactChange);
+                    }
+                    else
+                    {
+                        priceModifiers[thingDef] = baseMarketValue / (1f + priceImpactChange);
+                    }
                 }
-            }
-            else
-            {
-                if (priceIncrease)
+
+                TryClampPriceModifierIfNeeded(thingDef);
+                if (priceModifiers[thingDef] < 0.0000001f)
                 {
-                    priceModifiers[thingDef] = baseMarketValue * (1f + priceImpactChange);
+                    priceModifiers[thingDef] = 0.0000001f; // we set minimal price to avoid situations with endless minimal prices
                 }
-                else
-                {
-                    priceModifiers[thingDef] = baseMarketValue / (1f + priceImpactChange);
-                }
+                //Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef] + " - old price: " + oldPrice);
+                //Log.ResetMessageCount();
             }
-            if (priceModifiers[thingDef] < 0.0000001f)
+        }
+
+        private void TryClampPriceModifierIfNeeded(ThingDef thingDef)
+        {
+            if (VanillaTradingExpandedMod.settings.enablePriceFluctuationRestriction)
             {
-                priceModifiers[thingDef] = 0.0000001f; // we set minimal price to avoid situations with endless minimal prices
+                var value = priceModifiers[thingDef];
+                StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
+                var vanillaMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
+                StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
+
+                var change = value - vanillaMarketValue;
+                var diff = (change / vanillaMarketValue);
+                var range = new FloatRange(-VanillaTradingExpandedMod.settings.minPriceFluctuation, VanillaTradingExpandedMod.settings.maxPriceFluctuation);
+                if (range.Includes(diff) is false)
+                {
+                    diff = Mathf.Clamp(diff, range.min, range.max);
+                    priceModifiers[thingDef] = vanillaMarketValue * (1f + diff);
+                }
             }
-            //Log.Message("Affecing price of " + thingDef + ", priceIncrease: " + priceIncrease + ", priceImpactChange: " + priceImpactChange + " - new price: " + priceModifiers[thingDef] + " - old price: " + oldPrice);
-            //Log.ResetMessageCount();
         }
 
         public bool TryGetModifiedPriceFor(ThingDef thingDef, out float price)
         {
-            if (this.priceModifiers is null)
+            if (Utils.tradeableItemsToIgnore.Contains(thingDef) is false)
             {
-                InitVars();
+                if (this.priceModifiers is null)
+                {
+                    InitVars();
+                }
+                return this.priceModifiers.TryGetValue(thingDef, out price);
             }
-            return this.priceModifiers.TryGetValue(thingDef, out price);
+            price = -1f;
+            return false;
         }
         public override void ExposeData()
         {
