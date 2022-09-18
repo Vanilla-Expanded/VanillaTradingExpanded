@@ -1,0 +1,1197 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	
+	<VanillaTradingExpanded.NewsDef Name="VTE_FactionNewsBase" Abstract="True">
+		<newsWorker>VanillaTradingExpanded.NewsWorker_FactionAction</newsWorker>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<VanillaTradingExpanded.NewsDef Name="VTE_SettlementNewsBase" Abstract="True">
+		<newsWorker>VanillaTradingExpanded.NewsWorker_SettlementAction</newsWorker>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<VanillaTradingExpanded.NewsDef Name="VTE_CompanyNewsBase" Abstract="True">
+		<newsWorker>VanillaTradingExpanded.NewsWorker_CompanyAction</newsWorker>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_FactionNewsBase">
+		<defName>VTE_FactionSiegePlan</defName>
+		<textRulePack>VTE_FactionSiegePlan</textRulePack>
+		<thingCategories>
+			<li>Weapons</li>
+			<li>MortarShells</li>
+		</thingCategories>
+		<thingDefs>
+			<li>Chemfuel</li>
+		</thingDefs>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_FactionSiegePlan</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[FACTION_name] plans for a number of siege operations and began stockpiling ammo and weapons.</li>
+				<li>root->[FACTION_name] is preparing for war and will stockpile ammo and weapons.</li>
+				<li>root->[FACTION_name] buys excess amounts of weapons and mortar shells.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_FactionNewsBase">
+		<defName>VTE_FactionInfestationLoot</defName>
+		<textRulePack>VTE_FactionInfestationLoot</textRulePack>
+		<thingDefs>
+			<li>InsectJelly</li>
+		</thingDefs>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_FactionInfestationLoot</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[FACTION_name] has finally dealt with their infestations and decided to sell their excess jelly.</li>
+				<li>root->[FACTION_name] looted the insectoid caves and will sell the jelly on the market.</li>
+				<li>root->[FACTION_name] got a hold of a large supply of insect jelly and plans to sell it.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	
+	
+	
+	
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementGotPlague</defName>
+		<textRulePack>VTE_SettlementGotPlague</textRulePack>
+		<thingCategories>
+			<li>Medicine</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementGotPlague</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] is struggling with a plague. Medicine purchasing frenzy began.</li>
+				<li>root->[SETTLEMENT_label] is recovering after a raid. Medicine will be purchased in bulk.</li>
+				<li>root->[SETTLEMENT_label] is in dire need of medicine, which means the price will go up.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementPrisonBreak</defName>
+		<textRulePack>VTE_SettlementPrisonBreak</textRulePack>
+		<thingCategories>
+			<li>Weapons</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementPrisonBreak</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] had a prison break. They promise to step up the security.</li>
+				<li>root->[SETTLEMENT_label] is stockpiling weapons.</li>
+				<li>root->[SETTLEMENT_label] plans to equip everyone with new weapons.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementGotRaided</defName>
+		<textRulePack>VTE_SettlementGotRaided</textRulePack>
+		<thingCategories>
+			<li>Medicine</li>
+			<li>ResourcesRaw</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementGotRaided</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] was recently raided. Rebuilding is underway.</li>
+				<li>root->[SETTLEMENT_label] suffered a natural disaster and will purchase building materials.</li>
+				<li>root->[SETTLEMENT_label] plans to expand, but will require building materials to do so.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementPlagueDealtWith</defName>
+		<textRulePack>VTE_SettlementPlagueDealtWith</textRulePack>
+		<thingCategories>
+			<li>Medicine</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementPlagueDealtWith</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] dealt with their plague and now sells excess medicine.</li>
+				<li>root->[SETTLEMENT_label] sells off excess medicine.</li>
+				<li>root->[SETTLEMENT_label] no longer has any need for their medicine stockpiles.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementPrisonBreakDealtWith</defName>
+		<textRulePack>VTE_SettlementPrisonBreakDealtWith</textRulePack>
+		<thingCategories>
+			<li>Weapons</li>
+			<li>ApparelArmor</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementPrisonBreakDealtWith</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] had a prison break which failed dramatically. They decided to sell excess weaponry and armor.</li>
+				<li>root->[SETTLEMENT_label] decided not to go to war. They will sell their weapons and armors.</li>
+				<li>root->[SETTLEMENT_label] will sell their old weapons and armors.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementRecentRaidSellOff</defName>
+		<textRulePack>VTE_SettlementRecentRaidSellOff</textRulePack>
+		<thingCategories>
+			<li>Weapons</li>
+			<li>ResourcesRaw</li>
+			<li>ApparelArmor</li>
+		</thingCategories>
+		<thingSetMakerTags>
+			<li>RewardStandardHighFreq</li>
+		</thingSetMakerTags>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementRecentRaidSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] was recently raided. Looters sell off whatever they stole.</li>
+				<li>root->[SETTLEMENT_label] scavenged a lot of useful junk and will soon flood the market with it.</li>
+				<li>root->[SETTLEMENT_label] plans to empty the stockpiles.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementCombatEmergency</defName>
+		<textRulePack>VTE_SettlementCombatEmergency</textRulePack>
+		<thingCategories>
+			<li>Weapons</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementCombatEmergency</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] buys off large amounts of weapons due to an emergency.</li>
+				<li>root->[SETTLEMENT_label] prepares to go to war and will purchase weapons.</li>
+				<li>root->[SETTLEMENT_label] requires a large amount of weapons quite urgently. Prices are expected to go up.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementManhunterMeat</defName>
+		<textRulePack>VTE_SettlementManhunterMeat</textRulePack>
+		<thingCategories>
+			<li>MeatRaw</li>
+			<li>Leathers</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementManhunterMeat</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells off large quantities of meat they obtained from a manhunter pack.</li>
+				<li>root->[SETTLEMENT_label] had a very bountiful hunting trip and will sell excess meat.</li>
+				<li>root->[SETTLEMENT_label] no longer requires their meat and will soon flood the market with it.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementZzzt</defName>
+		<textRulePack>VTE_SettlementZzzt</textRulePack>
+		<thingCategories>
+			<li>ResourcesRaw</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementZzzt</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] suffered a Zzzt, and now plans to purchase a large amount of building materials to rebuild.</li>
+				<li>root->[SETTLEMENT_label] suffered a gas explosion and will need building materials to rebuild.</li>
+				<li>root->[SETTLEMENT_label] plans an expansion and will acquire building resources. Prices are bound to go up.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementAlphabeavers</defName>
+		<textRulePack>VTE_SettlementAlphabeavers</textRulePack>
+		<thingDefs>
+			<li>WoodLog</li>
+		</thingDefs>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementAlphabeavers</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] is struggling with a pack of alphabeavers, and purchases a large quantity of wood.</li>
+				<li>root->[SETTLEMENT_label] ran out of wood and will buy it in bulk.</li>
+				<li>root->[SETTLEMENT_label] requires copious amounts of wood for their project.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementAlphabeaversDealtWith</defName>
+		<textRulePack>VTE_SettlementAlphabeaversDealtWith</textRulePack>
+		<thingDefs>
+			<li>WoodLog</li>
+		</thingDefs>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementAlphabeaversDealtWith</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] has gotten rid of the beaver pack that troubled them, and now sell excess wood.</li>
+				<li>root->[SETTLEMENT_label] sells their excess wood.</li>
+				<li>root->[SETTLEMENT_label] cut down a large chunk of the forest with the intent to sell wood.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementBlight</defName>
+		<textRulePack>VTE_SettlementBlight</textRulePack>
+		<thingCategories>
+			<li>FoodRaw</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementBlight</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] has suffered a terrible blight and buys off large quantities of food.</li>
+				<li>root->[SETTLEMENT_label] has had their food stockpile burn down.</li>
+				<li>root->[SETTLEMENT_label] plans to purchase large quantity of food.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementBigHarvest</defName>
+		<textRulePack>VTE_SettlementBigHarvest</textRulePack>
+		<thingCategories>
+			<li>FoodRaw</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementBigHarvest</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] has had an amazing harvest and sells off their food supplies.</li>
+				<li>root->[SETTLEMENT_label] plans to sell large quantities of food.</li>
+				<li>root->[SETTLEMENT_label] has had a fortunate harvest and will sell the excess food.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementMechanoidShipsSalvaged</defName>
+		<textRulePack>VTE_SettlementMechanoidShipsSalvaged</textRulePack>
+		<thingDefs>
+			<li>Plasteel</li>
+			<li>Steel</li>
+			<li>ComponentIndustrial</li>
+		</thingDefs>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementMechanoidShipsSalvaged</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] has dealt with Defoliator ships and now sell excess plasteel.</li>
+				<li>root->[SETTLEMENT_label] has mined a large amount of plasteel and plans to sell it.</li>
+				<li>root->[SETTLEMENT_label] sells unused plasteel.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementPowerArmorUpgrade</defName>
+		<textRulePack>VTE_SettlementPowerArmorUpgrade</textRulePack>
+		<thingDefs>
+			<li>Plasteel</li>
+			<li>Steel</li>
+			<li>ComponentIndustrial</li>
+		</thingDefs>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementPowerArmorUpgrade</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] has decided to upgrade their defenses with a new set of powered armors. They buy Plasteel in bulk.</li>
+				<li>root->[SETTLEMENT_label] requires plasteel and plans to buy a lot of it in bulk.</li>
+				<li>root->[SETTLEMENT_label] improves their defenses and plans to obtain plasteel, steel and components.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementColdSnap</defName>
+		<textRulePack>VTE_SettlementColdSnap</textRulePack>
+		<thingCategories>
+			<li>Foods</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementColdSnap</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] has been struck with coldsnap, ruining their food supply.</li>
+				<li>root->[SETTLEMENT_label] has lost their food supply.</li>
+				<li>root->[SETTLEMENT_label] buys food in bulk.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementHeatWave</defName>
+		<textRulePack>VTE_SettlementHeatWave</textRulePack>
+		<thingCategories>
+			<li>Foods</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementHeatWave</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] has suffered a terrible heat wave and decided to sell off their food before it rots.</li>
+				<li>root->[SETTLEMENT_label] has had a freezer malfunction and sells food before it rots.</li>
+				<li>root->[SETTLEMENT_label] sells their food stockpile.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementTextilePurchase</defName>
+		<textRulePack>VTE_SettlementTextilePurchase</textRulePack>
+		<thingCategories>
+			<li>Textiles</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementTextilePurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of textiles.</li>
+				<li>root->[SETTLEMENT_label] plans to supply their tailors with copious amounts of textiles.</li>
+				<li>root->[SETTLEMENT_label] buys textiles in bulk.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementLeatherPurchase</defName>
+		<textRulePack>VTE_SettlementLeatherPurchase</textRulePack>
+		<thingCategories>
+			<li>Leathers</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementLeatherPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of leathers.</li>
+				<li>root->[SETTLEMENT_label] buys leathers in bulk.</li>
+				<li>root->[SETTLEMENT_label] acquires copious amounts of various leathers.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementWoolsPurchase</defName>
+		<textRulePack>VTE_SettlementWoolsPurchase</textRulePack>
+		<thingCategories>
+			<li>Wools</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementWoolsPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of wools.</li>
+				<li>root->[SETTLEMENT_label] buys large amounts of various wools.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementDrugsPurchase</defName>
+		<textRulePack>VTE_SettlementDrugsPurchase</textRulePack>
+		<thingCategories>
+			<li>Drugs</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementDrugsPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of drugs.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementStoneBlocksPurchase</defName>
+		<textRulePack>VTE_SettlementStoneBlocksPurchase</textRulePack>
+		<thingCategories>
+			<li>StoneBlocks</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementStoneBlocksPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of stone blocks.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementTechprintsPurchase</defName>
+		<textRulePack>VTE_SettlementTechprintsPurchase</textRulePack>
+		<thingCategories>
+			<li>Techprints</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementTechprintsPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of techprints.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementBodyPartsPurchase</defName>
+		<textRulePack>VTE_SettlementBodyPartsPurchase</textRulePack>
+		<thingCategories>
+			<li>BodyParts</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementBodyPartsPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of body parts.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementWeaponsMeleePurchase</defName>
+		<textRulePack>VTE_SettlementWeaponsMeleePurchase</textRulePack>
+		<thingCategories>
+			<li>WeaponsMelee</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementWeaponsMeleePurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of melee weapons.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementWeaponsRangedPurchase</defName>
+		<textRulePack>VTE_SettlementWeaponsRangedPurchase</textRulePack>
+		<thingCategories>
+			<li>WeaponsRanged</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementWeaponsRangedPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of ranged weapons.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementApparelPurchase</defName>
+		<textRulePack>VTE_SettlementApparelPurchase</textRulePack>
+		<thingCategories>
+			<li>Apparel</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementApparelPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of apparel.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementArmorPurchase</defName>
+		<textRulePack>VTE_SettlementArmorPurchase</textRulePack>
+		<thingCategories>
+			<li>ApparelArmor</li>
+		</thingCategories>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementArmorPurchase</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] acquires a large amount of armor.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementTextileSellOff</defName>
+		<textRulePack>VTE_SettlementTextileSellOff</textRulePack>
+		<thingCategories>
+			<li>Textiles</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementTextileSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of textiles.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementLeatherSellOff</defName>
+		<textRulePack>VTE_SettlementLeatherSellOff</textRulePack>
+		<thingCategories>
+			<li>Leathers</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementLeatherSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of leathers.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementWoolsSellOff</defName>
+		<textRulePack>VTE_SettlementWoolsSellOff</textRulePack>
+		<thingCategories>
+			<li>Wools</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementWoolsSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of wools.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementDrugsSellOff</defName>
+		<textRulePack>VTE_SettlementDrugsSellOff</textRulePack>
+		<thingCategories>
+			<li>Drugs</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementDrugsSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of drugs.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementStoneBlocksSellOff</defName>
+		<textRulePack>VTE_SettlementStoneBlocksSellOff</textRulePack>
+		<thingCategories>
+			<li>StoneBlocks</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementStoneBlocksSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of stone blocks.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementTechprintsSellOff</defName>
+		<textRulePack>VTE_SettlementTechprintsSellOff</textRulePack>
+		<thingCategories>
+			<li>Techprints</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementTechprintsSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of techprints.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementBodyPartsSellOff</defName>
+		<textRulePack>VTE_SettlementBodyPartsSellOff</textRulePack>
+		<thingCategories>
+			<li>BodyParts</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementBodyPartsSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of body parts.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementWeaponsMeleeSellOff</defName>
+		<textRulePack>VTE_SettlementWeaponsMeleeSellOff</textRulePack>
+		<thingCategories>
+			<li>WeaponsMelee</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementWeaponsMeleeSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of melee weapons.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementWeaponsRangedSellOff</defName>
+		<textRulePack>VTE_SettlementWeaponsRangedSellOff</textRulePack>
+		<thingCategories>
+			<li>WeaponsRanged</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementWeaponsRangedSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of ranged weapons.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementApparelSellOff</defName>
+		<textRulePack>VTE_SettlementApparelSellOff</textRulePack>
+		<thingCategories>
+			<li>Apparel</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementApparelSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of apparel.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_SettlementNewsBase">
+		<defName>VTE_SettlementArmorSellOff</defName>
+		<textRulePack>VTE_SettlementArmorSellOff</textRulePack>
+		<thingCategories>
+			<li>ApparelArmor</li>
+		</thingCategories>
+		<priceImpactRandomInRange>-0.01~-0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~1200</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SettlementArmorSellOff</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[SETTLEMENT_label] sells a large amount of armor.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	
+	
+	
+	
+	
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_CompanyGrowth</defName>
+		<textRulePack>VTE_CompanyGrowth</textRulePack>
+		<priceImpactRandomInRange>0.02~0.10</priceImpactRandomInRange>
+		<priceImpactTicksDelay>1200~6600</priceImpactTicksDelay> 
+		<commonality>2.25</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_CompanyGrowth</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has reported steady growth. Share price is bound to increase in the long term.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_NewShipPurchased</defName>
+		<textRulePack>VTE_NewShipPurchased</textRulePack>
+		<priceImpactRandomInRange>0.02~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>1200~6600</priceImpactTicksDelay> 
+		<commonality>1.1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_NewShipPurchased</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has purchased a brand new low orbit trading ship. Share price should go up in the long term.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_CompanyDecline</defName>
+		<textRulePack>VTE_CompanyDecline</textRulePack>
+		<priceImpactRandomInRange>-0.02~-0.10</priceImpactRandomInRange>
+		<priceImpactTicksDelay>1200~6600</priceImpactTicksDelay> 
+		<commonality>2.25</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_CompanyDecline</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has reported budget cuts. Share price is bound to decrease in the long term.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_ShipCrashed</defName>
+		<textRulePack>VTE_ShipCrashed</textRulePack>
+		<priceImpactRandomInRange>-0.02~-0.15</priceImpactRandomInRange>
+		<priceImpactTicksDelay>1200~6600</priceImpactTicksDelay> 
+		<commonality>1.1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_ShipCrashed</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has reported that one of their ships has crashed. Share price should go down.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_FearOfBankruptcy</defName>
+		<textRulePack>VTE_FearOfBankruptcy</textRulePack>
+		<priceImpactRandomInRange>-0.9~0.9</priceImpactRandomInRange>
+		<priceImpactTicksDelay>100~200</priceImpactTicksDelay> 
+		<commonality>0.5</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_FearOfBankruptcy</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] is rumored to announce bankruptcy. Share price can either crash or skyrocket.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_MediocreEarnings</defName>
+		<textRulePack>VTE_MediocreEarnings</textRulePack>
+		<priceImpactRandomInRange>-0.01~0.01</priceImpactRandomInRange>
+		<priceImpactTicksDelay>600~4600</priceImpactTicksDelay> 
+		<commonality>3</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_MediocreEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a mediocre earnings report. Price is expected to move sideways.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_DecentEarnings</defName>
+		<textRulePack>VTE_DecentEarnings</textRulePack>
+		<priceImpactRandomInRange>0.01~0.02</priceImpactRandomInRange>
+		<priceImpactTicksDelay>600~4600</priceImpactTicksDelay> 
+		<commonality>2.5</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_DecentEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a decent earnings report. Price is expected to move slightly up.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_GoodEarnings</defName>
+		<textRulePack>VTE_GoodEarnings</textRulePack>
+		<priceImpactRandomInRange>0.01~0.03</priceImpactRandomInRange>
+		<priceImpactTicksDelay>600~4600</priceImpactTicksDelay> 
+		<commonality>2</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_GoodEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a good earnings report. Price is expected to move slightly up.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_GreatEarnings</defName>
+		<textRulePack>VTE_GreatEarnings</textRulePack>
+		<priceImpactRandomInRange>0.01~0.05</priceImpactRandomInRange>
+		<priceImpactTicksDelay>600~4600</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_GreatEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a great earnings report. Price is expected to move up.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_ExcellentEarnings</defName>
+		<textRulePack>VTE_ExcellentEarnings</textRulePack>
+		<priceImpactRandomInRange>0.02~0.08</priceImpactRandomInRange>
+		<priceImpactTicksDelay>600~4600</priceImpactTicksDelay> 
+		<commonality>0.5</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_ExcellentEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted an excellent earnings report. Price is expected to jump up.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_OutstandingEarnings</defName>
+		<textRulePack>VTE_OutstandingEarnings</textRulePack>
+		<priceImpactRandomInRange>0.05~0.1</priceImpactRandomInRange>
+		<priceImpactTicksDelay>600~4600</priceImpactTicksDelay> 
+		<commonality>0.5</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_OutstandingEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted an outstanding earnings report. Price is expected to skyrocket.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_BelowAverageEarnings</defName>
+		<textRulePack>VTE_BelowAverageEarnings</textRulePack>
+		<priceImpactRandomInRange>-0.01~-0.02</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~2600</priceImpactTicksDelay> 
+		<commonality>3</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_BelowAverageEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a below average earnings report. Price is expected to drop slightly.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_SubParEarnings</defName>
+		<textRulePack>VTE_SubParEarnings</textRulePack>
+		<priceImpactRandomInRange>-0.01~-0.03</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~2600</priceImpactTicksDelay> 
+		<commonality>2.5</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_SubParEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a subpar earnings report. Price is expected to drop slightly.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_BadEarnings</defName>
+		<textRulePack>VTE_BadEarnings</textRulePack>
+		<priceImpactRandomInRange>-0.01~-0.06</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~2600</priceImpactTicksDelay> 
+		<commonality>2</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_BadEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a bad earnings report. Price is expected to move down.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_VeryBadEarnings</defName>
+		<textRulePack>VTE_VeryBadEarnings</textRulePack>
+		<priceImpactRandomInRange>-0.04~-0.08</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~2600</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_VeryBadEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a very bad earnings report. Price is expected to fall sharply.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	<VanillaTradingExpanded.NewsDef ParentName="VTE_CompanyNewsBase">
+		<defName>VTE_TerribleEarnings</defName>
+		<textRulePack>VTE_TerribleEarnings</textRulePack>
+		<priceImpactRandomInRange>-0.05~-0.14</priceImpactRandomInRange>
+		<priceImpactTicksDelay>300~2600</priceImpactTicksDelay> 
+		<commonality>1</commonality>
+	</VanillaTradingExpanded.NewsDef>
+	
+	<RulePackDef>
+		<defName>VTE_TerribleEarnings</defName>
+		<rulePack>
+			<rulesStrings>
+				<li>root->[COMPANY] has posted a terrible earnings report. Price is expected to crash.</li>
+			</rulesStrings>
+		</rulePack>
+	</RulePackDef>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</Defs>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  
+  <IncidentDef>
+    <defName>VTE_Collectors</defName>
+    <label>collectors</label>
+    <targetTags>
+      <li>Map_PlayerHome</li>
+    </targetTags>
+    <workerClass>VanillaTradingExpanded.IncidentWorker_Collectors</workerClass>
+    <baseChance>0</baseChance>
+    <category>ThreatBig</category>
+    <pointsScaleable>true</pointsScaleable>
+    <tale>Raid</tale>
+  </IncidentDef>
+
+  <IncidentDef>
+    <defName>VTE_CaravanArriveForItems</defName>
+    <label>caravan arrived for items</label>
+    <targetTags>
+      <li>Map_PlayerHome</li>
+    </targetTags>
+    <workerClass>VanillaTradingExpanded.IncidentWorker_CaravanArriveForItems</workerClass>
+    <baseChance>0</baseChance>
+    <category>Misc</category>
+  </IncidentDef>
+</Defs>
