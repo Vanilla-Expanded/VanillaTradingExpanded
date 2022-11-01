@@ -45,8 +45,6 @@ namespace VanillaTradingExpanded
             Scribe_Values.Look(ref enablePriceFluctuationRestriction, "enablePriceFluctuationRestriction", false);
             Scribe_Values.Look(ref minPriceFluctuation, "minPriceFluctuation", 0.95f);
             Scribe_Values.Look(ref maxPriceFluctuation, "maxPriceFluctuation", 2f);
-
-
         }
     }
     public class VanillaTradingExpandedMod : Mod
