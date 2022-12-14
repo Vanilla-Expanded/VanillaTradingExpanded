@@ -418,7 +418,7 @@ namespace VanillaTradingExpanded
             {
                 if (Find.TickManager.TicksGame > itemsToBeSqueezedInTicks[key])
                 {
-                    if (!priceHistoryRecorders[key].squeezeOccured)
+                    if (priceHistoryRecorders.TryGetValue(key, out var record) && record.squeezeOccured)
                     {
                         AffectPrice(key, true, Rand.Range(0.01f, 1f));
                         priceHistoryRecorders[key].squeezeOccured = true;
@@ -549,7 +549,7 @@ namespace VanillaTradingExpanded
                                     things.Add(thing);
                                 }
                                 IntVec3 intVec = DropCellFinder.TradeDropSpot(localMap);
-                                DropPodUtility.DropThingsNear(intVec, localMap, things, 110, canInstaDropDuringInit: false, leaveSlag: true);
+                                DropPodUtility.DropThingsNear(intVec, localMap, things, 110, canInstaDropDuringInit: false, leaveSlag: false);
                                 var list = "";
                                 foreach (var thing in things)
                                 {

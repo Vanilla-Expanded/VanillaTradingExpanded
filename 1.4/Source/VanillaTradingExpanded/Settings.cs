@@ -157,6 +157,7 @@ namespace VanillaTradingExpanded
                 settings.maximumMarketValueOfItemsPerPlayerWealth = 0.01f;
                 settings.minPriceFluctuation = 0.95f;
                 settings.maxPriceFluctuation = 2f;
+                settings.enablePriceFluctuationRestriction = false;
             }
             listingStandard.End();
         }
