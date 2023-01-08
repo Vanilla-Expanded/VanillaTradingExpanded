@@ -366,32 +366,32 @@ namespace VanillaTradingExpanded
                     {
                         recorder.RecordCurrentPrice();
                         // here we check prices for last 30 days and see how they changed. if price fell down by 25%, there is 50% chance of squeezing. and vice versa 
-                        if (!itemsToBeCrashedInTicks.ContainsKey(kvp.Key) && !itemsToBeSqueezedInTicks.ContainsKey(kvp.Key) && (!recorder.squeezeOccured || !recorder.crashOccured))
-                        {
-                            var priceIn30Days = recorder.GetPriceInPreviousDays(30, false);
-                            if (priceIn30Days != -1f)
-                            {
-                                var pct = recorder.records.Last() / priceIn30Days;
-                                if (!recorder.squeezeOccured && pct >= 1.25f)
-                                {
-                                    if (Rand.Bool)
-                                    {
-                                        recorder.squeezeOccured = true;
-                                        AffectPrice(kvp.Key, true, Rand.Range(0.01f, 1f));
-                                        itemsToBeCrashedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
-                                    }
-                                }
-                                else if (!recorder.crashOccured && pct <= 0.75f)
-                                {
-                                    if (Rand.Bool)
-                                    {
-                                        recorder.crashOccured = true;
-                                        AffectPrice(kvp.Key, false, Rand.Range(0.01f, 1f));
-                                        itemsToBeSqueezedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
-                                    }
-                                }
-                            }
-                        }
+                        //if (!itemsToBeCrashedInTicks.ContainsKey(kvp.Key) && !itemsToBeSqueezedInTicks.ContainsKey(kvp.Key) && (!recorder.squeezeOccured || !recorder.crashOccured))
+                        //{
+                        //    var priceIn30Days = recorder.GetPriceInPreviousDays(30, false);
+                        //    if (priceIn30Days != -1f)
+                        //    {
+                        //        var pct = recorder.records.Last() / priceIn30Days;
+                        //        if (!recorder.squeezeOccured && pct >= 1.25f)
+                        //        {
+                        //            if (Rand.Bool)
+                        //            {
+                        //                recorder.squeezeOccured = true;
+                        //                AffectPrice(kvp.Key, true, Rand.Range(0.01f, 1f));
+                        //                itemsToBeCrashedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
+                        //            }
+                        //        }
+                        //        else if (!recorder.crashOccured && pct <= 0.75f)
+                        //        {
+                        //            if (Rand.Bool)
+                        //            {
+                        //                recorder.crashOccured = true;
+                        //                AffectPrice(kvp.Key, false, Rand.Range(0.01f, 1f));
+                        //                itemsToBeSqueezedInTicks[kvp.Key] = Find.TickManager.TicksGame + Rand.RangeInclusive(GenDate.TicksPerDay, GenDate.TicksPerDay * 2);
+                        //            }
+                        //        }
+                        //    }
+                        //}
                     }
                 }
 
@@ -401,31 +401,31 @@ namespace VanillaTradingExpanded
                 }
             }
 
-            foreach (var key in itemsToBeCrashedInTicks.Keys.ToList())
-            {
-                if (Find.TickManager.TicksGame > itemsToBeCrashedInTicks[key])
-                {
-                    if (!priceHistoryRecorders[key].crashOccured)
-                    {
-                        AffectPrice(key, false, Rand.Range(0.01f, 1f));
-                        priceHistoryRecorders[key].crashOccured = true;
-                    }
-                    itemsToBeCrashedInTicks.Remove(key);
-                }
-            }
-
-            foreach (var key in itemsToBeSqueezedInTicks.Keys.ToList())
-            {
-                if (Find.TickManager.TicksGame > itemsToBeSqueezedInTicks[key])
-                {
-                    if (priceHistoryRecorders.TryGetValue(key, out var record) && record.squeezeOccured)
-                    {
-                        AffectPrice(key, true, Rand.Range(0.01f, 1f));
-                        priceHistoryRecorders[key].squeezeOccured = true;
-                    }
-                    itemsToBeSqueezedInTicks.Remove(key);
-                }
-            }
+            //foreach (var key in itemsToBeCrashedInTicks.Keys.ToList())
+            //{
+            //    if (Find.TickManager.TicksGame > itemsToBeCrashedInTicks[key])
+            //    {
+            //        if (!priceHistoryRecorders[key].crashOccured)
+            //        {
+            //            AffectPrice(key, false, Rand.Range(0.01f, 1f));
+            //            priceHistoryRecorders[key].crashOccured = true;
+            //        }
+            //        itemsToBeCrashedInTicks.Remove(key);
+            //    }
+            //}
+            //
+            //foreach (var key in itemsToBeSqueezedInTicks.Keys.ToList())
+            //{
+            //    if (Find.TickManager.TicksGame > itemsToBeSqueezedInTicks[key])
+            //    {
+            //        if (priceHistoryRecorders.TryGetValue(key, out var record) && record.squeezeOccured)
+            //        {
+            //            AffectPrice(key, true, Rand.Range(0.01f, 1f));
+            //            priceHistoryRecorders[key].squeezeOccured = true;
+            //        }
+            //        itemsToBeSqueezedInTicks.Remove(key);
+            //    }
+            //}
 
             // process every 3 day 
             if (Find.TickManager.TicksGame % (GenDate.TicksPerDay * 3) == 0)
