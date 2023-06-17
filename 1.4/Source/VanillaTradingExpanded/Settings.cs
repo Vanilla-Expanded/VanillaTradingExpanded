@@ -21,6 +21,7 @@ namespace VanillaTradingExpanded
         public int maxMarkupOnNPCContract = 10;
         public float newsPriceImpactMultiplier = 1f;
         public float amountOfItemsToFluctuate = 0.2f;
+        public bool contractBlackListCollectibles = false;
         public bool caravanLessContractItemPickup = false;
         public float maximumMarketValueOfItemsInContracts = 10000;
         public float maximumMarketValueOfItemsPerPlayerWealth = 0.01f;
@@ -39,6 +40,7 @@ namespace VanillaTradingExpanded
             Scribe_Values.Look(ref maxMarkupOnNPCContract, "maxMarkupOnNPCContract", 10);
             Scribe_Values.Look(ref newsPriceImpactMultiplier, "newsPriceImpactMultiplier", 1f);
             Scribe_Values.Look(ref amountOfItemsToFluctuate, "itemsToFluctuate", 0.2f);
+            Scribe_Values.Look(ref contractBlackListCollectibles, "contractBlackListCollectibles", false);
             Scribe_Values.Look(ref caravanLessContractItemPickup, "caravanLessContractItemPickup", false);
             Scribe_Values.Look(ref maximumMarketValueOfItemsInContracts, "maximumMarketValueOfItemsInContracts", 10000);
             Scribe_Values.Look(ref maximumMarketValueOfItemsPerPlayerWealth, "maximumMarketValueOfItemsPerPlayerWealth", 0.01f);
@@ -128,6 +130,7 @@ namespace VanillaTradingExpanded
             buf1 = settings.maximumMarketValueOfItemsInContracts.ToString();
             Widgets.TextFieldNumeric(new Rect(inRect.width - 200, listingStandard.curY - 24, 200, 24), ref settings.maximumMarketValueOfItemsInContracts, ref buf1);
             listingStandard.SliderLabeled("VTE.MaximumMarketValueOfItemsPerPlayerWealth".Translate(), ref settings.maximumMarketValueOfItemsPerPlayerWealth, settings.maximumMarketValueOfItemsPerPlayerWealth.ToStringPercent());
+            listingStandard.CheckboxLabeled("VTE.ContractBlackListCollectibles".Translate(), ref settings.contractBlackListCollectibles);
             listingStandard.CheckboxLabeled("VTE.CaravanLessContractItemPickup".Translate(), ref settings.caravanLessContractItemPickup);
             listingStandard.SliderLabeled("VTE.AmountOfRandomItemsToFluctuate".Translate(), ref settings.amountOfItemsToFluctuate, ((float)(settings.amountOfItemsToFluctuate)).ToStringPercent(), 0.01f, 1f);
             if (Find.World != null)
@@ -152,6 +155,7 @@ namespace VanillaTradingExpanded
                 settings.maxMarkupOnNPCContract = 10;
                 settings.newsPriceImpactMultiplier = 1f;
                 settings.amountOfItemsToFluctuate = 0.2f;
+                settings.contractBlackListCollectibles = false;
                 settings.caravanLessContractItemPickup = false;
                 settings.maximumMarketValueOfItemsInContracts = 10000;
                 settings.maximumMarketValueOfItemsPerPlayerWealth = 0.01f;

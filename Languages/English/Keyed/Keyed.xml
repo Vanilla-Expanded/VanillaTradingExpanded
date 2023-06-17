@@ -128,6 +128,7 @@ Cargo pods are arriving containing:
 	<VTE.AmountOfRandomItemsToFluctuate>Amount of random item price fluctuations:</VTE.AmountOfRandomItemsToFluctuate>
 	<VTE.ResetPriceChanges>Reset price fluctuations</VTE.ResetPriceChanges>
 	<VTE.YouCanTakeThisLoanOn>You can only take this loan again on {0}.</VTE.YouCanTakeThisLoanOn>
+	<VTE.ContractBlackListCollectibles>Blacklist collectibles (Eggs, Meat, Leather and Wool) for contracts</VTE.ContractBlackListCollectibles>
 	<VTE.CaravanLessContractItemPickup>Caravan-less contract item pickup</VTE.CaravanLessContractItemPickup>
 	<VTE.MaximumMarketValueOfItemsInContracts>Maximum value of NPC contracts in silver:</VTE.MaximumMarketValueOfItemsInContracts>
 	<VTE.MaximumMarketValueOfItemsPerPlayerWealth>Maximum value of NPC contracts in percentage of wealth:</VTE.MaximumMarketValueOfItemsPerPlayerWealth>
