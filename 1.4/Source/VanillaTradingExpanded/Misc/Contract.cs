@@ -20,7 +20,6 @@ namespace VanillaTradingExpanded
         public Map mapToTakeItems;
         public string Name => "x" + BaseName;
         public string BaseName => amount + " " + ItemName;
-        private ThingCategoryDef[] blacklist = { ThingCategoryDefOf.EggsFertilized, ThingCategoryDefOf.EggsUnfertilized, ThingCategoryDefOf.MeatRaw, ThingCategoryDefOf.Leathers, ThingCategoryDefOf.Wools };
         public string ItemName
         {
             get
@@ -47,11 +46,10 @@ namespace VanillaTradingExpanded
             {
                 tries++;
                 Reset();
-                item = Utils.craftableOrCollectableItems.RandomElement();
-                while (VanillaTradingExpandedMod.settings.contractBlackListCollectibles && item.thingCategories.Any(x => blacklist.Contains(x)))
-                {
-                    item = Utils.craftableOrCollectableItems.RandomElement();
-                }
+                item = VanillaTradingExpandedMod.settings.contractBlackListCollectibles ?
+                    Utils.craftableOrCollectableItemsBlacklistCollectibles.RandomElement() :
+                    Utils.craftableOrCollectableItems.RandomElement();
+
                 stuff = GenStuff.RandomStuffFor(item);
                 amount = Mathf.Max(1, (int)(targetMarketValue.RandomInRange / item.GetStatValueAbstract(StatDefOf.MarketValue, stuff)));
                 if (targetMarketValue.Includes(BaseMarketValue))
