@@ -47,7 +47,7 @@ namespace VanillaTradingExpanded
 
         public int GetRepayDateTicks()
         {
-            return (int)(Find.TickManager.TicksAbs + (GenDate.TicksPerDay * loanRepayPeriodDays));
+            return (int)(GenDate.TicksPerDay * loanRepayPeriodDays);
         }
     }
     public class BankExtension : DefModExtension
