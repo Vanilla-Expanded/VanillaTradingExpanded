@@ -260,7 +260,7 @@ namespace VanillaTradingExpanded
 					Widgets.DrawHighlight(rect);
 				}
 
-				var loanAmount = loanOption.GetLoanAmountFrom(bank);
+				var loanAmount = loanOption.GetLoanAmountFrom(bank, loanOption.loanAmountPerDeposit.Value);
 				var repayAmount = loanIsTaken ? loan.curRepayAmount : loanOption.GetRepayAmountFrom(bank);
 				var repayDate = loanIsTaken ? loan.repayDate : Find.TickManager.TicksAbs + loanOption.GetRepayDateTicks();
 
