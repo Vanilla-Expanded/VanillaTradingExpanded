@@ -15,6 +15,7 @@ namespace VanillaTradingExpanded
 	public static class GuiHelper
 	{
 		public static readonly Texture2D ChartIcon = ContentFinder<Texture2D>.Get("UI/Chart");
+		public static readonly Texture2D LoanTakenTexture = SolidColorMaterials.NewSolidColorTexture(new ColorInt(22, 22, 22).ToColor);
 
 		private static readonly Rect DefaultTexCoords;
 		private static readonly Rect LinkedTexCoords;

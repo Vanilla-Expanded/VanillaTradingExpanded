@@ -253,8 +253,8 @@ namespace VanillaTradingExpanded
 			{
 				if (loanIsTaken)
                 {
-					GUI.DrawTexture(rect, SolidColorMaterials.NewSolidColorTexture(new ColorInt(22, 22, 22).ToColor));
-				}
+                    GUI.DrawTexture(rect, GuiHelper.LoanTakenTexture);
+                }
 				else
                 {
 					Widgets.DrawHighlight(rect);
