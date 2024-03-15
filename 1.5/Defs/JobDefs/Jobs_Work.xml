@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+
+  <JobDef>
+    <defName>VTE_ViewPrices</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_ViewPrices</driverClass>
+    <reportString>using trading terminal to view prices.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
+  
+  <JobDef>
+    <defName>VTE_ContactBank</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_ContactBank</driverClass>
+    <reportString>using trading terminal to contact bank.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
+  
+  <JobDef>
+    <defName>VTE_ViewNews</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_ViewNews</driverClass>
+    <reportString>using trading terminal to view news.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
+  
+	<JobDef>
+    <defName>VTE_OpenStockMarket</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_OpenStockMarket</driverClass>
+    <reportString>using trading terminal to open stock market.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
+  
+   <JobDef>
+    <defName>VTE_OpenContracts</defName>
+    <driverClass>VanillaTradingExpanded.JobDriver_OpenContracts</driverClass>
+    <reportString>using trading terminal to open contracts.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
+</Defs>
