@@ -715,8 +715,18 @@ namespace VanillaTradingExpanded
             StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
             foreach (var key in priceModifiers.Keys.ToList())
             {
-                var diff = priceModifiers[key] - key.GetStatValueAbstract(StatDefOf.MarketValue);
-                var priceDifferencePct = Mathf.Abs(priceModifiers[key] / key.GetStatValueAbstract(StatDefOf.MarketValue));
+                var marketValue = key.GetStatValueAbstract(StatDefOf.MarketValue);
+                if (marketValue == 0f)
+                {
+                    marketValue = Rand.Range(-0.01f, 0.01f);
+                    if (marketValue == 0f)
+                    {
+                        marketValue = 0.01f;
+                    }
+                }
+                var diff = priceModifiers[key] - marketValue;
+                var priceDifferencePct = 0f;
+                priceDifferencePct = Mathf.Abs(priceModifiers[key] / marketValue);
                 var change = Rand.Range(0.0005f, 0.005f) * priceDifferencePct;
                 AffectPrice(key, diff < 0, change);
             }
