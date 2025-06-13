@@ -11,8 +11,8 @@ namespace VanillaTradingExpanded
 {
     public class IncidentWorker_CaravanArriveForItems : IncidentWorker_NeutralGroup
 	{
-		public override bool FactionCanBeGroupSource(Faction f, Map map, bool desperate = false)
-		{
+		public override bool FactionCanBeGroupSource(Faction f, IncidentParms parms, bool desperate = false)
+        {
 			return Find.FactionManager.GetFactions(allowNonHumanlike: false).Where(x => !x.HostileTo(Faction.OfPlayer)
 				&& x.def.pawnGroupMakers.Exists(x => x.kindDef == PawnGroupKindDefOf.Trader)).Contains(f);
 		}
@@ -35,7 +35,7 @@ namespace VanillaTradingExpanded
 			{
 				return false;
 			}
-			if (!FactionCanBeGroupSource(parms.faction, map))
+			if (!FactionCanBeGroupSource(parms.faction, parms))
             {
 				return false;
             }
@@ -150,7 +150,8 @@ namespace VanillaTradingExpanded
 		}
 		private Pawn GenerateTrader(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, TraderKindDef traderKind)
 		{
-			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(groupMaker.traders.RandomElementByWeight((PawnGenOption x) => x.selectionWeight).kind, parms.faction, PawnGenerationContext.NonPlayer, fixedIdeo: parms.ideo, tile: parms.tile, forceGenerateNewPawn: false, newborn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, colonistRelationChanceFactor: 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowFood: true, allowAddictions: true, inhabitant: parms.inhabitants));
+			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(groupMaker.traders.RandomElementByWeight((PawnGenOption x) => x.selectionWeight).kind, parms.faction, PawnGenerationContext.NonPlayer, fixedIdeo: parms.ideo, 
+				tile: parms.tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, colonistRelationChanceFactor: 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowFood: true, allowAddictions: true, inhabitant: parms.inhabitants));
 			pawn.mindState.wantsToTradeWithColony = true;
 			PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn, actAsIfSpawned: true);
 			pawn.trader.traderKind = traderKind;
@@ -178,7 +179,7 @@ namespace VanillaTradingExpanded
 			List<Pawn> list2 = new List<Pawn>();
 			for (int j = 0; j < num; j++)
 			{
-				Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kind, parms.faction, PawnGenerationContext.NonPlayer, fixedIdeo: parms.ideo, tile: parms.tile, forceGenerateNewPawn: false, newborn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, colonistRelationChanceFactor: 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowFood: true, allowAddictions: true, inhabitant: parms.inhabitants));
+				Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kind, parms.faction, PawnGenerationContext.NonPlayer, fixedIdeo: parms.ideo, tile: parms.tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, colonistRelationChanceFactor: 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowFood: true, allowAddictions: true, inhabitant: parms.inhabitants));
 				if (i < list.Count)
 				{
 					i++;
@@ -194,17 +195,15 @@ namespace VanillaTradingExpanded
 			{
 				return;
 			}
-			foreach (PawnGenOption item2 in PawnGroupMakerUtility.ChoosePawnGenOptionsByPoints(parms.points, groupMaker.guards, parms))
+			foreach (var item in PawnGroupMakerUtility.ChoosePawnGenOptionsByPoints(parms.points, groupMaker.guards, parms))
 			{
-				PawnGenerationRequest request = PawnGenerationRequest.MakeDefault();
-				request.KindDef = item2.kind;
+                PawnGenerationRequest request = new PawnGenerationRequest(item.Option.kind, parms.faction, PawnGenerationContext.NonPlayer, fixedIdeo: parms.ideo, forcedXenotype: item.Xenotype, tile: parms.tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: true, colonistRelationChanceFactor: 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: true, allowFood: true, allowAddictions: true, inhabitant: parms.inhabitants, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, biocodeWeaponChance: 0f, biocodeApparelChance: 0f, extraPawnForExtraRelationChance: null, relationWithExtraPawnChanceFactor: 1f, validatorPreGear: null, validatorPostGear: null);
 				request.Faction = parms.faction;
 				request.Tile = parms.tile;
 				request.MustBeCapableOfViolence = true;
 				request.Inhabitant = parms.inhabitants;
 				request.FixedIdeo = parms.ideo;
-				Pawn item = PawnGenerator.GeneratePawn(request);
-				outPawns.Add(item);
+				outPawns.Add(PawnGenerator.GeneratePawn(request));
 			}
 		}
 		protected virtual void SendLetter(IncidentParms parms, List<Pawn> pawns, TraderKindDef traderKind)

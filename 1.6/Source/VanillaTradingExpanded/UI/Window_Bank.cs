@@ -253,16 +253,17 @@ namespace VanillaTradingExpanded
 			{
 				if (loanIsTaken)
                 {
-					GUI.DrawTexture(rect, SolidColorMaterials.NewSolidColorTexture(new ColorInt(22, 22, 22).ToColor));
-				}
+                    GUI.DrawTexture(rect, GuiHelper.LoanTakenTexture);
+                }
 				else
                 {
 					Widgets.DrawHighlight(rect);
 				}
-
-				var loanAmount = loanOption.GetLoanAmountFrom(bank);
+				var rateValue = (loanOption.repayAmountPerDeposit ?? loanOption.loanAmountPerDeposit);
+                var rate = rateValue.HasValue ? rateValue.Value : 1;
+                var loanAmount = loanOption.GetLoanAmountFrom(bank, rate);
 				var repayAmount = loanIsTaken ? loan.curRepayAmount : loanOption.GetRepayAmountFrom(bank);
-				var repayDate = loanIsTaken ? loan.repayDate :  loanOption.GetRepayDateTicks();
+				var repayDate = loanIsTaken ? loan.repayDate : Find.TickManager.TicksAbs + loanOption.GetRepayDateTicks();
 
 				var posY = loanTitle.yMax;
 				var posX = rect.x + 90;

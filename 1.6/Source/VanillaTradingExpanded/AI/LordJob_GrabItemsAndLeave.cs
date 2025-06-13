@@ -62,7 +62,7 @@ namespace VanillaTradingExpanded
 					break;
 				}
 			}
-			List<Pawn> allPawnsSpawned = base.Map.mapPawns.AllPawnsSpawned;
+			var allPawnsSpawned = base.Map.mapPawns.AllPawnsSpawned;
 			for (int j = 0; j < allPawnsSpawned.Count; j++)
 			{
 				if (allPawnsSpawned[j].CurJob != null && allPawnsSpawned[j].jobs.curDriver is JobDriver_PrepareCaravan_GatherItems && allPawnsSpawned[j].CurJob.lord == lord)

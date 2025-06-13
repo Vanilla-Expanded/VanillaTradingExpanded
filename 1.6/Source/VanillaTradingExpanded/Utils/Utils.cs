@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using LudeonTK;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -103,6 +104,7 @@ namespace VanillaTradingExpanded
         }
 
         public static HashSet<ThingDef> craftableOrCollectableItems = new HashSet<ThingDef>();
+        public static HashSet<ThingDef> craftableOrCollectableItemsBlacklistCollectibles = new HashSet<ThingDef>();
         public static HashSet<ThingDef> nonCraftableItems = new HashSet<ThingDef>();
         public static HashSet<ThingDef> animals = new HashSet<ThingDef>();
         public static HashSet<ThingDef> tradeableItemsToIgnore = new HashSet<ThingDef>
@@ -114,6 +116,9 @@ namespace VanillaTradingExpanded
         {
             ThingDefOf.Beer
         };
+        private static HashSet<ThingCategoryDef> blacklistCollectibles = new HashSet<ThingCategoryDef> 
+        { ThingCategoryDefOf.EggsFertilized, ThingCategoryDefOf.EggsUnfertilized, ThingCategoryDefOf.MeatRaw, 
+            ThingCategoryDefOf.Leathers, ThingCategoryDefOf.Wools };
 
         private static HashSet<ThingDef> collectableThings = new HashSet<ThingDef>();
         public static List<ThingDef> cachedTradeableItems = new List<ThingDef>();
@@ -228,7 +233,8 @@ namespace VanillaTradingExpanded
                     }
                 }
             }
-
+            craftableOrCollectableItemsBlacklistCollectibles = craftableOrCollectableItems.Where(x => x.thingCategories is null
+            || x.thingCategories.Any(cat => blacklistCollectibles.Contains(cat)) is false).ToHashSet();
             foreach (var thing in cachedTradeableItems)
             {
                 if (thing.IsNutritionGivingIngestible)

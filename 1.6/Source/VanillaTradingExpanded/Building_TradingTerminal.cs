@@ -18,7 +18,7 @@ namespace VanillaTradingExpanded
 		{
 			get
 			{
-				if (base.Spawned && base.Map.gameConditionManager.ElectricityDisabled)
+				if (base.Spawned && base.Map.gameConditionManager.ElectricityDisabled(base.Map))
 				{
 					return false;
 				}
@@ -41,7 +41,7 @@ namespace VanillaTradingExpanded
 			{
 				return new FloatMenuOption("CannotUseNoPath".Translate(), null);
 			}
-			if (base.Spawned && base.Map.gameConditionManager.ElectricityDisabled)
+			if (base.Spawned && base.Map.gameConditionManager.ElectricityDisabled(base.Map))
 			{
 				return new FloatMenuOption("CannotUseSolarFlare".Translate(), null);
 			}

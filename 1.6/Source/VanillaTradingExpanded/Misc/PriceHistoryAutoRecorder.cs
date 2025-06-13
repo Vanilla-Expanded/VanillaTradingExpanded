@@ -173,8 +173,15 @@ namespace VanillaTradingExpanded
 			{
 				arr = RecordsToBytes();
 			}
-			DataExposeUtility.ByteArray(ref arr, "records");
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			try
+			{
+                DataExposeUtility.LookByteArray(ref arr, "records");
+            }
+			catch (Exception ex)
+			{
+				Log.Error("Exception saving in Vanilla Trading Expanded: " + ex);
+			}
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
 			{
 				SetRecordsFromBytes(arr);
 			}
