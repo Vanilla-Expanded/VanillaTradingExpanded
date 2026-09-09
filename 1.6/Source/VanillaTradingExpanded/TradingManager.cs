@@ -794,16 +794,20 @@ namespace VanillaTradingExpanded
                 var value = priceModifiers[thingDef];
                 StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = true;
                 var vanillaMarketValue = thingDef.GetStatValueAbstract(StatDefOf.MarketValue);
-                StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
-
-                var change = value - vanillaMarketValue;
-                var diff = (change / vanillaMarketValue);
-                var range = new FloatRange(-VanillaTradingExpandedMod.settings.minPriceFluctuation, VanillaTradingExpandedMod.settings.maxPriceFluctuation);
-                if (range.Includes(diff) is false)
+                if (vanillaMarketValue > 0)
                 {
-                    diff = Mathf.Clamp(diff, range.min, range.max);
-                    priceModifiers[thingDef] = vanillaMarketValue * (1f + diff);
+                    StatWorker_GetBaseValueFor_Patch.outputOnlyVanilla = false;
+
+                    var change = value - vanillaMarketValue;
+                    var diff = (change / vanillaMarketValue);
+                    var range = new FloatRange(-VanillaTradingExpandedMod.settings.minPriceFluctuation, VanillaTradingExpandedMod.settings.maxPriceFluctuation);
+                    if (range.Includes(diff) is false)
+                    {
+                        diff = Mathf.Clamp(diff, range.min, range.max);
+                        priceModifiers[thingDef] = vanillaMarketValue * (1f + diff);
+                    }
                 }
+                
             }
         }
 
